@@ -1,0 +1,236 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "تم تكوين الجهاز بالفعل",
+            "reauth_successful": "إعادة المصادقة الناجحة"
+        },
+        "error": {
+            "cannot_connect": "فشل الاتصال",
+            "invalid_auth": "مصادقة غير صالحة",
+            "unknown": "خطأ غير متوقع"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "بريد إلكتروني",
+                    "password": "كلمة المرور",
+                    "region": "منطقة"
+                }
+            },
+            "reauth_confirm": {
+                "description": "يحتاج تكامل Petlibro إلى إعادة توحيد حسابك",
+                "data": {
+                    "password": "كلمة المرور"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "device_sn": {
+                "name": "جهاز SN"
+            },
+            "mac_address": {
+                "name": "عنوان MAC"
+            },
+            "wifi_ssid": {
+                "name": "Wi-fi ssid"
+            },
+            "wifi_rssi": {
+                "name": "قوة إشارة Wi-Fi"
+            },
+            "remaining_desiccant": {
+                "name": "المجففة الأيام المتبقية"
+            },
+            "battery_state": {
+                "name": "مستوى البطارية"
+            },
+            "electric_quantity": {
+                "name": "البطارية / AC ٪"
+            },
+            "today_feeding_quantity": {
+                "name": "كمية التغذية اليوم"
+            },
+            "today_feeding_times": {
+                "name": "أوقات التغذية اليوم"
+            },
+            "today_eating_times": {
+                "name": "أوقات الأكل اليوم"
+            },
+            "today_eating_time": {
+                "name": "وقت الأكل الكلي اليوم"
+            },
+            "feeding_plan_state": {
+                "name": "خطة التغذية اليوم"
+            },
+            "today_total_ml": {
+                "name": "استهلاك المياه اليوم (ML)"
+            },
+            "weight": {
+                "name": "الوزن الحالي"
+            },
+            "weight_percent": {
+                "name": "الماء المتبقي"
+            },
+            "use_water_interval": {
+                "name": "فاصل الماء"
+            },
+            "use_water_duration": {
+                "name": "مدة وقت الماء"
+            },
+            "remaining_filter_days": {
+                "name": "يوم المرشح المتبقي"
+            },
+            "remaining_cleaning_days": {
+                "name": "أيام التنظيف المتبقية"
+            },
+            "resolution": {
+                "name": "دقة الكاميرا"
+            },
+            "night_vision": {
+                "name": "وضع الرؤية الليلية"
+            },
+            "enable_video_record": {
+                "name": "تمكين تسجيل الفيديو"
+            },
+            "video_record_switch": {
+                "name": "مفتاح تسجيل الفيديو"
+            },
+            "video_record_mode": {
+                "name": "وضع تسجيل الفيديو"
+            },
+            "next_feeding_day": {
+                "name": "جدول التغذية"
+            },
+            "next_feeding_time": {
+                "name": "تبدأ التغذية"
+            },
+            "next_feeding_end_time": {
+                "name": "نهايات التغذية"
+            },
+            "feeding_plan": {
+                "name": "خطة التغذية"
+            },
+            "temperature": {
+                "name": "درجة حرارة"
+            },
+            "plate_position": {
+                "name": "وضع لوحة"
+            },
+            "display_selection": {
+                "name": "قيمة العرض"
+            }
+        },
+        "switch": {
+            "child_lock_switch": {
+                "name": "قفل الأزرار"
+            },
+            "enable_light": {
+                "name": "تمكين العرض"
+            },
+            "enable_sound": {
+                "name": "تمكين الصوت"
+            },
+            "manual_feed_now": {
+                "name": "فتح/إغلاق يدويًا"
+            }
+        },
+        "button": {
+            "manual_feed": {
+                "name": "تغذية يدوي"
+            },
+            "manual_cleaning": {
+                "name": "التنظيف اليدوي"
+            },
+            "enable_feeding_plan": {
+                "name": "تمكين خطة التغذية"
+            },
+            "disable_feeding_plan": {
+                "name": "تعطيل خطة التغذية"
+            },
+            "manual_lid_open": {
+                "name": "غطاء مفتوح يدويا"
+            },
+            "display_on": {
+                "name": "تشغيل الشاشة"
+            },
+            "display_off": {
+                "name": "إيقاف تشغيل الشاشة"
+            },
+            "sound_on": {
+                "name": "تشغيل الصوت"
+            },
+            "sound_off": {
+                "name": "قم بإيقاف تشغيل الصوت"
+            },
+            "desiccant_reset": {
+                "name": "تم استبدال المجففة"
+            },
+            "ring_bell": {
+                "name": "رنين جرس"
+            },
+            "rotate_food_bowl": {
+                "name": "تدوير وعاء الطعام"
+            }
+        },
+        "binary_sensor": {
+            "door_state": {
+                "name": "غطاء"
+            },
+            "food_dispenser_state": {
+                "name": "موزع الطعام"
+            },
+            "door_blocked": {
+                "name": "حالة الغطاء"
+            },
+            "food_low": {
+                "name": "حالة الغذاء"
+            },
+            "online": {
+                "name": "Wi-Fi"
+            },
+            "whether_in_sleep_mode": {
+                "name": "وضع السكون"
+            },
+            "enable_low_battery_notice": {
+                "name": "حالة البطارية"
+            },
+            "child_lock_switch": {
+                "name": "قفل الأزرار"
+            },
+            "sound_switch": {
+                "name": "حالة الصوت"
+            },
+            "display_switch": {
+                "name": "حالة العرض"
+            }
+        },
+        "number": {
+            "sound_level": {
+                "name": "مستوى الحجم"
+            },
+            "desiccant_cycle": {
+                "name": "تردد الجفاف"
+            },
+            "lid_close_time": {
+                "name": "غطاء قرب الوقت"
+            }
+        },
+        "select": {
+            "lid_speed": {
+                "name": "سرعة الغطاء"
+            },
+            "lid_mode": {
+                "name": "وضع الغطاء"
+            },
+            "display_icon": {
+                "name": "أيقونة معروضة"
+            }
+        },
+        "text": {
+            "display_text": {
+                "name": "نص على الشاشة"
+            }
+        }
+    }
+}

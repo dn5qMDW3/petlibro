@@ -1,0 +1,236 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "デバイスはすでに構成されています",
+            "reauth_successful": "再認証が成功しました"
+        },
+        "error": {
+            "cannot_connect": "接続に失敗しました",
+            "invalid_auth": "無効な認証",
+            "unknown": "予期しないエラー"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "メール",
+                    "password": "パスワード",
+                    "region": "地域"
+                }
+            },
+            "reauth_confirm": {
+                "description": "Petlibro統合は、アカウントを再認証する必要があります",
+                "data": {
+                    "password": "パスワード"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "device_sn": {
+                "name": "デバイスSN"
+            },
+            "mac_address": {
+                "name": "Macアドレス"
+            },
+            "wifi_ssid": {
+                "name": "wi-fi ssid"
+            },
+            "wifi_rssi": {
+                "name": "Wi-Fi信号強度"
+            },
+            "remaining_desiccant": {
+                "name": "乾燥した残りの日"
+            },
+            "battery_state": {
+                "name": "バッテリーレベル"
+            },
+            "electric_quantity": {
+                "name": "バッテリー / AC％"
+            },
+            "today_feeding_quantity": {
+                "name": "今日の給餌量"
+            },
+            "today_feeding_times": {
+                "name": "今日の給餌時間"
+            },
+            "today_eating_times": {
+                "name": "今日の食事時間"
+            },
+            "today_eating_time": {
+                "name": "今日の総食事時間"
+            },
+            "feeding_plan_state": {
+                "name": "今日の給餌計画"
+            },
+            "today_total_ml": {
+                "name": "今日の水消費量（ML）"
+            },
+            "weight": {
+                "name": "現在の重量"
+            },
+            "weight_percent": {
+                "name": "残りの水"
+            },
+            "use_water_interval": {
+                "name": "水間隔"
+            },
+            "use_water_duration": {
+                "name": "水時間期間"
+            },
+            "remaining_filter_days": {
+                "name": "残りのフィルターの日"
+            },
+            "remaining_cleaning_days": {
+                "name": "残りの掃除日"
+            },
+            "resolution": {
+                "name": "カメラの解像度"
+            },
+            "night_vision": {
+                "name": "ナイトビジョンモード"
+            },
+            "enable_video_record": {
+                "name": "ビデオ録画が有効になっています"
+            },
+            "video_record_switch": {
+                "name": "ビデオ録画スイッチ"
+            },
+            "video_record_mode": {
+                "name": "ビデオ録画モード"
+            },
+            "next_feeding_day": {
+                "name": "給餌スケジュール"
+            },
+            "next_feeding_time": {
+                "name": "給餌が始まります"
+            },
+            "next_feeding_end_time": {
+                "name": "給餌の終わり"
+            },
+            "feeding_plan": {
+                "name": "給餌計画"
+            },
+            "temperature": {
+                "name": "温度"
+            },
+            "plate_position": {
+                "name": "プレート位置"
+            },
+            "display_selection": {
+                "name": "表示値"
+            }
+        },
+        "switch": {
+            "child_lock_switch": {
+                "name": "ボタンロック"
+            },
+            "enable_light": {
+                "name": "表示を有効にします"
+            },
+            "enable_sound": {
+                "name": "サウンドを有効にします"
+            },
+            "manual_feed_now": {
+                "name": "蓋を手動/閉じます"
+            }
+        },
+        "button": {
+            "manual_feed": {
+                "name": "手動フィード"
+            },
+            "manual_cleaning": {
+                "name": "手動クリーニング"
+            },
+            "enable_feeding_plan": {
+                "name": "給餌計画を有効にします"
+            },
+            "disable_feeding_plan": {
+                "name": "給餌計画を無効にします"
+            },
+            "manual_lid_open": {
+                "name": "手動で開いたふた"
+            },
+            "display_on": {
+                "name": "展示をオンにします"
+            },
+            "display_off": {
+                "name": "ディスプレイをオフにします"
+            },
+            "sound_on": {
+                "name": "音をオンにします"
+            },
+            "sound_off": {
+                "name": "音をオフにします"
+            },
+            "desiccant_reset": {
+                "name": "乾燥剤の交換"
+            },
+            "ring_bell": {
+                "name": "リングベル"
+            },
+            "rotate_food_bowl": {
+                "name": "フードボウルを回転させます"
+            }
+        },
+        "binary_sensor": {
+            "door_state": {
+                "name": "蓋"
+            },
+            "food_dispenser_state": {
+                "name": "食品ディスペンサー"
+            },
+            "door_blocked": {
+                "name": "蓋のステータス"
+            },
+            "food_low": {
+                "name": "食べ物の状態"
+            },
+            "online": {
+                "name": "Wi-Fi"
+            },
+            "whether_in_sleep_mode": {
+                "name": "スリープモード"
+            },
+            "enable_low_battery_notice": {
+                "name": "バッテリーステータス"
+            },
+            "child_lock_switch": {
+                "name": "ボタンロック"
+            },
+            "sound_switch": {
+                "name": "サウンドステータス"
+            },
+            "display_switch": {
+                "name": "ステータスを表示します"
+            }
+        },
+        "number": {
+            "sound_level": {
+                "name": "ボリュームレベル"
+            },
+            "desiccant_cycle": {
+                "name": "乾燥剤周波数"
+            },
+            "lid_close_time": {
+                "name": "ふたの近い時間"
+            }
+        },
+        "select": {
+            "lid_speed": {
+                "name": "蓋の速度"
+            },
+            "lid_mode": {
+                "name": "蓋モード"
+            },
+            "display_icon": {
+                "name": "展示されているアイコン"
+            }
+        },
+        "text": {
+            "display_text": {
+                "name": "展示されているテキスト"
+            }
+        }
+    }
+}

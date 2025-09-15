@@ -1,0 +1,236 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "ডিভাইস ইতিমধ্যে কনফিগার করা আছে",
+            "reauth_successful": "সফলতা সফল"
+        },
+        "error": {
+            "cannot_connect": "সংযোগ করতে ব্যর্থ",
+            "invalid_auth": "অবৈধ প্রমাণীকরণ",
+            "unknown": "অপ্রত্যাশিত ত্রুটি"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "ইমেল",
+                    "password": "পাসওয়ার্ড",
+                    "region": "অঞ্চল"
+                }
+            },
+            "reauth_confirm": {
+                "description": "পেটলিব্রো ইন্টিগ্রেশনটির আপনার অ্যাকাউন্টটি পুনরায় প্রমাণীকরণ করা দরকার",
+                "data": {
+                    "password": "পাসওয়ার্ড"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "device_sn": {
+                "name": "ডিভাইস এসএন"
+            },
+            "mac_address": {
+                "name": "ম্যাক ঠিকানা"
+            },
+            "wifi_ssid": {
+                "name": "Wi-Fi ssid"
+            },
+            "wifi_rssi": {
+                "name": "ওয়াই-ফাই সিগন্যাল শক্তি"
+            },
+            "remaining_desiccant": {
+                "name": "অবশিষ্ট দিনগুলি"
+            },
+            "battery_state": {
+                "name": "ব্যাটারি স্তর"
+            },
+            "electric_quantity": {
+                "name": "ব্যাটারি / এসি %"
+            },
+            "today_feeding_quantity": {
+                "name": "আজকের খাওয়ানোর পরিমাণ"
+            },
+            "today_feeding_times": {
+                "name": "আজকের খাওয়ানোর সময়"
+            },
+            "today_eating_times": {
+                "name": "আজকের খাওয়ার সময়"
+            },
+            "today_eating_time": {
+                "name": "আজকের মোট খাওয়ার সময়"
+            },
+            "feeding_plan_state": {
+                "name": "আজকের খাওয়ানো পরিকল্পনা"
+            },
+            "today_total_ml": {
+                "name": "আজকের জলের ব্যবহার (এমএল)"
+            },
+            "weight": {
+                "name": "বর্তমান ওজন"
+            },
+            "weight_percent": {
+                "name": "বাকি জল"
+            },
+            "use_water_interval": {
+                "name": "জলের ব্যবধান"
+            },
+            "use_water_duration": {
+                "name": "জলের সময় সময়কাল"
+            },
+            "remaining_filter_days": {
+                "name": "ফিল্টার দিন বাকি"
+            },
+            "remaining_cleaning_days": {
+                "name": "বাকি পরিষ্কারের দিনগুলি"
+            },
+            "resolution": {
+                "name": "ক্যামেরা রেজোলিউশন"
+            },
+            "night_vision": {
+                "name": "নাইট ভিশন মোড"
+            },
+            "enable_video_record": {
+                "name": "ভিডিও রেকর্ডিং সক্ষম"
+            },
+            "video_record_switch": {
+                "name": "ভিডিও রেকর্ডিং সুইচ"
+            },
+            "video_record_mode": {
+                "name": "ভিডিও রেকর্ডিং মোড"
+            },
+            "next_feeding_day": {
+                "name": "খাওয়ানোর সময়সূচী"
+            },
+            "next_feeding_time": {
+                "name": "খাওয়ানো শুরু"
+            },
+            "next_feeding_end_time": {
+                "name": "খাওয়ানো শেষ"
+            },
+            "feeding_plan": {
+                "name": "খাওয়ানো পরিকল্পনা"
+            },
+            "temperature": {
+                "name": "তাপমাত্রা"
+            },
+            "plate_position": {
+                "name": "প্লেট অবস্থান"
+            },
+            "display_selection": {
+                "name": "প্রদর্শন মান"
+            }
+        },
+        "switch": {
+            "child_lock_switch": {
+                "name": "বোতাম লক"
+            },
+            "enable_light": {
+                "name": "প্রদর্শন সক্ষম করুন"
+            },
+            "enable_sound": {
+                "name": "শব্দ সক্ষম করুন"
+            },
+            "manual_feed_now": {
+                "name": "ম্যানুয়ালি খোলা/বন্ধ id াকনা"
+            }
+        },
+        "button": {
+            "manual_feed": {
+                "name": "ম্যানুয়াল ফিড"
+            },
+            "manual_cleaning": {
+                "name": "ম্যানুয়াল পরিষ্কার"
+            },
+            "enable_feeding_plan": {
+                "name": "খাওয়ানোর পরিকল্পনা সক্ষম করুন"
+            },
+            "disable_feeding_plan": {
+                "name": "খাওয়ানোর পরিকল্পনা অক্ষম করুন"
+            },
+            "manual_lid_open": {
+                "name": "ম্যানুয়ালি খোলা id াকনা"
+            },
+            "display_on": {
+                "name": "প্রদর্শন চালু করুন"
+            },
+            "display_off": {
+                "name": "প্রদর্শন বন্ধ করুন"
+            },
+            "sound_on": {
+                "name": "শব্দ চালু করুন"
+            },
+            "sound_off": {
+                "name": "শব্দ বন্ধ করুন"
+            },
+            "desiccant_reset": {
+                "name": "ডেসিক্যান্ট প্রতিস্থাপন"
+            },
+            "ring_bell": {
+                "name": "রিং বেল"
+            },
+            "rotate_food_bowl": {
+                "name": "খাবারের বাটি ঘোরান"
+            }
+        },
+        "binary_sensor": {
+            "door_state": {
+                "name": "Id াকনা"
+            },
+            "food_dispenser_state": {
+                "name": "খাদ্য সরবরাহকারী"
+            },
+            "door_blocked": {
+                "name": "Id াকনা স্থিতি"
+            },
+            "food_low": {
+                "name": "খাদ্য স্থিতি"
+            },
+            "online": {
+                "name": "ওয়াই-ফাই"
+            },
+            "whether_in_sleep_mode": {
+                "name": "স্লিপ মোড"
+            },
+            "enable_low_battery_notice": {
+                "name": "ব্যাটারি স্থিতি"
+            },
+            "child_lock_switch": {
+                "name": "বোতাম লক"
+            },
+            "sound_switch": {
+                "name": "শব্দ স্থিতি"
+            },
+            "display_switch": {
+                "name": "প্রদর্শন স্থিতি"
+            }
+        },
+        "number": {
+            "sound_level": {
+                "name": "ভলিউম স্তর"
+            },
+            "desiccant_cycle": {
+                "name": "ডেসিক্যান্ট ফ্রিকোয়েন্সি"
+            },
+            "lid_close_time": {
+                "name": "Lid াকনা কাছাকাছি সময়"
+            }
+        },
+        "select": {
+            "lid_speed": {
+                "name": "Id াকনা গতি"
+            },
+            "lid_mode": {
+                "name": "Id াকনা মোড"
+            },
+            "display_icon": {
+                "name": "প্রদর্শনে আইকন"
+            }
+        },
+        "text": {
+            "display_text": {
+                "name": "প্রদর্শনীতে পাঠ্য"
+            }
+        }
+    }
+}

@@ -1,0 +1,239 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Apparaat is al geconfigureerd",
+            "reauth_successful": "Herauthenticatie succesvol"
+        },
+        "error": {
+            "cannot_connect": "Verbinding mislukt",
+            "invalid_auth": "Ongeldige authenticatie",
+            "unknown": "Onverwachte fout"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "Email",
+                    "password": "Password",
+                    "region": "Regio"
+                }
+            },
+            "reauth_confirm": {
+                "description": "De PETLIBRO-integratie moet uw account opnieuw verifiëren",
+                "data": {
+                    "password": "Password"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "device_sn": {
+                "name": "Serienummer"
+            },
+            "mac_address": {
+                "name": "MAC Address"
+            },
+            "wifi_ssid": {
+                "name": "Wi-Fi SSID"
+            },
+            "wifi_rssi": {
+                "name": "Wi-Fi signaalsterkte"
+            },
+            "remaining_desiccant": {
+                "name": "Resterende dagen droogmiddel"
+            },
+            "battery_state": {
+                "name": "Batterijniveau"
+            },
+            "electric_quantity": {
+                "name": "Batterij %"
+            },
+            "today_feeding_quantity": {
+                "name": "Totale Voedingshoeveelheid van vandaag"
+            },
+            "today_feeding_times": {
+                "name": "Totale voedermomenten van vandaag"
+            },
+            "today_eating_times": {
+                "name": "Totale Eetmomenten van vandaag"
+            },
+            "today_eating_time": {
+                "name": "Totale eettijd van vandaag"
+            },
+            "feeding_plan_state": {
+                "name": "Voedingsplan van vandaag"
+            },
+            "today_total_ml": {
+                "name": "Waterverbruik vandaag (ml)"
+            },
+            "weight": {
+                "name": "Huidig ​​gewicht"
+            },
+            "weight_percent": {
+                "name": "Resterend water"
+            },
+            "use_water_interval": {
+                "name": "Waterinterval"
+            },
+            "use_water_duration": {
+                "name": "Watertijdsduur"
+            },
+            "remaining_filter_days": {
+                "name": "Resterende filterdagen"
+            },
+            "remaining_cleaning_days": {
+                "name": "Resterende reinigingsdagen"
+            },
+            "resolution": {
+                "name": "Cameraresolutie"
+            },
+            "night_vision": {
+                "name": "Nachtzichtmodus"
+            },
+            "enable_video_record": {
+                "name": "Video-opname ingeschakeld"
+            },
+            "video_record_switch": {
+                "name": "Video-opnameschakelaar"
+            },
+            "video_record_mode": {
+                "name": "Video-opnamemodus"
+            },
+            "next_feeding_day": {
+                "name": "Voedingsschema"
+            },
+            "next_feeding_time": {
+                "name": "Het voeren begint"
+            },
+            "next_feeding_end_time": {
+                "name": "Voeding eindigt"
+            },
+            "feeding_plan": {
+                "name": "Voedingsplan"
+            },
+            "temperature": {
+                "name": "Temperatuur"
+            },
+            "plate_position": {
+                "name": "Plaatpositie"
+            },
+            "display_selection": {
+                "name": "Schermwaarde"
+            }
+        },
+        "switch": {
+            "child_lock_switch": {
+                "name": "Tastensperre"
+            },
+            "enable_light": {
+                "name": "Scherm inschakelen"
+            },
+            "enable_sound": {
+                "name": "Geluid inschakelen"
+            },
+            "manual_feed_now": {
+                "name": "Handmatig openen/sluiten deksel"
+            }
+        },
+        "button": {
+            "manual_feed": {
+                "name": "Handmatige voeding"
+            },
+            "manual_cleaning": {
+                "name": "Handmatige reiniging"
+            },
+            "enable_feeding_plan": {
+                "name": "Voedingsplan inschakelen"
+            },
+            "disable_feeding_plan": {
+                "name": "Voedingsplan uitschakelen"
+            },
+            "manual_lid_open": {
+                "name": "Handmatig deksel openen"
+            },
+            "display_on": {
+                "name": "Scherm inschakelen"
+            },
+            "display_off": {
+                "name": "Scherm uitschakelen"
+            },
+            "sound_on": {
+                "name": "Zet geluid aan"
+            },
+            "sound_off": {
+                "name": "Geluid uitzetten"
+            },
+            "desiccant_reset": {
+                "name": "Droogmiddel vervangen"
+            },
+            "ring_bell": {
+                "name": "Bel Aan"
+            },
+            "rotate_food_bowl": {
+                "name": "Draai de voerbak"
+            },
+            "reposition_schedule": {
+                "name": "Herpositionering voedingsplan"
+            }
+        },
+        "binary_sensor": {
+            "door_state": {
+                "name": "Deksel"
+            },
+            "food_dispenser_state": {
+                "name": "Voedselautomaat"
+            },
+            "door_blocked": {
+                "name": "Dekselstatus"
+            },
+            "food_low": {
+                "name": "Voedselstatus"
+            },
+            "online": {
+                "name": "Wi-Fi"
+            },
+            "whether_in_sleep_mode": {
+                "name": "SlaapstandStand-bymodus"
+            },
+            "enable_low_battery_notice": {
+                "name": "Batterijstatus"
+            },
+            "child_lock_switch": {
+                "name": "Tastensperre"
+            },
+            "sound_switch": {
+                "name": "Geluidsstatus"
+            },
+            "display_switch": {
+                "name": "Schermstatus"
+            }
+        },
+        "number": {
+            "sound_level": {
+                "name": "Geluidsniveau"
+            },
+            "desiccant_cycle": {
+                "name": "Droogmiddelfrequentie"
+            },
+            "lid_close_time": {
+                "name": "Sluittijd deksel"
+            }
+        },
+        "select": {
+            "lid_speed": {
+                "name": "Dekselsnelheid"
+            },
+            "lid_mode": {
+                "name": "Dekselmodus"
+            },
+            "display_icon": {
+                "name": "Symbol op het scherm"
+            }
+        },
+        "text": {
+            "display_text": {
+                "name": "Tekst op het scherm"
+            }
+        }
+    }
+}

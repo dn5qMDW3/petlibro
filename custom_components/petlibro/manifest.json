@@ -1,0 +1,14 @@
+{
+  "domain": "petlibro",
+  "name": "PETLIBRO",
+  "codeowners": [
+    "@jjjonesjr33"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/jjjonesjr33/petlibro",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/jjjonesjr33/petlibro/issues",
+  "loggers": ["petlibro"],
+  "version": "1.1.27"
+}

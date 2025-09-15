@@ -1,0 +1,236 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "O dispositivo já está configurado",
+            "reauth_successful": "Reautenticação bem -sucedida"
+        },
+        "error": {
+            "cannot_connect": "Falhou em conectar",
+            "invalid_auth": "Autenticação inválida",
+            "unknown": "Erro inesperado"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "E-mail",
+                    "password": "Senha",
+                    "region": "Região"
+                }
+            },
+            "reauth_confirm": {
+                "description": "A integração Petlibro precisa re-autenticar sua conta",
+                "data": {
+                    "password": "Senha"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "device_sn": {
+                "name": "Dispositivo sn"
+            },
+            "mac_address": {
+                "name": "Endereço MAC"
+            },
+            "wifi_ssid": {
+                "name": "Wi-fi ssid"
+            },
+            "wifi_rssi": {
+                "name": "Força do sinal Wi-Fi"
+            },
+            "remaining_desiccant": {
+                "name": "Dias restantes dessecantes"
+            },
+            "battery_state": {
+                "name": "Nível da bateria"
+            },
+            "electric_quantity": {
+                "name": "Bateria / CA %"
+            },
+            "today_feeding_quantity": {
+                "name": "Quantidade de alimentação de hoje"
+            },
+            "today_feeding_times": {
+                "name": "Os tempos de alimentação de hoje"
+            },
+            "today_eating_times": {
+                "name": "Os tempos de alimentação de hoje"
+            },
+            "today_eating_time": {
+                "name": "Tempo total de alimentação de hoje"
+            },
+            "feeding_plan_state": {
+                "name": "Plano de alimentação de hoje"
+            },
+            "today_total_ml": {
+                "name": "O consumo de água de hoje (ML)"
+            },
+            "weight": {
+                "name": "Peso atual"
+            },
+            "weight_percent": {
+                "name": "Água restante"
+            },
+            "use_water_interval": {
+                "name": "Intervalo de água"
+            },
+            "use_water_duration": {
+                "name": "Duração do tempo da água"
+            },
+            "remaining_filter_days": {
+                "name": "Dia do filtro restante"
+            },
+            "remaining_cleaning_days": {
+                "name": "Dias de limpeza restantes"
+            },
+            "resolution": {
+                "name": "Resolução da câmera"
+            },
+            "night_vision": {
+                "name": "Modo de visão noturna"
+            },
+            "enable_video_record": {
+                "name": "Gravação de vídeo ativada"
+            },
+            "video_record_switch": {
+                "name": "Interruptor de gravação de vídeo"
+            },
+            "video_record_mode": {
+                "name": "Modo de gravação de vídeo"
+            },
+            "next_feeding_day": {
+                "name": "Cronograma de alimentação"
+            },
+            "next_feeding_time": {
+                "name": "A alimentação começa"
+            },
+            "next_feeding_end_time": {
+                "name": "Fins de alimentação"
+            },
+            "feeding_plan": {
+                "name": "Plano de alimentação"
+            },
+            "temperature": {
+                "name": "Temperatura"
+            },
+            "plate_position": {
+                "name": "Posição da placa"
+            },
+            "display_selection": {
+                "name": "Valor de exibição"
+            }
+        },
+        "switch": {
+            "child_lock_switch": {
+                "name": "Botões trava"
+            },
+            "enable_light": {
+                "name": "Ativar exibição"
+            },
+            "enable_sound": {
+                "name": "Ativar som"
+            },
+            "manual_feed_now": {
+                "name": "Tampa manualmente aberta/fechada"
+            }
+        },
+        "button": {
+            "manual_feed": {
+                "name": "Feed manual"
+            },
+            "manual_cleaning": {
+                "name": "Limpeza manual"
+            },
+            "enable_feeding_plan": {
+                "name": "Ativar plano de alimentação"
+            },
+            "disable_feeding_plan": {
+                "name": "Desativar o plano de alimentação"
+            },
+            "manual_lid_open": {
+                "name": "Tampa manualmente aberta"
+            },
+            "display_on": {
+                "name": "Ligue o exibição"
+            },
+            "display_off": {
+                "name": "Desligue a exibição"
+            },
+            "sound_on": {
+                "name": "Ligue o som"
+            },
+            "sound_off": {
+                "name": "Desligue o som"
+            },
+            "desiccant_reset": {
+                "name": "Desiclante substituído"
+            },
+            "ring_bell": {
+                "name": "Sino anel"
+            },
+            "rotate_food_bowl": {
+                "name": "Gire a tigela de comida"
+            }
+        },
+        "binary_sensor": {
+            "door_state": {
+                "name": "Tampa"
+            },
+            "food_dispenser_state": {
+                "name": "Dispensador de alimentos"
+            },
+            "door_blocked": {
+                "name": "Status da tampa"
+            },
+            "food_low": {
+                "name": "Status alimentar"
+            },
+            "online": {
+                "name": "Wi-fi"
+            },
+            "whether_in_sleep_mode": {
+                "name": "Modo de suspensão"
+            },
+            "enable_low_battery_notice": {
+                "name": "Status da bateria"
+            },
+            "child_lock_switch": {
+                "name": "Botões trava"
+            },
+            "sound_switch": {
+                "name": "Status de som"
+            },
+            "display_switch": {
+                "name": "Status de exibição"
+            }
+        },
+        "number": {
+            "sound_level": {
+                "name": "Nível de volume"
+            },
+            "desiccant_cycle": {
+                "name": "Frequência dessecante"
+            },
+            "lid_close_time": {
+                "name": "Tampa de tempo fechado"
+            }
+        },
+        "select": {
+            "lid_speed": {
+                "name": "Velocidade da tampa"
+            },
+            "lid_mode": {
+                "name": "Modo de tampa"
+            },
+            "display_icon": {
+                "name": "Ícone em exibição"
+            }
+        },
+        "text": {
+            "display_text": {
+                "name": "Texto em exibição"
+            }
+        }
+    }
+}

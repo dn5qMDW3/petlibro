@@ -1,0 +1,239 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Enhed er allerede registreret",
+            "reauth_successful": "Geautentificering vellykket"
+        },
+        "error": {
+            "cannot_connect": "Kunne ikke oprette forbindelse",
+            "invalid_auth": "Ugyldig autentificering",
+            "unknown": "Uventet fejl"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "Email",
+                    "password": "Password",
+                    "region": "Region"
+                }
+            },
+            "reauth_confirm": {
+                "description": "PETLIBRO integration har brug for at genautentificere din konto",
+                "data": {
+                    "password": "Password"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "device_sn": {
+                "name": "Serienummer"
+            },
+            "mac_address": {
+                "name": "MAC Address"
+            },
+            "wifi_ssid": {
+                "name": "Wi-Fi SSID"
+            },
+            "wifi_rssi": {
+                "name": "Wi-Fi Signalstyrke"
+            },
+            "remaining_desiccant": {
+                "name": "Tørremiddel Resterende Dage"
+            },
+            "battery_state": {
+                "name": "Batteriniveau"
+            },
+            "electric_quantity": {
+                "name": "Batteri %"
+            },
+            "today_feeding_quantity": {
+                "name": "Dagens Fodermængde"
+            },
+            "today_feeding_times": {
+                "name": "Dagens Fodertælling"
+            },
+            "today_eating_times": {
+                "name": "Dagens Spisetælling"
+            },
+            "today_eating_time": {
+                "name": "Dagens Samlede Spisetid"
+            },
+            "feeding_plan_state": {
+                "name": "Dagens Foderplan"
+            },
+            "today_total_ml": {
+                "name": "Dagens Vandindtag (ml)"
+            },
+            "weight": {
+                "name": "Nuværende Vægt"
+            },
+            "weight_percent": {
+                "name": "Resterende Vand"
+            },
+            "use_water_interval": {
+                "name": "Vandinterval"
+            },
+            "use_water_duration": {
+                "name": "Vandets Varighed"
+            },
+            "remaining_filter_days": {
+                "name": "Resterende Filterdage"
+            },
+            "remaining_cleaning_days": {
+                "name": "Resterende Rengøringsdage"
+            },
+            "resolution": {
+                "name": "Kameraopløsning"
+            },
+            "night_vision": {
+                "name": "Nattesynstilstand"
+            },
+            "enable_video_record": {
+                "name": "Videooptagelse Aktiveret"
+            },
+            "video_record_switch": {
+                "name": "Videooptagelsesknap"
+            },
+            "video_record_mode": {
+                "name": "Videooptagelsestilstand"
+            },
+            "next_feeding_day": {
+                "name": "Fodringsplan"
+            },
+            "next_feeding_time": {
+                "name": "Fodring Begynder"
+            },
+            "next_feeding_end_time": {
+                "name": "Fodring Ender"
+            },
+            "feeding_plan": {
+                "name": "Fodringsplan"
+            },
+            "temperature": {
+                "name": "Temperatur"
+            },
+            "plate_position": {
+                "name": "Pladeposition"
+            },
+            "display_selection": {
+                "name": "Skærmsværdi"
+            }
+        },
+        "switch": {
+            "child_lock_switch": {
+                "name": "Lå Knapper"
+            },
+            "enable_light": {
+                "name": "Aktivér Skærm"
+            },
+            "enable_sound": {
+                "name": "Aktivér Lyd"
+            },
+            "manual_feed_now": {
+                "name": "Manuel Åbning/Lukning af Låg"
+            }
+        },
+        "button": {
+            "manual_feed": {
+                "name": "Manuel Fodring"
+            },
+            "manual_cleaning": {
+                "name": "Manuel Rengøring"
+            },
+            "enable_feeding_plan": {
+                "name": "Aktivér Fodringsplan"
+            },
+            "disable_feeding_plan": {
+                "name": "Deaktiver Fodringsplan"
+            },
+            "manual_lid_open": {
+                "name": "Åbn Låget Manuelt"
+            },
+            "display_on": {
+                "name": "Tænd for Skærmen"
+            },
+            "display_off": {
+                "name": "Sluk for Skærmen"
+            },
+            "sound_on": {
+                "name": "Tænd for Lyden"
+            },
+            "sound_off": {
+                "name": "Sluk for Lyden"
+            },
+            "desiccant_reset": {
+                "name": "Tørremiddel Udskiftet"
+            },
+            "ring_bell": {
+                "name": "Ring med Klokken"
+            },
+            "rotate_food_bowl": {
+                "name": "Drej Madskålen"
+            },
+            "reposition_schedule": {
+                "name": "Omplacer Tidsplanen"
+            }
+        },
+        "binary_sensor": {
+            "door_state": {
+                "name": "Låg"
+            },
+            "food_dispenser_state": {
+                "name": "Maddispenser"
+            },
+            "door_blocked": {
+                "name": "Lågstatus"
+            },
+            "food_low": {
+                "name": "Madstatus"
+            },
+            "online": {
+                "name": "Wi-Fi"
+            },
+            "whether_in_sleep_mode": {
+                "name": "Dvaletilstand"
+            },
+            "enable_low_battery_notice": {
+                "name": "Batteristatus"
+            },
+            "child_lock_switch": {
+                "name": "Knapper Lås"
+            },
+            "sound_switch": {
+                "name": "Lydstatus"
+            },
+            "display_switch": {
+                "name": "Skærmstatus"
+            }
+        },
+        "number": {
+            "sound_level": {
+                "name": "Lydstyrkeniveau"
+            },
+            "desiccant_cycle": {
+                "name": "Tørremiddelfrekvens"
+            },
+            "lid_close_time": {
+                "name": "Lågets Lukketid"
+            }
+        },
+        "select": {
+            "lid_speed": {
+                "name": "Låghastighed"
+            },
+            "lid_mode": {
+                "name": "Lågtilstand"
+            },
+            "display_icon": {
+                "name": "Ikon på Skærmen"
+            }
+        },
+        "text": {
+            "display_text": {
+                "name": "Tekst på Skærmen"
+            }
+        }
+    }
+}

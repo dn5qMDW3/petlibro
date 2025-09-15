@@ -1,0 +1,236 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Устройство уже настроено",
+            "reauth_successful": "Повторное вещество успешно"
+        },
+        "error": {
+            "cannot_connect": "Не удалось подключиться",
+            "invalid_auth": "Неверная аутентификация",
+            "unknown": "Неожиданная ошибка"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "Электронная почта",
+                    "password": "Пароль",
+                    "region": "Область"
+                }
+            },
+            "reauth_confirm": {
+                "description": "Интеграция Petlibro должна повторно создать вашу учетную запись",
+                "data": {
+                    "password": "Пароль"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "device_sn": {
+                "name": "Устройство Sn"
+            },
+            "mac_address": {
+                "name": "MAC -адрес"
+            },
+            "wifi_ssid": {
+                "name": "Wi-Fi Ssid"
+            },
+            "wifi_rssi": {
+                "name": "Прочность сигнала Wi-Fi"
+            },
+            "remaining_desiccant": {
+                "name": "Определяющие оставшиеся дни"
+            },
+            "battery_state": {
+                "name": "Уровень аккумулятора"
+            },
+            "electric_quantity": {
+                "name": "Батарея / AC %"
+            },
+            "today_feeding_quantity": {
+                "name": "Сегодняшнее количество кормления"
+            },
+            "today_feeding_times": {
+                "name": "Сегодняшнее время кормления"
+            },
+            "today_eating_times": {
+                "name": "Сегодняшнее время еды"
+            },
+            "today_eating_time": {
+                "name": "Сегодняшнее время еды"
+            },
+            "feeding_plan_state": {
+                "name": "Сегодняшний план кормления"
+            },
+            "today_total_ml": {
+                "name": "Сегодняшнее потребление воды (ML)"
+            },
+            "weight": {
+                "name": "Текущий вес"
+            },
+            "weight_percent": {
+                "name": "Оставшаяся вода"
+            },
+            "use_water_interval": {
+                "name": "Водный интервал"
+            },
+            "use_water_duration": {
+                "name": "Продолжительность времени воды"
+            },
+            "remaining_filter_days": {
+                "name": "Оставшийся день фильтра"
+            },
+            "remaining_cleaning_days": {
+                "name": "Остальные дни чистки"
+            },
+            "resolution": {
+                "name": "Разрешение камеры"
+            },
+            "night_vision": {
+                "name": "Режим ночного видения"
+            },
+            "enable_video_record": {
+                "name": "Запись видео включена"
+            },
+            "video_record_switch": {
+                "name": "Переключатель видеозаписи"
+            },
+            "video_record_mode": {
+                "name": "Режим записи видео"
+            },
+            "next_feeding_day": {
+                "name": "График кормления"
+            },
+            "next_feeding_time": {
+                "name": "Кормление начинается"
+            },
+            "next_feeding_end_time": {
+                "name": "Кормление заканчивается"
+            },
+            "feeding_plan": {
+                "name": "План кормления"
+            },
+            "temperature": {
+                "name": "Температура"
+            },
+            "plate_position": {
+                "name": "Положение пластины"
+            },
+            "display_selection": {
+                "name": "Значение отображения"
+            }
+        },
+        "switch": {
+            "child_lock_switch": {
+                "name": "Кнопки блокируют"
+            },
+            "enable_light": {
+                "name": "Включить дисплей"
+            },
+            "enable_sound": {
+                "name": "Включить звук"
+            },
+            "manual_feed_now": {
+                "name": "Вручную открытую/закрытую крышку"
+            }
+        },
+        "button": {
+            "manual_feed": {
+                "name": "Ручная корм"
+            },
+            "manual_cleaning": {
+                "name": "Ручная уборка"
+            },
+            "enable_feeding_plan": {
+                "name": "Включить план кормления"
+            },
+            "disable_feeding_plan": {
+                "name": "Отключить план кормления"
+            },
+            "manual_lid_open": {
+                "name": "Вручную открытую крышку"
+            },
+            "display_on": {
+                "name": "Включите дисплей"
+            },
+            "display_off": {
+                "name": "Выключить дисплей"
+            },
+            "sound_on": {
+                "name": "Включите звук"
+            },
+            "sound_off": {
+                "name": "Выключить звук"
+            },
+            "desiccant_reset": {
+                "name": "Заменен"
+            },
+            "ring_bell": {
+                "name": "Кольцо колокола"
+            },
+            "rotate_food_bowl": {
+                "name": "Поверните миску с едой"
+            }
+        },
+        "binary_sensor": {
+            "door_state": {
+                "name": "Крышка"
+            },
+            "food_dispenser_state": {
+                "name": "Диспенсер еды"
+            },
+            "door_blocked": {
+                "name": "Статус крышки"
+            },
+            "food_low": {
+                "name": "Статус еды"
+            },
+            "online": {
+                "name": "Wi-Fi"
+            },
+            "whether_in_sleep_mode": {
+                "name": "Спящий режим"
+            },
+            "enable_low_battery_notice": {
+                "name": "Состояние батареи"
+            },
+            "child_lock_switch": {
+                "name": "Кнопки блокируют"
+            },
+            "sound_switch": {
+                "name": "Звуковой статус"
+            },
+            "display_switch": {
+                "name": "Отображение статуса"
+            }
+        },
+        "number": {
+            "sound_level": {
+                "name": "Уровень объема"
+            },
+            "desiccant_cycle": {
+                "name": "Исчезающая частота"
+            },
+            "lid_close_time": {
+                "name": "Крышка близко время"
+            }
+        },
+        "select": {
+            "lid_speed": {
+                "name": "Скорость крышки"
+            },
+            "lid_mode": {
+                "name": "Режим крышки"
+            },
+            "display_icon": {
+                "name": "Значок на дисплее"
+            }
+        },
+        "text": {
+            "display_text": {
+                "name": "Текст на дисплее"
+            }
+        }
+    }
+}

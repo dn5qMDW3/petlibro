@@ -1,0 +1,367 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured",
+            "reauth_successful": "Reauthentication successful"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "Email",
+                    "password": "Password",
+                    "region": "Region"
+                }
+            },
+            "reauth_confirm": {
+                "description": "The PETLIBRO integration needs to re-authenticate your account",
+                "data": {
+                    "password": "Password"
+                }
+            }
+        }
+    },
+	"options": {
+        "abort": {
+            "account_update_success": "Account updated",
+            "account_update_nomember": "Member data not loaded, please check logs",
+            "account_update_nochanges": "No settings were changed",
+            "error_check_logs": "Error, please check logs"
+        },
+        "error": {
+            "unknown": "Unexpected error"
+        },
+		"step": {
+			"init": {
+                "menu_options": {
+                    "account_settings": "Account settings"
+                }
+			},
+            "account_settings": {
+                "title": "Account Settings",
+                "description": "For account: {email}",
+                "data": {
+                    "nickname": "Nickname",
+                    "gender": "Gender"
+                },
+                "sections": {
+                    "measurement_unit": {
+                        "name": "Measurement Units",
+                        "data": {
+                            "feedUnitType": "Feeder/Feeding",
+                            "waterUnitType": "Fountain/Drinking",
+                            "weightUnitType": "Weight"
+                        }
+                    }
+
+                }
+            }
+        }
+    },
+    "selector": {
+        "member_gender": {
+            "options": {
+                "male": "Male",
+                "female": "Female",
+                "none": "Prefer not to say"
+            }
+        },
+        "pet_sex": {
+            "options": {
+                "male": "Male",
+                "female": "Female",
+                "none": "None selected"
+            }
+        },
+        "unit_type": {
+            "options": {
+                "cups": "cup (US legal cup)",
+                "ounces": "oz (ounce)",
+                "grams": "g (gram)",
+                "milliliters": "ml (milliliter)",
+                "kilograms": "kg (kilogram)",
+                "pounds": "lb (pound)"
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "device_sn": {
+                "name": "Device SN"
+            },
+            "mac_address": {
+                "name": "MAC Address"
+            },
+            "wifi_ssid": {
+                "name": "Wi-Fi SSID"
+            },
+            "wifi_rssi": {
+                "name": "Wi-Fi Signal Strength"
+            },
+            "remaining_desiccant": {
+                "name": "Desiccant Remaining Days"
+            },
+            "battery_state": {
+                "name": "Battery Level"
+            },
+            "electric_quantity": {
+                "name": "Battery / AC %"
+            },
+            "today_feeding_quantity": {
+                "name": "Today's Feeding Quantity"
+            },
+            "today_feeding_times": {
+                "name": "Today's Feeding Times"
+            },
+            "today_eating_times": {
+                "name": "Today's Eating Times"
+            },
+            "today_eating_time": {
+                "name": "Today's Total Eating Time"
+            },
+            "last_feed_time": {
+                "name": "Last Feed Time"
+            },
+            "last_feed_quantity": {
+                "name": "Last Feed Quantity"
+            },
+            "feeding_plan_state": {
+                "name": "Today's Feeding Plan"
+            },
+            "today_total_ml": {
+                "name": "Today's Water Consumption (mL)"
+            },
+            "weight": {
+                "name": "Current Weight"
+            },
+            "weight_percent": {
+                "name": "Remaining Water"
+            },
+            "use_water_interval": {
+                "name": "Water Interval"
+            },
+            "use_water_duration": {
+                "name": "Water Time Duration"
+            },
+            "remaining_filter_days": {
+                "name": "Remaining Filter Day"
+            },
+            "remaining_cleaning_days": {
+                "name": "Remaining Cleaning Days"
+            },
+            "resolution": {
+                "name": "Camera Resolution"
+            },
+            "night_vision": {
+                "name": "Night Vision Mode"
+            },
+            "enable_video_record": {
+                "name": "Video Recording Enabled"
+            },
+            "video_record_switch": {
+                "name": "Video Recording Switch"
+            },
+            "video_record_mode": {
+                "name": "Video Recording Mode"
+            },
+            "next_feeding_day": {
+                "name": "Feeding Schedule"
+            },
+            "next_feeding_time": {
+                "name": "Feeding Begins"
+            },
+            "next_feeding_end_time": {
+                "name": "Feeding Ends"
+            },
+            "feeding_plan": {
+                "name": "Feeding Plan"
+            },
+            "temperature": {
+                "name": "Temperature"
+            },
+            "plate_position": {
+                "name": "Plate Position"
+            },
+            "display_selection": {
+                "name": "Display Value"
+            },
+            "vacuum_mode": {
+                "name": "Vacuum Mode"
+            }
+        },
+        "switch": {
+            "child_lock_switch": {
+                "name": "Buttons Lock"
+            },
+            "enable_light": {
+                "name": "Enable Display"
+            },
+            "enable_sound": {
+                "name": "Enable Sound"
+            },
+            "manual_feed_now": {
+                "name": "Manually Open/Close Lid"
+            }
+        },
+        "button": {
+            "manual_feed": {
+                "name": "Manual Feed"
+            },
+            "manual_cleaning": {
+                "name": "Manual Cleaning"
+            },
+            "enable_feeding_plan": {
+                "name": "Enable Feeding Plan"
+            },
+            "disable_feeding_plan": {
+                "name": "Disable Feeding Plan"
+            },
+            "manual_lid_open": {
+                "name": "Manually Open Lid"
+            },
+            "display_on": {
+                "name": "Turn On Display"
+            },
+            "display_off": {
+                "name": "Turn Off Display"
+            },
+            "sound_on": {
+                "name": "Turn On Sound"
+            },
+            "sound_off": {
+                "name": "Turn Off Sound"
+            },
+            "sleep_on": {
+                "name": "Turn On Sleep Mode"
+            },
+            "sleep_off": {
+                "name": "Turn Off Sleep Mode"
+            },
+            "desiccant_reset": {
+                "name": "Desiccant Reset"
+            },
+            "ring_bell": {
+                "name": "Ring Bell"
+            },
+            "rotate_food_bowl": {
+                "name": "Rotate Food Bowl"
+            },
+            "reposition_schedule": {
+                "name": "Reposition Schedule"
+            },
+            "light_on": {
+                "name": "Turn On Indicator"
+            },
+            "light_off": {
+                "name": "Turn Off Indicator"
+            },
+            "cleaning_reset": {
+                "name": "Cleaning Reset"
+            },
+            "filter_reset": {
+                "name": "Filter Reset"
+            }
+        },
+        "binary_sensor": {
+            "door_state": {
+                "name": "Lid"
+            },
+            "food_dispenser_state": {
+                "name": "Food Dispenser"
+            },
+            "food_outlet_state": {
+                "name": "Food Outlet"
+            },
+            "vacuum_state": {
+                "name": "Vacuum State"
+            },
+            "door_blocked": {
+                "name": "Lid Status"
+            },
+            "food_low": {
+                "name": "Food Status"
+            },
+            "online": {
+                "name": "Wi-Fi"
+            },
+            "whether_in_sleep_mode": {
+                "name": "Sleep Mode"
+            },
+            "enable_low_battery_notice": {
+                "name": "Battery Status"
+            },
+            "child_lock_switch": {
+                "name": "Buttons Lock"
+            },
+            "sound_switch": {
+                "name": "Sound Status"
+            },
+            "display_switch": {
+                "name": "Display Status"
+            },
+            "light_switch": {
+                "name": "Indicator"
+            }
+        },
+        "number": {
+            "sound_level": {
+                "name": "Volume Level"
+            },
+            "desiccant_cycle": {
+                "name": "Desiccant Cycle"
+            },
+            "lid_close_time": {
+                "name": "Lid Close Time"
+            },
+            "water_interval": {
+                "name": "Water Interval"
+            },
+            "water_low_threshold": {
+                "name": "Water Low Threshold"
+            },
+            "water_sensing_delay": {
+                "name": "Water Sensing Delay"
+            },
+            "water_dispensing_duration": {
+                "name": "Water Dispensing Duration"
+            },
+            "cleaning_cycle": {
+                "name": "Cleaning Cycle"
+            },
+            "filter_cycle": {
+                "name": "Filter Cycle"
+            }
+        },
+        "select": {
+            "lid_speed": {
+                "name": "Lid Speed"
+            },
+            "lid_mode": {
+                "name": "Lid Mode"
+            },
+            "display_icon": {
+                "name": "Icon on Display"
+            },
+            "water_dispensing_mode": {
+                "name": "Water Dispensing Mode"
+            },
+            "plate_position": {
+                "name": "Plate Position"
+            }
+        },
+        "text": {
+            "display_text": {
+                "name": "Text on Display"
+            }
+        },
+        "update": {
+            "firmware": {
+                "name": "Update"
+            }
+        }
+    }
+}

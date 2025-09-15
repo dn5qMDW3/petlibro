@@ -1,0 +1,236 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "设备已经配置",
+            "reauth_successful": "重新验证成功"
+        },
+        "error": {
+            "cannot_connect": "无法连接",
+            "invalid_auth": "无效的身份验证",
+            "unknown": "意外错误"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "电子邮件",
+                    "password": "密码",
+                    "region": "地区"
+                }
+            },
+            "reauth_confirm": {
+                "description": "Petlibro集成需要重新认证您的帐户",
+                "data": {
+                    "password": "密码"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "device_sn": {
+                "name": "设备SN"
+            },
+            "mac_address": {
+                "name": "MAC地址"
+            },
+            "wifi_ssid": {
+                "name": "Wi-Fi SSID"
+            },
+            "wifi_rssi": {
+                "name": "Wi-Fi信号强度"
+            },
+            "remaining_desiccant": {
+                "name": "剩余日子"
+            },
+            "battery_state": {
+                "name": "电池水平"
+            },
+            "electric_quantity": {
+                "name": "电池 / AC％"
+            },
+            "today_feeding_quantity": {
+                "name": "今天的喂养数量"
+            },
+            "today_feeding_times": {
+                "name": "今天的喂养时间"
+            },
+            "today_eating_times": {
+                "name": "今天的饮食时间"
+            },
+            "today_eating_time": {
+                "name": "今天的总饮食时间"
+            },
+            "feeding_plan_state": {
+                "name": "今天的喂养计划"
+            },
+            "today_total_ml": {
+                "name": "今天的用水（ML）"
+            },
+            "weight": {
+                "name": "当前重量"
+            },
+            "weight_percent": {
+                "name": "剩余的水"
+            },
+            "use_water_interval": {
+                "name": "水间隔"
+            },
+            "use_water_duration": {
+                "name": "水时间持续时间"
+            },
+            "remaining_filter_days": {
+                "name": "剩余的过滤日"
+            },
+            "remaining_cleaning_days": {
+                "name": "剩余的清洁日"
+            },
+            "resolution": {
+                "name": "相机分辨率"
+            },
+            "night_vision": {
+                "name": "夜视模式"
+            },
+            "enable_video_record": {
+                "name": "启用了视频录制"
+            },
+            "video_record_switch": {
+                "name": "视频记录开关"
+            },
+            "video_record_mode": {
+                "name": "视频录制模式"
+            },
+            "next_feeding_day": {
+                "name": "喂食时间表"
+            },
+            "next_feeding_time": {
+                "name": "喂食开始"
+            },
+            "next_feeding_end_time": {
+                "name": "进食末端"
+            },
+            "feeding_plan": {
+                "name": "喂养计划"
+            },
+            "temperature": {
+                "name": "温度"
+            },
+            "plate_position": {
+                "name": "板位置"
+            },
+            "display_selection": {
+                "name": "显示值"
+            }
+        },
+        "switch": {
+            "child_lock_switch": {
+                "name": "按钮锁"
+            },
+            "enable_light": {
+                "name": "启用显示"
+            },
+            "enable_sound": {
+                "name": "启用声音"
+            },
+            "manual_feed_now": {
+                "name": "手动打开/关闭盖子"
+            }
+        },
+        "button": {
+            "manual_feed": {
+                "name": "手动饲料"
+            },
+            "manual_cleaning": {
+                "name": "手动清洁"
+            },
+            "enable_feeding_plan": {
+                "name": "启用喂养计划"
+            },
+            "disable_feeding_plan": {
+                "name": "禁用喂养计划"
+            },
+            "manual_lid_open": {
+                "name": "手动打开盖子"
+            },
+            "display_on": {
+                "name": "打开显示"
+            },
+            "display_off": {
+                "name": "关闭显示"
+            },
+            "sound_on": {
+                "name": "打开声音"
+            },
+            "sound_off": {
+                "name": "关闭声音"
+            },
+            "desiccant_reset": {
+                "name": "干燥剂更换"
+            },
+            "ring_bell": {
+                "name": "铃铛"
+            },
+            "rotate_food_bowl": {
+                "name": "旋转食物碗"
+            }
+        },
+        "binary_sensor": {
+            "door_state": {
+                "name": "盖"
+            },
+            "food_dispenser_state": {
+                "name": "食物分配器"
+            },
+            "door_blocked": {
+                "name": "盖状态"
+            },
+            "food_low": {
+                "name": "食物状况"
+            },
+            "online": {
+                "name": "无线上网"
+            },
+            "whether_in_sleep_mode": {
+                "name": "睡眠模式"
+            },
+            "enable_low_battery_notice": {
+                "name": "电池状态"
+            },
+            "child_lock_switch": {
+                "name": "按钮锁"
+            },
+            "sound_switch": {
+                "name": "声音状态"
+            },
+            "display_switch": {
+                "name": "显示状态"
+            }
+        },
+        "number": {
+            "sound_level": {
+                "name": "音量水平"
+            },
+            "desiccant_cycle": {
+                "name": "干燥频率"
+            },
+            "lid_close_time": {
+                "name": "盖关闭时间"
+            }
+        },
+        "select": {
+            "lid_speed": {
+                "name": "盖子速度"
+            },
+            "lid_mode": {
+                "name": "盖模式"
+            },
+            "display_icon": {
+                "name": "显示的图标"
+            }
+        },
+        "text": {
+            "display_text": {
+                "name": "显示文字"
+            }
+        }
+    }
+}

@@ -1,0 +1,236 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "डिवाइस पहले से ही कॉन्फ़िगर किया गया है",
+            "reauth_successful": "सफल सफल"
+        },
+        "error": {
+            "cannot_connect": "जोडने में विफल",
+            "invalid_auth": "अमान्य प्रमाणीकरण",
+            "unknown": "अप्रत्याशित त्रुटि"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "ईमेल",
+                    "password": "पासवर्ड",
+                    "region": "क्षेत्र"
+                }
+            },
+            "reauth_confirm": {
+                "description": "पेट्लिब्रो एकीकरण को आपके खाते को फिर से प्रमाणित करने की आवश्यकता है",
+                "data": {
+                    "password": "पासवर्ड"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "device_sn": {
+                "name": "युक्ति एसएन"
+            },
+            "mac_address": {
+                "name": "मैक पता"
+            },
+            "wifi_ssid": {
+                "name": "वाई-फाई ssid"
+            },
+            "wifi_rssi": {
+                "name": "वाई-फाई सिग्नल शक्ति"
+            },
+            "remaining_desiccant": {
+                "name": "शेष दिन desiccant"
+            },
+            "battery_state": {
+                "name": "बैटरी स्तर"
+            },
+            "electric_quantity": {
+                "name": "बैटरी / एसी %"
+            },
+            "today_feeding_quantity": {
+                "name": "आज की फीडिंग की मात्रा"
+            },
+            "today_feeding_times": {
+                "name": "आज का खिला समय"
+            },
+            "today_eating_times": {
+                "name": "आज का खाने का समय"
+            },
+            "today_eating_time": {
+                "name": "आज का कुल खाने का समय"
+            },
+            "feeding_plan_state": {
+                "name": "आज की फीडिंग प्लान"
+            },
+            "today_total_ml": {
+                "name": "आज का पानी की खपत (एमएल)"
+            },
+            "weight": {
+                "name": "वर्तमान वजन"
+            },
+            "weight_percent": {
+                "name": "शेष पानी"
+            },
+            "use_water_interval": {
+                "name": "पानी का अंतराल"
+            },
+            "use_water_duration": {
+                "name": "जल काल अवधि"
+            },
+            "remaining_filter_days": {
+                "name": "शेष फिल्टर दिवस"
+            },
+            "remaining_cleaning_days": {
+                "name": "शेष सफाई के दिन"
+            },
+            "resolution": {
+                "name": "कैमरा संकल्प"
+            },
+            "night_vision": {
+                "name": "रात की दृष्टि मोड"
+            },
+            "enable_video_record": {
+                "name": "वीडियो रिकॉर्डिंग सक्षम"
+            },
+            "video_record_switch": {
+                "name": "वीडियो रिकॉर्डिंग स्विच"
+            },
+            "video_record_mode": {
+                "name": "वीडियो रिकॉर्डिंग विधा"
+            },
+            "next_feeding_day": {
+                "name": "फीडिंग अनुसूची"
+            },
+            "next_feeding_time": {
+                "name": "खिला शुरू होता है"
+            },
+            "next_feeding_end_time": {
+                "name": "खिला समाप्त होता है"
+            },
+            "feeding_plan": {
+                "name": "भरी योजना"
+            },
+            "temperature": {
+                "name": "तापमान"
+            },
+            "plate_position": {
+                "name": "प्लेट स्थिति"
+            },
+            "display_selection": {
+                "name": "प्रदर्शन मान"
+            }
+        },
+        "switch": {
+            "child_lock_switch": {
+                "name": "बटोन लॉक"
+            },
+            "enable_light": {
+                "name": "प्रदर्शन सक्षम करें"
+            },
+            "enable_sound": {
+                "name": "ध्वनि सक्षम करें"
+            },
+            "manual_feed_now": {
+                "name": "मैन्युअल रूप से खुला/बंद ढक्कन"
+            }
+        },
+        "button": {
+            "manual_feed": {
+                "name": "मैनुअल फ़ीड"
+            },
+            "manual_cleaning": {
+                "name": "मैनुअल सफाई"
+            },
+            "enable_feeding_plan": {
+                "name": "फीडिंग प्लान सक्षम करें"
+            },
+            "disable_feeding_plan": {
+                "name": "फीडिंग प्लान को अक्षम करें"
+            },
+            "manual_lid_open": {
+                "name": "मैन्युअल रूप से खुले ढक्कन"
+            },
+            "display_on": {
+                "name": "प्रदर्शन चालू करें"
+            },
+            "display_off": {
+                "name": "डिस्प्ले बंद करें"
+            },
+            "sound_on": {
+                "name": "ध्वनि को चालू करें"
+            },
+            "sound_off": {
+                "name": "ध्वनि बंद करना"
+            },
+            "desiccant_reset": {
+                "name": "Desiccant ने प्रतिस्थापित किया"
+            },
+            "ring_bell": {
+                "name": "घंटी बजाना"
+            },
+            "rotate_food_bowl": {
+                "name": "फूड बाउल घुमाएं"
+            }
+        },
+        "binary_sensor": {
+            "door_state": {
+                "name": "ढक्कन"
+            },
+            "food_dispenser_state": {
+                "name": "खाद्य प्रेषणकर्ता"
+            },
+            "door_blocked": {
+                "name": "ढक्कन की स्थिति"
+            },
+            "food_low": {
+                "name": "भोजन की स्थिति"
+            },
+            "online": {
+                "name": "वाईफ़ाई"
+            },
+            "whether_in_sleep_mode": {
+                "name": "स्लीप मोड"
+            },
+            "enable_low_battery_notice": {
+                "name": "बैटरी स्थिति"
+            },
+            "child_lock_switch": {
+                "name": "बटोन लॉक"
+            },
+            "sound_switch": {
+                "name": "ध्वनि की स्थिति"
+            },
+            "display_switch": {
+                "name": "प्रदर्शन स्थिति"
+            }
+        },
+        "number": {
+            "sound_level": {
+                "name": "खंड स्तर"
+            },
+            "desiccant_cycle": {
+                "name": "डेसिकेंट आवृत्ति"
+            },
+            "lid_close_time": {
+                "name": "ढक्कन करीबी समय"
+            }
+        },
+        "select": {
+            "lid_speed": {
+                "name": "ढक्कन की गति"
+            },
+            "lid_mode": {
+                "name": "ढक्कन विधा"
+            },
+            "display_icon": {
+                "name": "प्रदर्शन पर आइकन"
+            }
+        },
+        "text": {
+            "display_text": {
+                "name": "प्रदर्शन पर पाठ"
+            }
+        }
+    }
+}

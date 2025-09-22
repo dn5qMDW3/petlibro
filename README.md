@@ -37,6 +37,7 @@
 * Dockstream 2 Smart Fountain | Cordless Model (PLWF116)
 
 ### Pending Device(s)
+* N/A
 
 ### Some Devices / May or may not work as intended
 

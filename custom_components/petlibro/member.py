@@ -12,10 +12,11 @@ from .const import (
     DEFAULT_FEED,
     DEFAULT_WATER,
     DEFAULT_WEIGHT,
+    WATER_MAPPING,
     DOMAIN,
-    CommonAPIKeys as API,
+    APIKey as API,
     Gender,
-    UnitTypes,
+    Unit,
 )
 from .devices.event import EVENT_UPDATE, Event
 
@@ -51,7 +52,7 @@ class Member(Event):
     @property
     def entity_id(self) -> str:
         """Entity ID."""
-        return f"PL-{self._data.get(API.ACCOUNT_ID, API.EMAIL)}-data"
+        return f"PL-{self._data.get(API.ID, API.EMAIL)}-data"
 
 
     @property
@@ -68,47 +69,48 @@ class Member(Event):
     name = nickname
 
     @property
-    def gender(self) -> str:
-        """Gender on account as a string."""
+    def gender(self) -> Gender:
+        """Gender on account as an Enum."""
         try:
-            return Gender(self._data.get(API.GENDER, 0)).name.lower()
+            return Gender(self._data.get(API.GENDER, 0))
         except ValueError:
             _LOGGER.error("Unknown gender value: %s", self._data.get("gender"))
-            return str(Gender.NONE).lower()
+            return Gender.NONE
 
     @property
-    def weightUnitType(self) -> str:
-        """Weight unit type on account as a string."""
-        return self._get_unit_type(API.WEIGHT_UNIT, DEFAULT_WEIGHT).lower()
+    def weightUnitType(self) -> Unit:
+        """Weight unit type on account as an Enum."""
+        return self._get_unit_type(API.WEIGHT_UNIT, DEFAULT_WEIGHT)
 
     @property
-    def feedUnitType(self) -> str:
-        """Feed unit type on account as a string."""
-        return self._get_unit_type(API.FEED_UNIT, DEFAULT_FEED).lower()
+    def feedUnitType(self) -> Unit:
+        """Feed unit type on account as an Enum."""
+        return self._get_unit_type(API.FEED_UNIT, DEFAULT_FEED)
 
     @property
-    def waterUnitType(self) -> str:
-        """Water unit type on account as a string."""
-        return self._get_unit_type(API.WATER_UNIT, DEFAULT_WATER).lower()
+    def waterUnitType(self) -> Unit:
+        """Water unit type on account as an Enum."""
+        water_unit = self._get_unit_type(API.WATER_UNIT, DEFAULT_WATER)
+        return WATER_MAPPING.get(water_unit, water_unit)
 
-    def _get_unit_type(self, key: str, default: UnitTypes) -> str:
-        """Return a valid UnitTypes name for the given key."""
+    def _get_unit_type(self, key: str, default: Unit) -> Unit:
+        """Return a valid Unit Enum for the given key."""
         raw_value = self._data.get(key, default)
         try:
-            return UnitTypes(raw_value).name
+            return Unit(raw_value)
         except ValueError:
             _LOGGER.error("Unknown unit type for %s: %s", key, raw_value)
-            return default.name
+            return default
 
     def to_dict(self) -> dict[str, Any]:
         """Return all key attributes as a dictionary."""
         return {
             "email": self.email,
             "nickname": self.nickname,
-            "gender": self.gender.capitalize(),
-            "weight_unit": self.weightUnitType.capitalize(),
-            "feed_unit": self.feedUnitType.capitalize(),
-            "water_unit": self.waterUnitType.capitalize(),
+            "gender": self.gender.name.capitalize(),
+            "weight_unit": self.weightUnitType.name.capitalize(),
+            "feed_unit": self.feedUnitType.name.capitalize(),
+            "water_unit": self.waterUnitType.name.capitalize(),
         }
 
 class MemberEntity(SensorEntity):

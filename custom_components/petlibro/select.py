@@ -11,13 +11,14 @@ from typing import Optional
 from typing import Any
 from typing import List, Awaitable
 import logging
-from .const import DOMAIN
+from .const import DOMAIN, MANUAL_FEED_PORTIONS, Unit, APIKey
 from homeassistant.components.select import (
     SelectEntity,
     SelectEntityDescription,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.core import callback
+from homeassistant.const import Platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.config_entries import ConfigEntry  # Added ConfigEntry import
 from .hub import PetLibroHub  # Adjust the import path as necessary
@@ -66,13 +67,24 @@ class PetLibroSelectEntityDescription(SelectEntityDescription, PetLibroEntityDes
     """A class that describes device select entities."""
 
     options_list: list[str] = field(default_factory=list)  # Default to empty list
-    method: Callable[[_DeviceT, str], Any] = field(default=lambda _: True)  # Default lambda function
-    current_selection: Callable[[_DeviceT], str] | None = None  # Default to None
+    method: Callable[[PetLibroSelectEntity, _DeviceT, str], Any] = field(default=lambda s,d,_: True)  # Default lambda function
+    current_selection: Callable[[PetLibroSelectEntity, _DeviceT], str] | None = lambda s,d: None  # Default to None
+    entity_registry_visible_default_fn: Callable[[PetLibroSelectEntity], bool | None] = lambda _: None
+    entity_registry_enabled_default_fn: Callable[[PetLibroSelectEntity], bool | None] = lambda _: None
+    available_fn: Callable[[PetLibroSelectEntity], bool | None] = lambda _: None
+    petlibro_unit: APIKey | str | None = None
 
 class PetLibroSelectEntity(PetLibroEntity[_DeviceT], SelectEntity):
     """PETLIBRO select entity."""
 
     entity_description: PetLibroSelectEntityDescription[_DeviceT]
+
+    def __init__(self, device, hub, description):
+        """Initialize the select entity."""
+        super().__init__(device, hub, description)
+
+        if (unit_type := self.entity_description.petlibro_unit) and unit_type == APIKey.FEED_UNIT:
+            self.hub.manual_feed_unique_ids[Platform.SELECT].append(self._attr_unique_id)
 
     @property
     def options(self) -> list[str]:
@@ -94,7 +106,7 @@ class PetLibroSelectEntity(PetLibroEntity[_DeviceT], SelectEntity):
 
         if self.entity_description.current_selection is not None:
             try:
-                state = self.entity_description.current_selection(self.device)
+                state = self.entity_description.current_selection(self, self.device)
                 # Only expose labels HA knows about
                 return state if state in self.options else None
             except Exception as e:
@@ -107,12 +119,13 @@ class PetLibroSelectEntity(PetLibroEntity[_DeviceT], SelectEntity):
             return None
         _LOGGER.debug("Retrieved current option for '%s', %s: %s", self.entity_description.key, self.device.name, state)
         return state if state in self.options else None
-    
+
     async def async_select_option(self, current_selection: str) -> None:
         _LOGGER.debug(f"Setting current option {current_selection} for {self.device.name}")
         try:
             _LOGGER.debug(f"Calling method with current option={current_selection} for {self.device.name}")
-            await self.entity_description.method(self.device, current_selection)
+            if method := self.entity_description.method:
+                await method(self, self.device, current_selection)
 
             # Immediately reflect the user's choice if it's a valid option
             if current_selection in self.options:
@@ -122,6 +135,44 @@ class PetLibroSelectEntity(PetLibroEntity[_DeviceT], SelectEntity):
             _LOGGER.debug(f"Current option {current_selection} set successfully for {self.device.name}")
         except Exception as e:
             _LOGGER.error(f"Error setting current option {current_selection} for {self.device.name}: {e}")
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        if (available := self.entity_description.available_fn(self)) is not None:
+            return available
+        return super().available
+
+    @property
+    def entity_registry_visible_default(self) -> bool:
+        """Return if the entity should be visible when first added."""
+        if (visible_default := self.entity_description.entity_registry_visible_default_fn(self)) is not None:
+            return visible_default
+        return super().entity_registry_visible_default
+
+    @property
+    def entity_registry_enabled_default(self) -> bool:
+        """Return if the entity should be enabled when first added."""
+        if (enabled_default := self.entity_description.entity_registry_enabled_default_fn(self)) is not None:
+            return enabled_default
+        return super().entity_registry_enabled_default
+
+    @property
+    def enable_for_manual_feed(self) -> bool:
+        """Return True if entity should be enabled for manual feed portion setting."""
+        return self.member.feedUnitType is Unit.CUPS and not self.hub.entry.options.get(MANUAL_FEED_PORTIONS, False)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        if (self.entity_description.petlibro_unit == APIKey.FEED_UNIT
+            and self.enabled != self.enable_for_manual_feed
+        ):
+            self.hub.unit_entities.schedule_manual_feed_sync()
+            _LOGGER.warning("Feed unit mismatch, reloading integration.")
+
+        if self.enabled:
+            super()._handle_coordinator_update()
 
     @staticmethod
     def map_value_to_api(*, key: str, current_selection: str) -> str:
@@ -155,27 +206,110 @@ class PetLibroSelectEntity(PetLibroEntity[_DeviceT], SelectEntity):
         }
         return mappings.get(key, {}).get(current_selection, "unknown")
 
+CUPS_FRACTIONS_LIST = [
+    f"{f"{whole} " if whole else ""}{str(fraction)+"/₁₂" if fraction else ""}"
+    for whole in range(5)
+    for i, fraction in enumerate([0, "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹", "¹⁰", "¹¹"])
+    if not (whole >= 4 and i > 0) and not (not whole and not fraction)
+]
+
 DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
     Feeder: [
+    ],
+    AirSmartFeeder: [
+        PetLibroSelectEntityDescription[AirSmartFeeder](
+            key="manual_feed_quantity_cups",
+            translation_key="manual_feed_quantity_cups",
+            icon="mdi:scale",
+            current_selection=lambda s, d: s.options[d.manual_feed_quantity - 1],
+            method=lambda s, d, opt: d.set_manual_feed_quantity(s.options.index(opt) + 1),
+            options_list=CUPS_FRACTIONS_LIST,
+            unit_of_measurement=Unit.CUPS.symbol,
+            name="Manual Feed Quantity",
+            entity_registry_visible_default_fn=lambda self: self.enable_for_manual_feed,
+            entity_registry_enabled_default_fn=lambda self: self.enable_for_manual_feed,
+            available_fn=lambda self: self.enable_for_manual_feed,
+            petlibro_unit=APIKey.FEED_UNIT
+        )
+    ],
+    GranarySmartFeeder: [
+        PetLibroSelectEntityDescription[GranarySmartFeeder](
+            key="manual_feed_quantity_cups",
+            translation_key="manual_feed_quantity_cups",
+            icon="mdi:scale",
+            current_selection=lambda s, d: s.options[d.manual_feed_quantity - 1],
+            method=lambda s, d, opt: d.set_manual_feed_quantity(s.options.index(opt) + 1),
+            options_list=CUPS_FRACTIONS_LIST,
+            unit_of_measurement=Unit.CUPS.symbol,
+            name="Manual Feed Quantity",
+            entity_registry_visible_default_fn=lambda self: self.enable_for_manual_feed,
+            entity_registry_enabled_default_fn=lambda self: self.enable_for_manual_feed,
+            available_fn=lambda self: self.enable_for_manual_feed,
+            petlibro_unit=APIKey.FEED_UNIT
+        )
+    ],
+    GranarySmartCameraFeeder: [
+        PetLibroSelectEntityDescription[GranarySmartCameraFeeder](
+            key="manual_feed_quantity_cups",
+            translation_key="manual_feed_quantity_cups",
+            icon="mdi:scale",
+            current_selection=lambda s, d: s.options[d.manual_feed_quantity - 1],
+            method=lambda s, d, opt: d.set_manual_feed_quantity(s.options.index(opt) + 1),
+            options_list=CUPS_FRACTIONS_LIST,
+            unit_of_measurement=Unit.CUPS.symbol,
+            name="Manual Feed Quantity",
+            entity_registry_visible_default_fn=lambda self: self.enable_for_manual_feed,
+            entity_registry_enabled_default_fn=lambda self: self.enable_for_manual_feed,
+            available_fn=lambda self: self.enable_for_manual_feed,
+            petlibro_unit=APIKey.FEED_UNIT
+        )
     ],
     SpaceSmartFeeder: [
         PetLibroSelectEntityDescription[SpaceSmartFeeder](
             key="vacuum_mode",
             translation_key="vacuum_mode",
             icon="mdi:air-purifier",
-            current_selection=lambda device: device.vacuum_mode,
-            method=lambda device, current_selection: device.set_vacuum_mode(PetLibroSelectEntity.map_value_to_api(key="vacuum_mode", current_selection=current_selection)),
+            current_selection=lambda s, device: device.vacuum_mode,
+            method=lambda s, device, current_selection: device.set_vacuum_mode(PetLibroSelectEntity.map_value_to_api(key="vacuum_mode", current_selection=current_selection)),
             options_list=['Study','Normal','Manual'],
             name="Vacuum Mode"
         ),
+        PetLibroSelectEntityDescription[SpaceSmartFeeder](
+            key="manual_feed_quantity_cups",
+            translation_key="manual_feed_quantity_cups",
+            icon="mdi:scale",
+            current_selection=lambda s, d: s.options[d.manual_feed_quantity - 1],
+            method=lambda s, d, opt: d.set_manual_feed_quantity(s.options.index(opt) + 1),
+            options_list=CUPS_FRACTIONS_LIST,
+            unit_of_measurement=Unit.CUPS.symbol,
+            name="Manual Feed Quantity",
+            entity_registry_visible_default_fn=lambda self: self.enable_for_manual_feed,
+            entity_registry_enabled_default_fn=lambda self: self.enable_for_manual_feed,
+            available_fn=lambda self: self.enable_for_manual_feed,
+            petlibro_unit=APIKey.FEED_UNIT
+        )
     ],
     OneRFIDSmartFeeder: [
+        PetLibroSelectEntityDescription[OneRFIDSmartFeeder](
+            key="manual_feed_quantity_cups",
+            translation_key="manual_feed_quantity_cups",
+            icon="mdi:scale",
+            current_selection=lambda s, d: s.options[d.manual_feed_quantity - 1],
+            method=lambda s, d, opt: d.set_manual_feed_quantity(s.options.index(opt) + 1),
+            options_list=CUPS_FRACTIONS_LIST,
+            unit_of_measurement=Unit.CUPS.symbol,
+            name="Manual Feed Quantity",
+            entity_registry_visible_default_fn=lambda self: self.enable_for_manual_feed,
+            entity_registry_enabled_default_fn=lambda self: self.enable_for_manual_feed,
+            available_fn=lambda self: self.enable_for_manual_feed,
+            petlibro_unit=APIKey.FEED_UNIT
+        ),
         PetLibroSelectEntityDescription[OneRFIDSmartFeeder](
             key="lid_speed",
             translation_key="lid_speed",
             icon="mdi:speedometer",
-            current_selection=lambda device: device.lid_speed,
-            method=lambda device, current_selection: device.set_lid_speed(PetLibroSelectEntity.map_value_to_api(key="lid_speed", current_selection=current_selection)),
+            current_selection=lambda s, device: device.lid_speed,
+            method=lambda s, device, current_selection: device.set_lid_speed(PetLibroSelectEntity.map_value_to_api(key="lid_speed", current_selection=current_selection)),
             options_list=['Slow','Medium','Fast'],
             name="Lid Speed"
         ),
@@ -183,8 +317,8 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
             key="lid_mode",
             translation_key="lid_mode",
             icon="mdi:arrow-oscillating",
-            current_selection=lambda device: device.lid_mode,
-            method=lambda device, current_selection: device.set_lid_mode(PetLibroSelectEntity.map_value_to_api(key="lid_mode", current_selection=current_selection)),
+            current_selection=lambda s, device: device.lid_mode,
+            method=lambda s, device, current_selection: device.set_lid_mode(PetLibroSelectEntity.map_value_to_api(key="lid_mode", current_selection=current_selection)),
             options_list=['Open Mode (Stays Open Until Closed)','Personal Mode (Opens on Detection)'],
             name="Lid Mode"
         ),
@@ -192,8 +326,8 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
             key="display_icon",
             translation_key="display_icon",
             icon="mdi:monitor-star",
-            current_selection=lambda device: device.display_icon,
-            method=lambda device, current_selection: device.set_display_icon(PetLibroSelectEntity.map_value_to_api(key="display_icon", current_selection=current_selection)),
+            current_selection=lambda s, device: device.display_icon,
+            method=lambda s, device, current_selection: device.set_display_icon(PetLibroSelectEntity.map_value_to_api(key="display_icon", current_selection=current_selection)),
             options_list=['Heart','Dog','Cat','Elk'],
             name="Icon to Display"
         )
@@ -203,9 +337,9 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
             key="water_dispensing_mode",
             translation_key="water_dispensing_mode",
             icon="mdi:arrow-oscillating",
-            current_selection=lambda device: device.water_dispensing_mode,
-            method=lambda d, opt: (
-                _apply_with_cached_schedule(d, lambda interval, duration, _off: d.api.set_water_mode_intermittent(d.serial, interval, duration)) if opt == "Intermittent Water (Scheduled)" 
+            current_selection=lambda s, device: device.water_dispensing_mode,
+            method=lambda s, d, opt: (
+                _apply_with_cached_schedule(d, lambda interval, duration, _off: d.api.set_water_mode_intermittent(d.serial, interval, duration)) if opt == "Intermittent Water (Scheduled)"
                 else
                 _apply_with_cached_schedule(d, lambda interval, duration, _off: d.api.set_water_mode_constant(d.serial, interval, duration))
             ),
@@ -218,13 +352,13 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
             key="water_dispensing_mode",
             translation_key="water_dispensing_mode",
             icon="mdi:arrow-oscillating",
-            current_selection=lambda device: device.water_dispensing_mode,
-            method=lambda d, opt: (
-                _apply_and_refresh(d, d.api.set_water_mode_off(d.serial)) if opt == "Off" 
+            current_selection=lambda s, device: device.water_dispensing_mode,
+            method=lambda s, d, opt: (
+                _apply_and_refresh(d, d.api.set_water_mode_off(d.serial)) if opt == "Off"
                 else
-                _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_water_mode_radar_near(d.serial, interval, duration, currently_off=off)) if opt == "Sensor-Activated (Near)" 
+                _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_water_mode_radar_near(d.serial, interval, duration, currently_off=off)) if opt == "Sensor-Activated (Near)"
                 else
-                _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_water_mode_radar_far(d.serial, interval, duration, currently_off=off)) if opt == "Sensor-Activated (Far)" 
+                _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_water_mode_radar_far(d.serial, interval, duration, currently_off=off)) if opt == "Sensor-Activated (Far)"
                 else
                 _apply_with_cached_schedule( d, lambda interval, duration, off: d.api.set_new_water_mode_constant(d.serial, interval, duration, currently_off=off))  # Flowing Water (Constant)
             ),
@@ -237,11 +371,11 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
             key="water_dispensing_mode",
             translation_key="water_dispensing_mode",
             icon="mdi:arrow-oscillating",
-            current_selection=lambda device: device.water_dispensing_mode,
-            method=lambda d, opt: (
-                _apply_and_refresh(d, d.api.set_water_mode_off(d.serial)) if opt == "Off" 
+            current_selection=lambda s, device: device.water_dispensing_mode,
+            method=lambda s, d, opt: (
+                _apply_and_refresh(d, d.api.set_water_mode_off(d.serial)) if opt == "Off"
                 else
-                _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_new_water_mode_intermittent(d.serial, interval, duration, currently_off=off)) if opt == "Intermittent Water (Scheduled)" 
+                _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_new_water_mode_intermittent(d.serial, interval, duration, currently_off=off)) if opt == "Intermittent Water (Scheduled)"
                 else
                 _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_new_water_mode_constant(d.serial, interval, duration, currently_off=off))
             ),
@@ -254,9 +388,9 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
             key="water_dispensing_mode",
             translation_key="water_dispensing_mode",
             icon="mdi:arrow-oscillating",
-            current_selection=lambda device: device.water_dispensing_mode,
-            method=lambda d, opt: (
-                _apply_with_cached_schedule(d, lambda interval, duration, _off: d.api.set_water_mode_intermittent(d.serial, interval, duration)) if opt == "Intermittent Water (Scheduled)" 
+            current_selection=lambda s, device: device.water_dispensing_mode,
+            method=lambda s, d, opt: (
+                _apply_with_cached_schedule(d, lambda interval, duration, _off: d.api.set_water_mode_intermittent(d.serial, interval, duration)) if opt == "Intermittent Water (Scheduled)"
                 else
                 _apply_with_cached_schedule(d, lambda interval, duration, _off: d.api.set_water_mode_constant(d.serial, interval, duration))
             ),
@@ -269,11 +403,11 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
             key="plate_position",
             translation_key="plate_position",
             icon="mdi:rotate-3d-variant",
-            current_selection=lambda d: f"Plate {d.plate_position}" if d.plate_position else None,
-            method=lambda d, opt: d.set_plate_position(int(opt.split()[-1])),
+            current_selection=lambda s, d: f"Plate {d.plate_position}" if d.plate_position else None,
+            method=lambda s, d, opt: d.set_plate_position(int(opt.split()[-1])),
             options_list=["Plate 1", "Plate 2", "Plate 3"],
             name="Plate Position"
-        ), 
+        ),
     ]
 }
 

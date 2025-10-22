@@ -3,16 +3,19 @@ import asyncio
 from logging import getLogger
 from asyncio import gather
 from collections.abc import Mapping
+import sys
 from typing import List, Any, Optional
 from datetime import datetime, timedelta
 from .const import UPDATE_INTERVAL_SECONDS
 from homeassistant.core import HomeAssistant
-from homeassistant.const import CONF_REGION, CONF_API_TOKEN
+from homeassistant.const import CONF_REGION, CONF_API_TOKEN, Platform
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.components.sensor.const import SensorDeviceClass
 from aiohttp import ClientResponseError, ClientConnectorError
 from .api import PetLibroAPI  # Use a relative import if inside the same package
-from .const import DOMAIN, CONF_EMAIL, CONF_PASSWORD  # Import CONF_EMAIL and CONF_PASSWORD
+from .const import DOMAIN, CONF_EMAIL, CONF_PASSWORD, APIKey  # Import CONF_EMAIL and CONF_PASSWORD
 from .api import PetLibroAPIError
 from .devices import Device, product_name_map
 from .member import Member
@@ -22,20 +25,30 @@ _LOGGER = getLogger(__name__)
 class PetLibroHub:
     """A PetLibro hub wrapper class."""
 
-    def __init__(self, hass: HomeAssistant, data: Mapping[str, Any]) -> None:
+    def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         """Initialize the PetLibro Hub."""
         self.hass = hass
-        self._data = data
+        self.entry = config_entry
+        self._data = self.entry.data
         self.devices: List[Device] = []  # Initialize devices as an instance variable
         self.member: Member = None
         self.last_refresh_times = {}  # Track the last refresh time for the member & each device
         self.loaded_device_sn = set()  # Track device serial numbers that have already been loaded
         self._last_online_status = {}  # Store online status per device
 
+        self.manual_feed_unique_ids: dict[Platform, list[str]] = {
+            Platform.NUMBER: [], Platform.SELECT: []
+        }
+        self.unit_sensor_unique_ids: dict[APIKey, dict[SensorDeviceClass, list[str]]] = {
+            APIKey.FEED_UNIT: {SensorDeviceClass.WEIGHT: [], SensorDeviceClass.VOLUME: []},
+            APIKey.WEIGHT_UNIT: {SensorDeviceClass.WEIGHT: []},
+            APIKey.WATER_UNIT: {SensorDeviceClass.VOLUME: []},
+        }
+
         # Fetch email, password, and region from entry.data
-        email = data.get(CONF_EMAIL)
-        password = data.get(CONF_PASSWORD)
-        region = data.get(CONF_REGION)
+        email = self.entry.data.get(CONF_EMAIL)
+        password = self.entry.data.get(CONF_PASSWORD)
+        region = self.entry.data.get(CONF_REGION)
 
         # Check if the required information is provided
         if not email:
@@ -57,7 +70,7 @@ class PetLibroHub:
             region,
             email,
             password,
-            data.get(CONF_API_TOKEN)
+            self.entry.data.get(CONF_API_TOKEN)
         )
 
         # Setup DataUpdateCoordinator to periodically refresh device data
@@ -92,7 +105,7 @@ class PetLibroHub:
                 # Create a new device and add it without calling refresh immediately
                 if device_name in product_name_map:
                     _LOGGER.debug(f"Loading new device: {device_name} (Serial: {device_sn})")
-                    device = product_name_map[device_name](device_data, self.api)
+                    device = product_name_map[device_name](device_data, self.member, self.api)
                     self.devices.append(device)  # Add to device list
                     _LOGGER.debug(f"Successfully loaded device: {device_name} (Serial: {device_sn})")
                 else:
@@ -132,6 +145,11 @@ class PetLibroHub:
         self.member = Member(member_info, self.api)
         self.last_refresh_times[member_email] = datetime.utcnow()
         _LOGGER.debug("Member loaded successfully: %s", member_email)
+        
+    async def _initialize_helpers(self) -> None:
+        if "Unit_Entities" not in sys.modules:
+            from .helpers.unit_entities import Unit_Entities
+        self.unit_entities = Unit_Entities(hass=self.hass, config_entry=self.entry, hub=self)
 
     async def refresh_data(self) -> bool:
         """Refresh all known devices and member info from the PETLIBRO API."""
@@ -233,6 +251,14 @@ class PetLibroHub:
         if not device:
             _LOGGER.debug(f"Device with serial {serial} not found.")
         return device
+
+    def update_options(self, new_options: Mapping[str, Any]) -> None:
+        """Update config entry options."""
+        self.hass.config_entries.async_update_entry(
+            self.entry,
+            options={**self.entry.options, **new_options},
+        )
+        _LOGGER.debug(f"Config entry options updated with: {new_options}")
 
     async def async_refresh(self, force_member: bool = False) -> None:
         """Force a manual data refresh if enough time has passed.

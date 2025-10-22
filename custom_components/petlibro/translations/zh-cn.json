@@ -25,6 +25,80 @@
             }
         }
     },
+    "options": {
+        "abort": {
+            "no_member_data": "未加载成员数据，请检查日志",
+            "account_settings_abort": "{account_settings_abort}",
+            "integration_settings_abort": "{integration_settings_abort}",
+            "no_settings_changed": "未更改任何设置",
+            "error_check_logs": "错误，请检查日志"
+        },
+        "error": {
+            "unknown": "意外错误"
+        },
+        "step": {
+			"init": {
+                "menu_options": {
+                    "integration_settings": "集成设置",
+                    "account_settings": "账户设置"
+                }
+			},
+            "integration_settings": {
+                "title": "集成设置",
+                "data": {
+                    "manual_feed_portions": "按份量设置手动喂食量"
+                },
+                "data_description": {
+                    "manual_feed_portions": "默认：根据您选择的宠物饲料单位设置 ({uom})。"
+                }
+            },
+            "account_settings": {
+                "title": "账户设置",
+                "description": "账户：{email}",
+                "data": {
+                    "nickname": "昵称",
+                    "gender": "性别"
+                },
+                "sections": {
+                    "measurement_unit": {
+                        "name": "计量单位",
+                        "data": {
+                            "feedUnitType": "喂食器/喂食",
+                            "waterUnitType": "饮水机/饮用",
+                            "weightUnitType": "重量",
+                            "update_all_units": "更新所有 Petlibro 单位传感器实体的计量单位"
+                        },
+                        "data_description": {
+                            "update_all_units": "默认情况下，在此更改单位只会更新该类型的传感器实体。"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "common": {
+        "reloading_integration": "正在重新加载集成",
+        "settings_updated": "设置已更新",
+        "no_settings_changed": "未更改任何设置",
+        "sensors_updated": "传感器实体已更新",
+        "account_updated": "账户更新成功"
+    },
+    "selector": {
+        "member_gender": {
+            "options": {
+                "male": "男",
+                "female": "女",
+                "none": "不愿透露"
+            }
+        },
+        "pet_sex": {
+            "options": {
+                "male": "公",
+                "female": "母",
+                "none": "未选择"
+            }
+        }
+    },
     "entity": {
         "sensor": {
             "device_sn": {
@@ -48,8 +122,17 @@
             "electric_quantity": {
                 "name": "电池 / AC％"
             },
-            "today_feeding_quantity": {
-                "name": "今天的喂养数量"
+            "today_feeding_quantity_weight": {
+                "name": "今日喂食量（重量）"
+            },
+            "today_feeding_quantity_volume": {
+                "name": "今日喂食量（体积）"
+            },
+            "last_feed_quantity_weight": {
+                "name": "上次喂食量（重量）"
+            },
+            "last_feed_quantity_volume": {
+                "name": "上次喂食量（体积）"
             },
             "today_feeding_times": {
                 "name": "今天的喂养时间"
@@ -70,6 +153,9 @@
                 "name": "当前重量"
             },
             "weight_percent": {
+                "name": "剩余的水 (%)"
+            },
+            "remaining_water": {
                 "name": "剩余的水"
             },
             "use_water_interval": {
@@ -214,6 +300,9 @@
             },
             "lid_close_time": {
                 "name": "盖关闭时间"
+            },
+            "manual_feed_quantity": {
+                "name": "手动喂食量"
             }
         },
         "select": {
@@ -225,6 +314,9 @@
             },
             "display_icon": {
                 "name": "显示的图标"
+            },
+            "manual_feed_quantity_cups": {
+                "name": "手动喂食量"
             }
         },
         "text": {

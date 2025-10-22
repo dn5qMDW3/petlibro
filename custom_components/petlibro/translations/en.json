@@ -27,9 +27,9 @@
     },
 	"options": {
         "abort": {
-            "account_update_success": "Account updated",
-            "account_update_nomember": "Member data not loaded, please check logs",
-            "account_update_nochanges": "No settings were changed",
+            "no_member_data": "Member data not loaded, please check logs",
+            "account_settings_abort": "{account_settings_abort}",
+            "integration_settings_abort": "{integration_settings_abort}",
             "error_check_logs": "Error, please check logs"
         },
         "error": {
@@ -38,9 +38,19 @@
 		"step": {
 			"init": {
                 "menu_options": {
+                    "integration_settings": "Integration settings",
                     "account_settings": "Account settings"
                 }
 			},
+            "integration_settings": {
+                "title": "Integration Settings",
+                "data": {
+                    "manual_feed_portions": "Set Manual Feed amount by Portions"
+                },
+                "data_description": {
+                    "manual_feed_portions": "Default: Set by your chosen unit for pet feed ({uom})."
+                }
+            },
             "account_settings": {
                 "title": "Account Settings",
                 "description": "For account: {email}",
@@ -54,13 +64,23 @@
                         "data": {
                             "feedUnitType": "Feeder/Feeding",
                             "waterUnitType": "Fountain/Drinking",
-                            "weightUnitType": "Weight"
+                            "weightUnitType": "Weight",
+                            "update_all_units": "Update measurement unit of all Petlibro unit sensor entities"
+                        },
+                        "data_description": {
+                            "update_all_units": "By default, changing a unit here only updates sensor entities of that type."
                         }
                     }
-
                 }
             }
         }
+    },
+    "common": {
+        "reloading_integration": "The integration is being reloaded",
+        "settings_updated": "Settings updated",
+        "no_settings_changed": "No settings were changed",
+        "sensors_updated": "Sensor entities were updated",
+        "account_updated": "Account update successful"
     },
     "selector": {
         "member_gender": {
@@ -84,7 +104,9 @@
                 "grams": "g (gram)",
                 "milliliters": "ml (milliliter)",
                 "kilograms": "kg (kilogram)",
-                "pounds": "lb (pound)"
+                "pounds": "lb (pound)",
+                "water_ounces": "fl oz (fluid ounce)",
+                "water_milliliters": "ml (milliliter)"
             }
         }
     },
@@ -111,8 +133,11 @@
             "electric_quantity": {
                 "name": "Battery / AC %"
             },
-            "today_feeding_quantity": {
-                "name": "Today's Feeding Quantity"
+            "today_feeding_quantity_weight": {
+                "name": "Today's Feeding Quantity (Weight)"
+            },
+            "today_feeding_quantity_volume": {
+                "name": "Today's Feeding Quantity (Volume)"
             },
             "today_feeding_times": {
                 "name": "Today's Feeding Times"
@@ -126,8 +151,11 @@
             "last_feed_time": {
                 "name": "Last Feed Time"
             },
-            "last_feed_quantity": {
-                "name": "Last Feed Quantity"
+            "last_feed_quantity_weight": {
+                "name": "Last Feed Quantity (Weight)"
+            },
+            "last_feed_quantity_volume": {
+                "name": "Last Feed Quantity (Volume)"
             },
             "feeding_plan_state": {
                 "name": "Today's Feeding Plan"
@@ -139,6 +167,9 @@
                 "name": "Current Weight"
             },
             "weight_percent": {
+                "name": "Remaining Water (%)"
+            },
+            "remaining_water": {
                 "name": "Remaining Water"
             },
             "use_water_interval": {
@@ -355,6 +386,9 @@
             },
             "filter_cycle": {
                 "name": "Filter Cycle"
+            },
+            "manual_feed_quantity": {
+                "name": "Manual Feed Quantity"
             }
         },
         "select": {
@@ -372,6 +406,9 @@
             },
             "plate_position": {
                 "name": "Plate Position"
+            },
+            "manual_feed_quantity_cups": {
+                "name": "Manual Feed Quantity"
             }
         },
         "text": {

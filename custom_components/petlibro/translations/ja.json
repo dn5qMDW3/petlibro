@@ -25,6 +25,80 @@
             }
         }
     },
+    "options": {
+        "abort": {
+            "no_member_data": "メンバーデータが読み込まれていません。ログを確認してください",
+            "account_settings_abort": "{account_settings_abort}",
+            "integration_settings_abort": "{integration_settings_abort}",
+            "no_settings_changed": "設定は変更されませんでした",
+            "error_check_logs": "エラー、ログを確認してください"
+        },
+        "error": {
+            "unknown": "予期しないエラー"
+        },
+        "step": {
+			"init": {
+                "menu_options": {
+                    "integration_settings": "統合設定",
+                    "account_settings": "アカウント設定"
+                }
+			},
+            "integration_settings": {
+                "title": "統合設定",
+                "data": {
+                    "manual_feed_portions": "手動給餌量をポーション単位で設定"
+                },
+                "data_description": {
+                    "manual_feed_portions": "デフォルト: ペットフードの選択単位に基づいて設定します ({uom})。"
+                }
+            },
+            "account_settings": {
+                "title": "アカウント設定",
+                "description": "アカウント: {email}",
+                "data": {
+                    "nickname": "ニックネーム",
+                    "gender": "性別"
+                },
+                "sections": {
+                    "measurement_unit": {
+                        "name": "測定単位",
+                        "data": {
+                            "feedUnitType": "給餌機/給餌",
+                            "waterUnitType": "給水器/飲水",
+                            "weightUnitType": "重量",
+                            "update_all_units": "すべてのPetlibroユニットセンサーエンティティの測定単位を更新"
+                        },
+                        "data_description": {
+                            "update_all_units": "デフォルトでは、ここで単位を変更すると、その種類のセンサーエンティティのみが更新されます。"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "common": {
+        "reloading_integration": "統合を再読み込みしています",
+        "settings_updated": "設定が更新されました",
+        "no_settings_changed": "設定は変更されませんでした",
+        "sensors_updated": "センサーエンティティが更新されました",
+        "account_updated": "アカウントの更新に成功しました"
+    },
+    "selector": {
+        "member_gender": {
+            "options": {
+                "male": "男性",
+                "female": "女性",
+                "none": "答えたくない"
+            }
+        },
+        "pet_sex": {
+            "options": {
+                "male": "オス",
+                "female": "メス",
+                "none": "未選択"
+            }
+        }
+    },
     "entity": {
         "sensor": {
             "device_sn": {
@@ -48,8 +122,17 @@
             "electric_quantity": {
                 "name": "バッテリー / AC％"
             },
-            "today_feeding_quantity": {
-                "name": "今日の給餌量"
+            "today_feeding_quantity_weight": {
+                "name": "今日の給餌量（重量）"
+            },
+            "today_feeding_quantity_volume": {
+                "name": "今日の給餌量（容量）"
+            },
+            "last_feed_quantity_weight": {
+                "name": "最後の給餌量（重量）"
+            },
+            "last_feed_quantity_volume": {
+                "name": "最後の給餌量（容量）"
             },
             "today_feeding_times": {
                 "name": "今日の給餌時間"
@@ -70,6 +153,9 @@
                 "name": "現在の重量"
             },
             "weight_percent": {
+                "name": "残りの水 (%)"
+            },
+            "remaining_water": {
                 "name": "残りの水"
             },
             "use_water_interval": {
@@ -214,6 +300,9 @@
             },
             "lid_close_time": {
                 "name": "ふたの近い時間"
+            },
+            "manual_feed_quantity": {
+                "name": "手動給餌量"
             }
         },
         "select": {
@@ -225,6 +314,9 @@
             },
             "display_icon": {
                 "name": "展示されているアイコン"
+            },
+            "manual_feed_quantity_cups": {
+                "name": "手動給餌量"
             }
         },
         "text": {

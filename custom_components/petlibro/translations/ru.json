@@ -25,6 +25,80 @@
             }
         }
     },
+    "options": {
+        "abort": {
+            "no_member_data": "Данные участника не загружены, проверьте логи",
+            "account_settings_abort": "{account_settings_abort}",
+            "integration_settings_abort": "{integration_settings_abort}",
+            "no_settings_changed": "Настройки не были изменены",
+            "error_check_logs": "Ошибка, пожалуйста, проверьте логи"
+        },
+        "error": {
+            "unknown": "Неожиданная ошибка"
+        },
+        "step": {
+			"init": {
+                "menu_options": {
+                    "integration_settings": "Настройки интеграции",
+                    "account_settings": "Настройки аккаунта"
+                }
+			},
+            "integration_settings": {
+                "title": "Настройки интеграции",
+                "data": {
+                    "manual_feed_portions": "Задать ручную подачу по порциям"
+                },
+                "data_description": {
+                    "manual_feed_portions": "По умолчанию: устанавливается согласно выбранной единице измерения корма ({uom})."
+                }
+            },
+            "account_settings": {
+                "title": "Настройки аккаунта",
+                "description": "Для аккаунта: {email}",
+                "data": {
+                    "nickname": "Никнейм",
+                    "gender": "Пол"
+                },
+                "sections": {
+                    "measurement_unit": {
+                        "name": "Единицы измерения",
+                        "data": {
+                            "feedUnitType": "Кормушка/Кормление",
+                            "waterUnitType": "Фонтан/Питьё",
+                            "weightUnitType": "Вес",
+                            "update_all_units": "Обновить единицу измерения для всех сущностей датчиков Petlibro"
+                        },
+                        "data_description": {
+                            "update_all_units": "По умолчанию изменение единицы здесь обновляет только сущности датчиков этого типа."
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "common": {
+        "reloading_integration": "Интеграция перезагружается",
+        "settings_updated": "Настройки обновлены",
+        "no_settings_changed": "Настройки не были изменены",
+        "sensors_updated": "Сущности датчиков обновлены",
+        "account_updated": "Аккаунт успешно обновлен"
+    },
+    "selector": {
+        "member_gender": {
+            "options": {
+                "male": "Мужской",
+                "female": "Женский",
+                "none": "Не указывать"
+            }
+        },
+        "pet_sex": {
+            "options": {
+                "male": "Самец",
+                "female": "Самка",
+                "none": "Не выбрано"
+            }
+        }
+    },
     "entity": {
         "sensor": {
             "device_sn": {
@@ -48,8 +122,17 @@
             "electric_quantity": {
                 "name": "Батарея / AC %"
             },
-            "today_feeding_quantity": {
-                "name": "Сегодняшнее количество кормления"
+            "today_feeding_quantity_weight": {
+                "name": "Сегодняшнее количество корма (Вес)"
+            },
+            "today_feeding_quantity_volume": {
+                "name": "Сегодняшнее количество корма (Объем)"
+            },
+            "last_feed_quantity_weight": {
+                "name": "Последнее количество корма (Вес)"
+            },
+            "last_feed_quantity_volume": {
+                "name": "Последнее количество корма (Объем)"
             },
             "today_feeding_times": {
                 "name": "Сегодняшнее время кормления"
@@ -70,6 +153,9 @@
                 "name": "Текущий вес"
             },
             "weight_percent": {
+                "name": "Оставшаяся вода (%)"
+            },
+            "remaining_water": {
                 "name": "Оставшаяся вода"
             },
             "use_water_interval": {
@@ -214,6 +300,9 @@
             },
             "lid_close_time": {
                 "name": "Крышка близко время"
+            },
+            "manual_feed_quantity": {
+                "name": "Ручное количество корма"
             }
         },
         "select": {
@@ -225,6 +314,9 @@
             },
             "display_icon": {
                 "name": "Значок на дисплее"
+            },
+            "manual_feed_quantity_cups": {
+                "name": "Ручное количество корма"
             }
         },
         "text": {

@@ -25,6 +25,80 @@
             }
         }
     },
+    "options": {
+        "abort": {
+            "no_member_data": "सदस्य डेटा लोड नहीं हुआ, कृपया लॉग जांचें",
+            "account_settings_abort": "{account_settings_abort}",
+            "integration_settings_abort": "{integration_settings_abort}",
+            "no_settings_changed": "कोई सेटिंग्स नहीं बदली गईं",
+            "error_check_logs": "त्रुटि, कृपया लॉग जांचें"
+        },
+        "error": {
+            "unknown": "अप्रत्याशित त्रुटि"
+        },
+        "step": {
+			"init": {
+                "menu_options": {
+                    "integration_settings": "इंटीग्रेशन सेटिंग्स",
+                    "account_settings": "खाता सेटिंग्स"
+                }
+			},
+            "integration_settings": {
+                "title": "इंटीग्रेशन सेटिंग्स",
+                "data": {
+                    "manual_feed_portions": "पोरशन के अनुसार मैनुअल फीड मात्रा सेट करें"
+                },
+                "data_description": {
+                    "manual_feed_portions": "डिफ़ॉल्ट: आपके द्वारा चुनी गई पालतू भोजन इकाई के अनुसार सेट करें ({uom})।"
+                }
+            },
+            "account_settings": {
+                "title": "खाता सेटिंग्स",
+                "description": "खाते के लिए: {email}",
+                "data": {
+                    "nickname": "उपनाम",
+                    "gender": "लिंग"
+                },
+                "sections": {
+                    "measurement_unit": {
+                        "name": "माप की इकाइयाँ",
+                        "data": {
+                            "feedUnitType": "फीडर/खिलाना",
+                            "waterUnitType": "फव्वारा/पेय",
+                            "weightUnitType": "वज़न",
+                            "update_all_units": "सभी Petlibro यूनिट सेंसर एंटिटी की माप इकाई अपडेट करें"
+                        },
+                        "data_description": {
+                            "update_all_units": "डिफ़ॉल्ट रूप से, यहां एक इकाई बदलने से केवल उसी प्रकार की सेंसर एंटिटी अपडेट होती है।"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "common": {
+        "reloading_integration": "इंटीग्रेशन पुनः लोड किया जा रहा है",
+        "settings_updated": "सेटिंग्स अपडेट की गईं",
+        "no_settings_changed": "कोई सेटिंग्स नहीं बदली गईं",
+        "sensors_updated": "सेंसर एंटिटीज़ अपडेट की गईं",
+        "account_updated": "खाता अपडेट सफल रहा"
+    },
+    "selector": {
+        "member_gender": {
+            "options": {
+                "male": "पुरुष",
+                "female": "महिला",
+                "none": "नहीं बताना चाहता"
+            }
+        },
+        "pet_sex": {
+            "options": {
+                "male": "नर",
+                "female": "मादा",
+                "none": "कोई चयन नहीं"
+            }
+        }
+    },
     "entity": {
         "sensor": {
             "device_sn": {
@@ -48,8 +122,17 @@
             "electric_quantity": {
                 "name": "बैटरी / एसी %"
             },
-            "today_feeding_quantity": {
-                "name": "आज की फीडिंग की मात्रा"
+            "today_feeding_quantity_weight": {
+                "name": "आज की खिलाने की मात्रा (वज़न)"
+            },
+            "today_feeding_quantity_volume": {
+                "name": "आज की खिलाने की मात्रा (आयतन)"
+            },
+            "last_feed_quantity_weight": {
+                "name": "अंतिम खिलाने की मात्रा (वज़न)"
+            },
+            "last_feed_quantity_volume": {
+                "name": "अंतिम खिलाने की मात्रा (आयतन)"
             },
             "today_feeding_times": {
                 "name": "आज का खिला समय"
@@ -70,6 +153,9 @@
                 "name": "वर्तमान वजन"
             },
             "weight_percent": {
+                "name": "शेष पानी (%)"
+            },
+            "remaining_water": {
                 "name": "शेष पानी"
             },
             "use_water_interval": {
@@ -214,6 +300,9 @@
             },
             "lid_close_time": {
                 "name": "ढक्कन करीबी समय"
+            },
+            "manual_feed_quantity": {
+                "name": "मैनुअल खिलाने की मात्रा"
             }
         },
         "select": {
@@ -225,6 +314,9 @@
             },
             "display_icon": {
                 "name": "प्रदर्शन पर आइकन"
+            },
+            "manual_feed_quantity_cups": {
+                "name": "मैनुअल खिलाने की मात्रा"
             }
         },
         "text": {

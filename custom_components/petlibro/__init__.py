@@ -162,7 +162,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Initialize PetLibroHub
     try:
-        hub = PetLibroHub(hass, entry.data)
+        hub = PetLibroHub(hass, entry)
 
         # Store the hub in hass.data
         hass.data.setdefault(DOMAIN, {})[entry.entry_id] = hub
@@ -172,6 +172,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         # Load devices only once here
         await hub.load_devices()
+        
+        # Initialize Helpers
+        await hub._initialize_helpers()
 
         # Start the coordinator for periodic updates
         await hub.coordinator.async_config_entry_first_refresh()

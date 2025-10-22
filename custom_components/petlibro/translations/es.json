@@ -25,6 +25,80 @@
             }
         }
     },
+    "options": {
+        "abort": {
+            "no_member_data": "Datos de miembro no cargados, por favor revise los registros",
+            "account_settings_abort": "{account_settings_abort}",
+            "integration_settings_abort": "{integration_settings_abort}",
+            "no_settings_changed": "No se cambiaron configuraciones",
+            "error_check_logs": "Error, por favor revise los registros"
+        },
+        "error": {
+            "unknown": "Error inesperado"
+        },
+        "step": {
+			"init": {
+                "menu_options": {
+                    "integration_settings": "Configuración de la integración",
+                    "account_settings": "Configuración de la cuenta"
+                }
+			},
+            "integration_settings": {
+                "title": "Configuración de la integración",
+                "data": {
+                    "manual_feed_portions": "Establecer alimentación manual por porciones"
+                },
+                "data_description": {
+                    "manual_feed_portions": "Predeterminado: establecer según la unidad seleccionada para comida de mascotas ({uom})."
+                }
+            },
+            "account_settings": {
+                "title": "Configuración de la cuenta",
+                "description": "Para la cuenta: {email}",
+                "data": {
+                    "nickname": "Apodo",
+                    "gender": "Género"
+                },
+                "sections": {
+                    "measurement_unit": {
+                        "name": "Unidades de medida",
+                        "data": {
+                            "feedUnitType": "Comedero/Alimentación",
+                            "waterUnitType": "Fuente/Bebida",
+                            "weightUnitType": "Peso",
+                            "update_all_units": "Actualizar la unidad de medida de todas las entidades de sensores de unidad Petlibro"
+                        },
+                        "data_description": {
+                            "update_all_units": "De forma predeterminada, cambiar una unidad aquí solo actualiza las entidades de sensores de ese tipo."
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "common": {
+        "reloading_integration": "La integración se está recargando",
+        "settings_updated": "Configuraciones actualizadas",
+        "no_settings_changed": "No se cambiaron configuraciones",
+        "sensors_updated": "Entidades de sensores actualizadas",
+        "account_updated": "Actualización de cuenta exitosa"
+    },
+    "selector": {
+        "member_gender": {
+            "options": {
+                "male": "Masculino",
+                "female": "Femenino",
+                "none": "Prefiero no decirlo"
+            }
+        },
+        "pet_sex": {
+            "options": {
+                "male": "Macho",
+                "female": "Hembra",
+                "none": "Ninguno seleccionado"
+            }
+        }
+    },
     "entity": {
         "sensor": {
             "device_sn": {
@@ -48,8 +122,17 @@
             "electric_quantity": {
                 "name": "Batería / AC %"
             },
-            "today_feeding_quantity": {
-                "name": "La cantidad de alimentación de hoy"
+            "today_feeding_quantity_weight": {
+                "name": "Cantidad de alimento de hoy (Peso)"
+            },
+            "today_feeding_quantity_volume": {
+                "name": "Cantidad de alimento de hoy (Volumen)"
+            },
+            "last_feed_quantity_weight": {
+                "name": "Cantidad de última alimentación (Peso)"
+            },
+            "last_feed_quantity_volume": {
+                "name": "Cantidad de última alimentación (Volumen)|"
             },
             "today_feeding_times": {
                 "name": "Los tiempos de alimentación de hoy"
@@ -70,6 +153,9 @@
                 "name": "Peso actual"
             },
             "weight_percent": {
+                "name": "Agua restante (%)"
+            },
+            "remaining_water": {
                 "name": "Agua restante"
             },
             "use_water_interval": {
@@ -214,6 +300,9 @@
             },
             "lid_close_time": {
                 "name": "Tapa de tiempo cercano"
+            },
+            "manual_feed_quantity": {
+                "name": "Cantidad de alimento manual"
             }
         },
         "select": {
@@ -225,6 +314,9 @@
             },
             "display_icon": {
                 "name": "Icono en la pantalla"
+            },
+            "manual_feed_quantity_cups": {
+                "name": "Cantidad de alimento manual"
             }
         },
         "text": {

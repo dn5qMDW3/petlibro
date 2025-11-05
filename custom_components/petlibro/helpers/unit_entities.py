@@ -58,6 +58,8 @@ class Unit_Entities:
 
         numbers = self.hub.manual_feed_unique_ids.get(Platform.NUMBER)
         selects = self.hub.manual_feed_unique_ids.get(Platform.SELECT)
+        
+        reload_needed = False
 
         if len(numbers) != len(selects):
             _LOGGER.error(
@@ -103,9 +105,14 @@ class Unit_Entities:
 
 
             for entity_id in entity_ids:
+                if self.entity_registry.async_get(entity_id).disabled_by != disable:
+                    reload_needed = True
+                    _LOGGER.debug("Integration reload needed for entity: %s", entity_id)
+                else:
+                    _LOGGER.debug("Entity '%s' already %s, no reload needed", entity_id, "disabled" if disable else "enabled")
                 self.entity_registry.async_update_entity(entity_id, disabled_by=disable, hidden_by=hide)
 
-        return True
+        return reload_needed
 
     @callback
     def schedule_manual_feed_sync(self) -> None:
@@ -117,7 +124,7 @@ class Unit_Entities:
         """Run the sync_manual_feed_entity_visibility method with default args and reload if needed."""
         reload_needed = await self.sync_manual_feed_entity_visibility()
         if reload_needed:
-            self.hass.config_entries.async_schedule_reload(self.handler)
+            await self.hub.async_refresh(force_member=True)
 
     async def update_sensor_entity_units(
         self, /, new_units: dict[API|str, Unit] = UNDEFINED, update_all_units: bool = False
@@ -178,11 +185,10 @@ class Unit_Entities:
                     )
                     self.entity_registry.async_update_entity_options(entity_id, Platform.SENSOR, options)
 
-            if (
-                unit_type is API.FEED_UNIT
-                and Unit.CUPS in (unit, self.member.feedUnitType)
-                and not self.entry.options.get(MANUAL_FEED_PORTIONS)
-            ) or update_all_units:
+            if unit_type is API.FEED_UNIT and (
+                (Unit.CUPS in (unit, self.member.feedUnitType) and not self.entry.options.get(MANUAL_FEED_PORTIONS))
+                or update_all_units
+            ):
                 try:
                     reload_needed = await self.sync_manual_feed_entity_visibility(unit)
                 except HomeAssistantError as e:

@@ -6,6 +6,7 @@ from typing import cast
 from ..api import PetLibroAPI
 from .event import Event, EVENT_UPDATE
 from ..member import Member
+from ..const import DEFAULT_MAX_FEED_PORTIONS
 
 
 _LOGGER = getLogger(__name__)
@@ -17,6 +18,9 @@ class Device(Event):
         self._data: dict = {}
         self.api = api
         self.member = member
+        
+        self.feed_conv_factor = 1
+        self.max_feed_portions = DEFAULT_MAX_FEED_PORTIONS
 
         self.update_data(data)
 

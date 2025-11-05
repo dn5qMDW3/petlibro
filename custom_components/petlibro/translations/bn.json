@@ -69,6 +69,7 @@
                             "update_all_units": "সমস্ত Petlibro ইউনিট সেন্সর এন্টিটির পরিমাপ একক আপডেট করুন"
                         },
                         "data_description": {
+                            "feedUnitType": "অনুগ্রহ করে লক্ষ্য করুন, 'কাপ' ইউনিট সেন্সর এন্টিটির জন্য সমর্থিত নয়।",
                             "update_all_units": "ডিফল্টভাবে, এখানে ইউনিট পরিবর্তন করলে শুধুমাত্র সেই ধরনের সেন্সর এন্টিটি আপডেট হয়।"
                         }
                     }
@@ -77,7 +78,7 @@
         }
     },
     "common": {
-        "reloading_integration": "ইন্টিগ্রেশন পুনরায় লোড হচ্ছে",
+        "reloading_integration": "ইন্টিগ্রেশনটি শীঘ্রই পুনরায় লোড হবে",
         "settings_updated": "সেটিংস আপডেট হয়েছে",
         "no_settings_changed": "কোনও সেটিংস পরিবর্তন করা হয়নি",
         "sensors_updated": "সেন্সর এন্টিটিগুলি আপডেট হয়েছে",
@@ -133,6 +134,15 @@
             },
             "last_feed_quantity_volume": {
                 "name": "শেষ খাওয়ানোর পরিমাণ (পরিমাণ)"
+            },
+            "next_feed_time": {
+                "name": "পরবর্তী খাওয়ানোর সময়"
+            },
+            "next_feed_quantity_weight": {
+                "name": "পরবর্তী খাওয়ানোর পরিমাণ (ওজন)"
+            },
+            "next_feed_quantity_volume": {
+                "name": "পরবর্তী খাওয়ানোর পরিমাণ (পরিমাণ)"
             },
             "today_feeding_times": {
                 "name": "আজকের খাওয়ানোর সময়"

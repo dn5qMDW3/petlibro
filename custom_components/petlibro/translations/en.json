@@ -65,9 +65,10 @@
                             "feedUnitType": "Feeder/Feeding",
                             "waterUnitType": "Fountain/Drinking",
                             "weightUnitType": "Weight",
-                            "update_all_units": "Update measurement unit of all Petlibro unit sensor entities"
+                            "update_all_units": "Update measurement unit of all Petlibro unit sensors."
                         },
                         "data_description": {
+                            "feedUnitType": "Please note that 'cups' are not supported for sensor entities.",
                             "update_all_units": "By default, changing a unit here only updates sensor entities of that type."
                         }
                     }
@@ -76,7 +77,7 @@
         }
     },
     "common": {
-        "reloading_integration": "The integration is being reloaded",
+        "reloading_integration": "The integration will reload shortly",
         "settings_updated": "Settings updated",
         "no_settings_changed": "No settings were changed",
         "sensors_updated": "Sensor entities were updated",
@@ -99,14 +100,14 @@
         },
         "unit_type": {
             "options": {
-                "cups": "cup (US legal cup)",
+                "cups": "cups (US legal cup)",
                 "ounces": "oz (ounce)",
                 "grams": "g (gram)",
-                "milliliters": "ml (milliliter)",
+                "milliliters": "mL (milliliter)",
                 "kilograms": "kg (kilogram)",
                 "pounds": "lb (pound)",
-                "water_ounces": "fl oz (fluid ounce)",
-                "water_milliliters": "ml (milliliter)"
+                "water_ounces": "fl. oz. (fluid ounce)",
+                "water_milliliters": "mL (milliliter)"
             }
         }
     },
@@ -156,6 +157,15 @@
             },
             "last_feed_quantity_volume": {
                 "name": "Last Feed Quantity (Volume)"
+            }, 
+            "next_feed_time": {
+                "name": "Next Feed Time"
+            },
+            "next_feed_quantity_weight": {
+                "name": "Next Feed Quantity (Weight)"
+            },
+            "next_feed_quantity_volume": {
+                "name": "Next Feed Quantity (Volume)"
             },
             "feeding_plan_state": {
                 "name": "Today's Feeding Plan"

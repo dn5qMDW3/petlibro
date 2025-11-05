@@ -10,6 +10,7 @@
 # https://api.us.petlibro.com/device/ota/getUpgrade
 # https://api.us.petlibro.com/device/data/grainStatus
 # https://api.us.petlibro.com/device/feedingPlan/todayNew
+# https://api.us.petlibro.com/device/feedingPlan/list
 # https://api.us.petlibro.com/device/wetFeedingPlan/wetListV3
 
 from logging import getLogger
@@ -534,6 +535,9 @@ class PetLibroAPI:
 
     async def device_feeding_plan_today_new(self, serial: str) -> Dict[str, Any]:
         return await self.session.post_serial("/device/feedingPlan/todayNew", serial)
+
+    async def device_feeding_plan_list(self, serial: str) -> List[Dict[str, Any]]:
+        return await self.session.post_serial("/device/feedingPlan/list", serial)
 
     async def device_wet_feeding_plan(self, serial: str) -> Dict[str, Any]:
         return await self.session.post_serial("/device/wetFeedingPlan/wetListV3", serial)

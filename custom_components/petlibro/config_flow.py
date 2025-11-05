@@ -215,20 +215,18 @@ class PetlibroOptionsFlow(OptionsFlow):
             
             abort_messages = [self.get_common_translation("settings_updated", "Settings updated")]
 
-            # --- Reload integration if feed unit is cups
+            # --- Update entities and warn user if feed unit is cups
             if self.member.feedUnitType == Unit.CUPS:
-                reload_integration = await self.hub.unit_entities.sync_manual_feed_entity_visibility(Unit.CUPS)
+                reload_needed = await self.hub.unit_entities.sync_manual_feed_entity_visibility(Unit.CUPS)
 
-                if reload_integration:
+                if reload_needed:
                     abort_messages.append(
-                        self.get_common_translation("reloading_integration", "The integration is being reloaded")
+                        self.get_common_translation("reloading_integration", "The integration will reload shortly")
                     )
                     _LOGGER.debug("'manual_feed_portions' value changed while feed unit is 'cups', reloading integration.")
-                    self.hass.config_entries.async_schedule_reload(self.handler)
                 else:
                     _LOGGER.debug("No Manual Feed entities found — nothing to reload.")
-            else:
-                await self.hub.async_refresh()
+            await self.hub.async_refresh()
 
             # --- Done
             return self.async_abort(
@@ -271,7 +269,9 @@ class PetlibroOptionsFlow(OptionsFlow):
             )
 
             # --- Update entity options if units changed or update_all_units
-            reload_integration = await self.hub.unit_entities.update_sensor_entity_units(unit_updates, update_all_units)
+            reload_needed = False
+            if unit_updates or update_all_units:
+                reload_needed = await self.hub.unit_entities.update_sensor_entity_units(unit_updates, update_all_units)
 
             # --- Apply account-level changes through API
             abort_messages = []
@@ -286,15 +286,16 @@ class PetlibroOptionsFlow(OptionsFlow):
                     _LOGGER.error("Error updating account info via API.")
                     return self.async_abort(reason="error_check_logs")
 
+            # --- Build the abort message
             if update_all_units:
                 abort_messages.append(self.get_common_translation("sensors_updated", "Sensor entities were updated"))
 
-            # --- Reload or refresh
-            if reload_integration:
-                _LOGGER.debug("Reloading integration due to feed unit change to/from cups, or update_all_units chosen.")
-                abort_messages.append(self.get_common_translation("reloading_integration", "The integration is being reloaded"))
-                self.hass.config_entries.async_schedule_reload(self.handler)
-            elif info_updates or unit_updates:
+            if reload_needed:
+                _LOGGER.debug("Reloading integration due to feed unit change to/from cups.")
+                abort_messages.append(self.get_common_translation("reloading_integration", "The integration will reload shortly"))
+            
+            # --- Refresh hub data
+            if info_updates or unit_updates or reload_needed:
                 await self.hub.async_refresh(force_member=True)
                 
             # --- Done

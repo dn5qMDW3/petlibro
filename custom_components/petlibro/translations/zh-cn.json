@@ -69,6 +69,7 @@
                             "update_all_units": "更新所有 Petlibro 单位传感器实体的计量单位"
                         },
                         "data_description": {
+                            "feedUnitType": "请注意，“杯”单位不支持传感器实体。",
                             "update_all_units": "默认情况下，在此更改单位只会更新该类型的传感器实体。"
                         }
                     }
@@ -77,7 +78,7 @@
         }
     },
     "common": {
-        "reloading_integration": "正在重新加载集成",
+        "reloading_integration": "集成即将重新加载",
         "settings_updated": "设置已更新",
         "no_settings_changed": "未更改任何设置",
         "sensors_updated": "传感器实体已更新",
@@ -133,6 +134,15 @@
             },
             "last_feed_quantity_volume": {
                 "name": "上次喂食量（体积）"
+            },
+            "next_feed_time": {
+                "name": "下一次喂食时间"
+            },
+            "next_feed_quantity_weight": {
+                "name": "下一次喂食量（重量）"
+            },
+            "next_feed_quantity_volume": {
+                "name": "下一次喂食量（体积）"
             },
             "today_feeding_times": {
                 "name": "今天的喂养时间"

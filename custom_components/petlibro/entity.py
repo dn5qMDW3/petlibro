@@ -33,6 +33,7 @@ class PetLibroEntity(
         self.hub = hub
         self.member = hub.member
         self.entity_description = description
+        self.key = description.key
         self._attr_unique_id = f"{self.device.serial}-{description.key}"
 
     @cached_property

@@ -95,7 +95,7 @@ class Unit(IntEnum):
     WATER int values must be different to avoid aliasing. Take care when using .value
     """
 
-    CUPS = 1, 1/12, "cups", ""
+    CUPS = 1, round(1/12, 16), "cups", ""
     OUNCES = 2, 0.35, UnitOfMass.OUNCES, "weight"
     GRAMS = 3, 10, UnitOfMass.GRAMS, "weight"
     MILLILITERS = 4, 20, UnitOfVolume.MILLILITERS, "volume"
@@ -137,7 +137,7 @@ class Unit(IntEnum):
         return self._device_class
 
     @classmethod
-    def round(self, value: float, unit: _Unit):
+    def round(self, value: float, unit: _Unit) -> float:
         return round(value, ROUNDING_RULES.get(unit, 0))
 
     @classmethod
@@ -167,7 +167,8 @@ class Unit(IntEnum):
 DEFAULT_WEIGHT = Unit.POUNDS
 DEFAULT_FEED = Unit.CUPS
 DEFAULT_WATER = Unit.WATER_OUNCES
-MAX_FEED_PORTIONS = 48
+DEFAULT_PORTIONS_IN_CUP = 12
+DEFAULT_MAX_FEED_PORTIONS = 48
 MANUAL_FEED_PORTIONS = "manual_feed_portions"
 VALID_UNIT_TYPES: dict[str, set[Unit]] = {
     APIKey.WEIGHT_UNIT: {Unit.POUNDS, Unit.KILOGRAMS, None},

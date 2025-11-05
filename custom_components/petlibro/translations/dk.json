@@ -69,6 +69,7 @@
                             "update_all_units": "Opdater måleenheden for alle Petlibro-enhedssensor-entiteter"
                         },
                         "data_description": {
+                            "feedUnitType": "Bemærk venligst, at 'kopper' ikke understøttes for sensor-entiteter.",
                             "update_all_units": "Som standard opdaterer en ændring af enheden her kun sensor-entiteter af den type."
                         }
                     }
@@ -77,7 +78,7 @@
         }
     },
     "common": {
-        "reloading_integration": "Integrationen genindlæses",
+        "reloading_integration": "Integrationen genindlæses om kort tid",
         "settings_updated": "Indstillinger opdateret",
         "no_settings_changed": "Ingen indstillinger blev ændret",
         "sensors_updated": "Sensor-entiteter opdateret",
@@ -133,6 +134,15 @@
             },
             "last_feed_quantity_volume": {
                 "name": "Sidste fodermængde (Volumen)"
+            },
+            "next_feed_time": {
+                "name": "Næste fodringstid"
+            },
+            "next_feed_quantity_weight": {
+                "name": "Næste fodermængde (Vægt)"
+            },
+            "next_feed_quantity_volume": {
+                "name": "Næste fodermængde (Volumen)"
             },
             "today_feeding_times": {
                 "name": "Dagens Fodertælling"

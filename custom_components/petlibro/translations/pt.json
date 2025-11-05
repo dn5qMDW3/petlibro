@@ -69,6 +69,7 @@
                             "update_all_units": "Atualizar a unidade de medida de todas as entidades de sensores de unidade Petlibro"
                         },
                         "data_description": {
+                            "feedUnitType": "Observe que 'xícaras' não são compatíveis com entidades de sensores.",
                             "update_all_units": "Por padrão, alterar uma unidade aqui atualiza apenas as entidades de sensores desse tipo."
                         }
                     }
@@ -77,7 +78,7 @@
         }
     },
     "common": {
-        "reloading_integration": "A integração está sendo recarregada",
+        "reloading_integration": "A integração será recarregada em breve",
         "settings_updated": "Configurações atualizadas",
         "no_settings_changed": "Nenhuma configuração foi alterada",
         "sensors_updated": "Entidades de sensores atualizadas",
@@ -133,6 +134,15 @@
             },
             "last_feed_quantity_volume": {
                 "name": "Quantidade da última alimentação (Volume)"
+            },
+            "next_feed_time": {
+                "name": "Próximo horário de alimentação"
+            },
+            "next_feed_quantity_weight": {
+                "name": "Quantidade da próxima alimentação (Peso)"
+            },
+            "next_feed_quantity_volume": {
+                "name": "Quantidade da próxima alimentação (Volume)"
             },
             "today_feeding_times": {
                 "name": "Os tempos de alimentação de hoje"

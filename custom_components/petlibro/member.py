@@ -110,7 +110,7 @@ class Member(Event):
             "gender": self.gender.name.capitalize(),
             "weight_unit": self.weightUnitType.name.capitalize(),
             "feed_unit": self.feedUnitType.name.capitalize(),
-            "water_unit": self.waterUnitType.name.capitalize(),
+            "water_unit": self.waterUnitType.name.removeprefix('WATER_').capitalize(),
         }
 
 class MemberEntity(SensorEntity):

@@ -256,7 +256,7 @@ class AirSmartFeeder(Device):  # Inherit directly from Device
         for feed in self.feeding_plan_data.values():
             feed: dict
             
-            if not (feed.get("id") or feed.get("enable") or ":" in feed.get("executionTime", "")):
+            if not (feed.get("id") and feed.get("enable") and ":" in feed.get("executionTime", "")):
                 continue
                 
             timezone = ZoneInfo(feed.get("timezone", "UTC"))

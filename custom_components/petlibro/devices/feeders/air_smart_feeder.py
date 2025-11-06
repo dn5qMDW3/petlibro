@@ -31,8 +31,9 @@ class AirSmartFeeder(Device):  # Inherit directly from Device
             get_upgrade = await self.api.get_device_upgrade(self.serial)
             attribute_settings = await self.api.device_attribute_settings(self.serial)
             get_feeding_plan_today = await self.api.device_feeding_plan_today_new(self.serial)
-            feeding_plan_list = await self.api.device_feeding_plan_list(self.serial)
             get_work_record = await self.api.get_device_work_record(self.serial)
+            feeding_plan_list = (await self.api.device_feeding_plan_list(self.serial)
+                if self._data.get("enableFeedingPlan") else [])
     
             # Update internal data with fetched API data
             self.update_data({

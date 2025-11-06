@@ -32,7 +32,8 @@ class OneRFIDSmartFeeder(Device):
             get_default_matrix = await self.api.get_default_matrix(self.serial)
             get_work_record = await self.api.get_device_work_record(self.serial)
             get_feeding_plan_today = await self.api.device_feeding_plan_today_new(self.serial)
-            feeding_plan_list = await self.api.device_feeding_plan_list(self.serial)
+            feeding_plan_list = (await self.api.device_feeding_plan_list(self.serial)
+                if self._data.get("enableFeedingPlan") else [])
     
             # Update internal data with fetched API data
             self.update_data({

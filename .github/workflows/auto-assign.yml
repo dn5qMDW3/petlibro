@@ -13,12 +13,12 @@ jobs:
           github-token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           script: |
             const issue = context.payload.issue;
-            const labels = issue.labels.map(l => l.name.toLowerCase());
+            const labels = issue.labels.map(l => l.name);
 
             const projectId = "PVT_kwHOAclbns4AqfIH"; // Petlibro Project ID
 
             // Only process your templates
-            const allowedLabels = ["bug", "feature request", "new device"];
+            const allowedLabels = ["Bug", "Feature Request", "New Device"];
             if (!labels.some(l => allowedLabels.includes(l))) {
               console.log("Skipping — issue does not match your templates.");
               return;
@@ -67,69 +67,73 @@ jobs:
             }
 
             // 2️⃣ Set Priority
-            const priorityFieldId = "PVTSSF_lAHOAclbns4AqfIHzghudTQ";
-            const priorityOptions = {
-              "Critical": "79628723",
-              "High": "0a877460",
-              "Medium": "da944a9c",
-              "Low": "0b6337eb",
-              "Deferred": "9d531ad0",
-              "Completed": "20ffdcc8"
-            };
-
-            let priorityValue = "Medium"; // default
-            if (labels.includes("bug")) priorityValue = "High";
-            else if (labels.includes("feature request")) priorityValue = "Medium";
-            else if (labels.includes("new device")) priorityValue = "Low";
-
-            console.log(`Setting Priority to ${priorityValue} (ID: ${priorityOptions[priorityValue]})`);
             try {
+              const priorityFieldId = "PVTSSF_lAHOAclbns4AqfIHzghudTQ";
+              const priorityOptions = {
+                "Critical": "79628723",
+                "High": "0a877460",
+                "Medium": "da944a9c",
+                "Low": "0b6337eb",
+                "Deferred": "9d531ad0",
+                "Completed": "20ffdcc8"
+              };
+
+              let priorityValue = "Medium";
+              if (labels.includes("Bug")) priorityValue = "High";
+              else if (labels.includes("Feature Request")) priorityValue = "Medium";
+              else if (labels.includes("New Device")) priorityValue = "Low";
+
+              console.log(`Setting Priority to ${priorityValue} (ID: ${priorityOptions[priorityValue]})`);
               await github.graphql(`
-                mutation($itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
                   updateProjectV2ItemFieldValue(input: {
+                    projectId: $projectId,
                     itemId: $itemId,
                     fieldId: $fieldId,
                     value: { singleSelectOptionId: $optionId }
                   }) {
-                    item { id }
+                    projectV2Item { id }
                   }
                 }
-              `, { itemId, fieldId: priorityFieldId, optionId: priorityOptions[priorityValue] });
+              `, { projectId, itemId, fieldId: priorityFieldId, optionId: priorityOptions[priorityValue] });
+
               console.log(`✅ Set Priority to ${priorityValue}`);
             } catch (error) {
               console.error("Error setting Priority:", error);
             }
 
-            // 3️⃣ Set Status
-            const statusFieldId = "PVTSSF_lAHOAclbns4AqfIHzghucgA";
-            const statusOptions = {
-              "To triage": "f971fb55",
-              "Pending": "f75ad846",
-              "Ready": "856cdede",
-              "In progress": "47fc9ee4",
-              "In review": "5ef0dc97",
-              "Deferred": "e0243c67",
-              "Done": "98236657"
-            };
-
-            let statusValue = "To triage"; // default
-            if (labels.includes("bug")) statusValue = "Pending";
-            else if (labels.includes("feature request")) statusValue = "To triage";
-            else if (labels.includes("new device")) statusValue = "Ready";
-
-            console.log(`Setting Status to ${statusValue} (ID: ${statusOptions[statusValue]})`);
+            // 3️⃣ Set Status dynamically
             try {
+              const statusFieldId = "PVTSSF_lAHOAclbns4AqfIHzghucgA";
+              const statusOptions = {
+                "To triage": "f971fb55",
+                "Pending": "f75ad846",
+                "Ready": "856cdede",
+                "In progress": "47fc9ee4",
+                "In review": "5ef0dc97",
+                "Deferred": "e0243c67",
+                "Done": "98236657"
+              };
+
+              let statusValue = "To triage"; // default
+              if (labels.includes("Bug")) statusValue = "Pending";
+              else if (labels.includes("Feature Request")) statusValue = "To triage";
+              else if (labels.includes("New Device")) statusValue = "Ready";
+
+              console.log(`Setting Status to ${statusValue} (ID: ${statusOptions[statusValue]})`);
               await github.graphql(`
-                mutation($itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
                   updateProjectV2ItemFieldValue(input: {
+                    projectId: $projectId,
                     itemId: $itemId,
                     fieldId: $fieldId,
                     value: { singleSelectOptionId: $optionId }
                   }) {
-                    item { id }
+                    projectV2Item { id }
                   }
                 }
-              `, { itemId, fieldId: statusFieldId, optionId: statusOptions[statusValue] });
+              `, { projectId, itemId, fieldId: statusFieldId, optionId: statusOptions[statusValue] });
+
               console.log(`✅ Set Status to ${statusValue}`);
             } catch (error) {
               console.error("Error setting Status:", error);

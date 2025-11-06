@@ -116,9 +116,9 @@ jobs:
               };
 
               let statusValue = "To triage"; // default
-              if (labels.includes("Bug")) statusValue = "Pending";
+              if (labels.includes("Bug")) statusValue = "To triage";
               else if (labels.includes("Feature Request")) statusValue = "To triage";
-              else if (labels.includes("New Device")) statusValue = "Ready";
+              else if (labels.includes("New Device")) statusValue = "To triage";
 
               console.log(`Setting Status to ${statusValue} (ID: ${statusOptions[statusValue]})`);
               await github.graphql(`

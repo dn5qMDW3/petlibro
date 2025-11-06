@@ -17,10 +17,13 @@ jobs:
 
             const projectId = "PVT_kwHOAclbns4AqfIH"; // Petlibro Project ID
 
-            // Only process your templates
-            const allowedLabels = ["Bug", "Feature Request", "New Device"];
-            if (!labels.some(l => allowedLabels.includes(l))) {
+            // Only process your templates (case-insensitive)
+            const allowedLabels = ["bug", "feature request", "new device"];
+            const normalizedLabels = issue.labels.map(l => l.name.toLowerCase());
+            
+            if (!normalizedLabels.some(l => allowedLabels.includes(l))) {
               console.log("Skipping — issue does not match your templates.");
+              console.log("Labels on issue:", normalizedLabels);
               return;
             }
 

@@ -117,7 +117,7 @@ class PetLibroSession:
             if data.get("code") != 0:
                 raise PetLibroAPIError(f"Code: {data.get('code')}, Message: {data.get('msg')}")
 
-            return data.get("data")
+            return data.get("data") or {}
 
     async def re_login(self) -> str:
         """Re-login to get a new token when the old one expires."""

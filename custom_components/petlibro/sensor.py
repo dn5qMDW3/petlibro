@@ -257,16 +257,23 @@ class PetLibroSensorEntity(PetLibroEntity[_DeviceT], SensorEntity):
                     }
             case key if key in (
                 "today_feeding_quantity_weight",
-                "today_feeding_quantity_volume",
-                "last_feed_quantity_weight",
-                "last_feed_quantity_volume",
+                "last_feed_quantity_weight", 
                 "next_feed_quantity_weight",
+            ):
+                portion = getattr(self.device, key.removesuffix("_weight"), 0)
+                return {
+                    unit.symbol: Unit.convert_feed(portion * self.device.feed_conv_factor, None, unit, True)
+                    for unit in (Unit.GRAMS, Unit.OUNCES)
+                }
+            case key if key in (
+                "today_feeding_quantity_volume",
+                "last_feed_quantity_volume",
                 "next_feed_quantity_volume"
             ):
-                portion = getattr(self.device, key.removesuffix(f"_{self.device_class}"), 0)
-                return {"portion": portion} | {
+                portion = getattr(self.device, key.removesuffix("_volume"), 0)
+                return {
                     unit.symbol: Unit.convert_feed(portion * self.device.feed_conv_factor, None, unit, True)
-                    for unit in VALID_UNIT_TYPES[API.FEED_UNIT] if unit
+                    for unit in (Unit.CUPS, Unit.MILLILITERS)
                 }
             case key if key in (
                 "remaining_water", 

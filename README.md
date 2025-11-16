@@ -2,10 +2,12 @@
 
 ---
 # PETLIBRO integration for Home Assistant
-[![hacs_badge][hacsbadge]][hacs] [![hainstall][hainstallbadge]][hainstall] [![version][versionbadge]][versionlink] [![release][releasebadge]][releaselink] [![community][communitybadge]][communitylink] [![sponsor][sponsorbadge]][sponsorlink] [![discord][discordsponsorbadge]][discordsponsorlink] [![discord][discordbadge]][discordlink] [![patreon][patreonbadge]][patreonlink] [![BuyMeCoffee][buymecoffeebadge]][buymecoffee] [![PayPal][paypalbadge]][paypal]
+[![version][versionbadge]][versionlink] [![release][releasebadge]][releaselink] [![community][communitybadge]][communitylink] [![hainstall][hainstallbadge]][hainstall] [![hacs_badge][hacsbadge]][hacs]
 
 ## Supporting the development
-If you like this integration and want to support the development, please consider supporting these [developers][developerslink]. 
+[![sponsor][sponsorbadge]][sponsorlink] [![discord][discordsponsorbadge]][discordsponsorlink] [![discord][discordbadge]][discordlink] [![patreon][patreonbadge]][patreonlink] [![BuyMeCoffee][buymecoffeebadge]][buymecoffee] [![PayPal][paypalbadge]][paypal]
+
+If you enjoy this integration and want to support its development, please consider backing the [co-developers][developerslink]. On the [discussions board][developerslink], you’ll find their support links along with direct links to their GitHub profiles.
 
 [![Developers][developersbadge]][developerslink] [![JJJonesJr33][JJJonesJr33badge]][JJJonesJr33link] [![C4-Dimitri][C4-Dimitribadge]][C4-Dimitrilink] [![FeliGoblin][FeliGoblinbadge]][FeliGoblinlink]
 
@@ -135,7 +137,7 @@ logger:
 [![Star History Chart](https://api.star-history.com/svg?repos=jjjonesjr33/petlibro&type=Date&theme=dark)](https://www.star-history.com/#jjjonesjr33/petlibro&Date)
 
 [hacs]: https://hacs.xyz
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge&logo=homeassistantcommunitystore&logoColor=ccc
+[hacsbadge]: https://img.shields.io/badge/HACS-Custom-black.svg?style=for-the-badge&logo=homeassistantcommunitystore&logoColor=ccc
 
 [hainstall]: https://my.home-assistant.io/redirect/config_flow_start/?domain=petlibro
 [hainstallbadge]: https://img.shields.io/badge/dynamic/json?style=for-the-badge&logo=home-assistant&logoColor=ccc&label=usage&suffix=%20installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.petlibro.total

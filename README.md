@@ -5,7 +5,7 @@
 [![version][versionbadge]][versionlink] [![release][releasebadge]][releaselink] [![community][communitybadge]][communitylink] [![hainstall][hainstallbadge]][hainstall] [![starsbadge][starsbadge]][stars] [![hacs_badge][hacsbadge]][hacs]
 
 ## Supporting the development
-[![sponsor][sponsorbadge]][sponsorlink] [![discord][discordsponsorbadge]][discordsponsorlink] [![discord][discordbadge]][discordlink] [![patreon][patreonbadge]][patreonlink] [![BuyMeCoffee][buymecoffeebadge]][buymecoffee] [![PayPal][paypalbadge]][paypal]
+[![sponsor][sponsorbadge]][sponsorlink] [![discord][discordsponsorbadge]][discordsponsorlink] [![discord][discordbadge]][discordlink] [![patreon][patreonbadge]][patreonlink] [![kofibadge][kofibadge]][kofi] [![BuyMeCoffee][buymecoffeebadge]][buymecoffee] [![PayPal][paypalbadge]][paypal]
 
 If you enjoy this integration and want to support its development, please consider backing the [co-developers][developerslink]. On the [discussions board][developerslink], you’ll find their support links along with direct links to their GitHub profiles.
 
@@ -165,6 +165,9 @@ logger:
 
 [patreonlink]: https://www.patreon.com/c/JamieJonesJr
 [patreonbadge]: https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white
+
+[kofi]: https://ko-fi.com/jamiejonesjr
+[kofibadge]: https://img.shields.io/badge/Ko--fi-FF5E5B?style=for-the-badge&logo=kofi&logoColor=ffffff
 
 [buymecoffee]: https://www.buymeacoffee.com/jamiejonesjr
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a-coffee-yellow.svg?style=for-the-badge&logo=buymeacoffee&logoColor=ccc

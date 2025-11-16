@@ -1,13 +1,19 @@
-[![version](https://img.shields.io/github/manifest-json/v/jjjonesjr33/petlibro?filename=custom_components%2Fpetlibro%2Fmanifest.json&color=slateblue)](https://github.com/jjjonesjr33/petlibro/releases)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/jjjonesjr33/petlibro)
-[![Community Forum](https://img.shields.io/static/v1.svg?label=Community&message=Forum&color=41bdf5&logo=HomeAssistant&logoColor=white)](https://community.home-assistant.io/t/petlibro-cloud-integration-non-tuya-wip/759978)
-[![Become a Sponsor](https://img.shields.io/badge/Become%20a%20Sponsor-❤️-black)](https://github.com/sponsors/jjjonesjr33)
-[![Sponsors](https://img.shields.io/github/sponsors/jjjonesjr33?label=Sponsors)](https://github.com/sponsors/jjjonesjr33)
 ![Logo](https://raw.githubusercontent.com/jjjonesjr33/ha_petlibro/master/docs/media/logo.png)
+
+---
+# PETLIBRO integration for Home Assistant
+[![hacs_badge][hacsbadge]][hacs] [![hainstall][hainstallbadge]][hainstall] [![version][versionbadge]][versionlink] [![release][releasebadge]][releaselink] [![community][communitybadge]][communitylink] [![sponsor][sponsorbadge]][sponsorlink] [![discord][discordsponsorbadge]][discordsponsorlink] [![discord][discordbadge]][discordlink] [![patreon][patreonbadge]][patreonlink] [![BuyMeCoffee][buymecoffeebadge]][buymecoffee] [![PayPal][paypalbadge]][paypal]
+
+## Supporting the development
+If you like this integration and want to support the development, please consider supporting these [developers][developerslink]. 
+
+[![Developers][developersbadge]][developerslink] [![JJJonesJr33][JJJonesJr33badge]][JJJonesJr33link] [![C4-Dimitri][C4-Dimitribadge]][C4-Dimitrilink] [![FeliGoblin][FeliGoblinbadge]][FeliGoblinlink]
+
+---
+
 > [!IMPORTANT]  
 > Before setting up the integration in Home Assistant, be sure to review the [Account Management](https://github.com/jjjonesjr33/petlibro/wiki/PetLibro-Account-Management) and [Password Limitations](https://github.com/jjjonesjr33/petlibro/wiki/PetLibro-Password-Limitation) sections in the wiki. This will help ensure a smooth and successful setup process.
-
-# PETLIBRO integration for Home Assistant
+---
 
 ### Account Integration
 #### Manage your Petlibro account directly within Home Assistant
@@ -53,11 +59,11 @@
 >* Or get ahold of me via direct message on [Discord](https://discord.com/invite/3hkWMry) - `Jamie Jones Jr` / `jjjonesjr33` previously  `JJJonesJr33#0001`
 
 #### Also if you want to check out all the other things I do follow me on my [**Socials**](https://jjjonesjr33.com/).
+[![Socials][socialsbadge]][socialslink]
 
 # In Development
 #### This is still a WIP integration, features may or may not be removed at any time. If you have suggestions please let me know.
 > [!NOTE]
-  >* Switches to be added - Child Lock/Button Lock, Screen/Display, and Volume - (PLAF103), (PLAF203), (PLAF301)
   >* Tracking RFID per pet intance eat/drink - (PLWF305) - API Information gathered, working on implementation.
   >* Live camera feed for Granary Smart Camera Feeder (PLAF203) - Currently missing the API to setup live stream. Seems to connect via Kalay TUTK, if you have any experience integrating with this platform, please reach out to help us implement this.
 
@@ -78,11 +84,11 @@ logger:
     custom_components.petlibro: debug    # Enable debug logging for your component
 ```
 
-## Installation
-
-### Manually
-
-Get the folder `custom_components/petlibro` in your HA `config/custom_components`
+## Installation (Automatic)
+> [!IMPORTANT]
+> This is a HACS custom integration — not a Home Assistant Add-on. Don't try to add this repository as an add-on in Home Assistant.
+> 
+> The IMHO simplest way to install this integration is via the two buttons below ('_OPEN HACS REPOSITORY ON MY HA_' and '_ADD INTEGRATION TO MY HA_').
 
 
 ### Via [HACS](https://hacs.xyz/)
@@ -93,10 +99,88 @@ Get the folder `custom_components/petlibro` in your HA `config/custom_components
 
 - Enter your credentials.
 
-  > Only one device can be logged in at the same time.
+  > Only one account can be logged in at the same time.
   >
-  > If you to want to keep your phone's app connected, create another account for this integration and share your device to it.
+  > If you to want to keep your phone's app connected, create another account for this integration and share your device(s) to it.
+  
+## Installation (Manual)
 
+1. **Download the latest release**  
+   - Visit: https://github.com/jjjonesjr33/petlibro/releases  
+   - Download the newest `.zip` file.
+
+2. **Extract the ZIP file**  
+   - Open or extract the downloaded archive using your file manager.
+
+3. **Locate the integration folder**  
+   - Inside the extracted files, find:  
+     `custom_components/petlibro`
+
+4. **Copy the Petlibro folder to Home Assistant**  
+   - Place the folder into your Home Assistant config directory so the final path becomes:  
+     ```
+     config/custom_components/petlibro
+     ```
+
+5. **Restart Home Assistant**  
+   - Go to: *Settings → System → Restart*  
+   - Or restart the container/service manually.
+
+6. **Verify installation**  
+   - Navigate to *Settings → Devices & Services* and check that **Petlibro** appears.
+
+---
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=jjjonesjr33/petlibro&type=Date&theme=dark)](https://www.star-history.com/#jjjonesjr33/petlibro&Date)
+
+[hacs]: https://hacs.xyz
+[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge&logo=homeassistantcommunitystore&logoColor=ccc
+
+[hainstall]: https://my.home-assistant.io/redirect/config_flow_start/?domain=petlibro
+[hainstallbadge]: https://img.shields.io/badge/dynamic/json?style=for-the-badge&logo=home-assistant&logoColor=ccc&label=usage&suffix=%20installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.petlibro.total
+
+[versionlink]: https://github.com/jjjonesjr33/petlibro/releases
+[versionbadge]: https://img.shields.io/github/manifest-json/v/jjjonesjr33/petlibro?filename=custom_components%2Fpetlibro%2Fmanifest.json&color=slateblue&style=for-the-badge
+
+[releaselink]: https://github.com/jjjonesjr33/petlibro/releases
+[releasebadge]: https://img.shields.io/github/v/release/jjjonesjr33/petlibro?style=for-the-badge&logo=github&logoColor=ccc
+
+[communitylink]: https://community.home-assistant.io/t/petlibro-cloud-integration-non-tuya-wip/759978
+[communitybadge]: https://img.shields.io/static/v1.svg?label=Community&message=Forum&color=41bdf5&logo=HomeAssistant&logoColor=white&style=for-the-badge
+
+[developerslink]: https://github.com/jjjonesjr33/petlibro/discussions/56
+[developersbadge]: https://img.shields.io/badge/Support%20a%20Developer-❤️-black?style=for-the-badge
+
+[sponsorlink]: https://github.com/sponsors/jjjonesjr33
+[sponsorbadge]: https://img.shields.io/badge/Become%20a%20Sponsor-GitHub-black?style=for-the-badge&logo=github&logoColor=white
+
+[sponsorslink]: https://github.com/sponsors/jjjonesjr33
+[sponsorsbadge]: https://img.shields.io/github/sponsors/jjjonesjr33?label=Sponsors&style=for-the-badge&logo=github&logoColor=ccc
+
+[patreonlink]: https://www.patreon.com/c/JamieJonesJr
+[patreonbadge]: https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white
+
+[buymecoffee]: https://www.buymeacoffee.com/jamiejonesjr
+[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a-coffee-yellow.svg?style=for-the-badge&logo=buymeacoffee&logoColor=ccc
+
+[paypal]: https://paypal.me/jjjonesjr33
+[paypalbadge]: https://img.shields.io/badge/paypal-me-blue.svg?style=for-the-badge&logo=paypal&logoColor=ccc
+
+[discordsponsorlink]: https://discord.com/servers/jones-inc-541574294656909312
+[discordsponsorbadge]: https://img.shields.io/badge/Support%20on-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white
+
+[discordlink]: https://discord.com/invite/3hkWMry
+[discordbadge]: https://img.shields.io/discord/541574294656909312?style=for-the-badge&logo=discord&logoColor=white&color=5865F2
+
+[socialslink]: https://jjjonesjr33.com
+[socialsbadge]: https://img.shields.io/badge/Socials-JJJonesJr33-black?style=for-the-badge&logo=rss&logoColor=white
+
+[JJJonesJr33link]: https://github.com/jjjonesjr33
+[JJJonesJr33badge]: https://img.shields.io/badge/JJJonesJr33-GitHub-blue?style=for-the-badge&logo=github&logoColor=white
+
+[C4-Dimitrilink]: https://github.com/C4-Dimitri
+[C4-Dimitribadge]: https://img.shields.io/badge/C4%20Dimitri-GitHub-red?style=for-the-badge&logo=github&logoColor=white
+
+[FeliGoblinlink]: https://github.com/FeliGoblin
+[FeliGoblinbadge]: https://img.shields.io/badge/FeliGoblin-GitHub-green?style=for-the-badge&logo=github&logoColor=white

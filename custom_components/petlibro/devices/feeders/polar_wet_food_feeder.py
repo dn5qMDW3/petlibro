@@ -67,9 +67,10 @@ class PolarWetFoodFeeder(Device):
         return bool(self._data.get("realInfo", {}).get("barnDoorError", False))
 
     @property
-    def electric_quantity(self) -> int:
+    def electric_quantity(self) -> float:
         """Electric quantity (battery percentage or power state)."""
-        return self._data.get("electricQuantity", 0)
+        quantity = self._data.get("electricQuantity")
+        return quantity if isinstance(quantity, (float, int)) else 0
 
     @property
     def feeding_plan_state(self) -> bool:
@@ -162,7 +163,8 @@ class PolarWetFoodFeeder(Device):
     
     @property
     def wifi_rssi(self) -> int:
-        return self._data.get("wifiRssi", -100)  # WiFi signal strength
+        wifi_rssi = self._data.get("wifiRssi")
+        return wifi_rssi if isinstance(wifi_rssi, int) else -100  # WiFi signal strength
 
     @property
     def wifi_ssid(self) -> str:

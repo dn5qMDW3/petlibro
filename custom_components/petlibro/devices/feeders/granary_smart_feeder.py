@@ -57,12 +57,14 @@ class GranarySmartFeeder(Device):  # Inherit directly from Device
         return self._data.get("grainStatus", {}).get("todayFeedingQuantities", [])
 
     @property
-    def today_feeding_quantity(self) -> int:
-        return self._data.get("grainStatus", {}).get("todayFeedingQuantity", 0)
+    def today_feeding_quantity(self) -> float:
+        quantity = self._data.get("grainStatus", {}).get("todayFeedingQuantity")
+        return quantity if isinstance(quantity, (int, float)) else 0
 
     @property
     def today_feeding_times(self) -> int:
-        return self._data.get("grainStatus", {}).get("todayFeedingTimes", 0)
+        times = self._data.get("grainStatus", {}).get("todayFeedingTimes")
+        return times if isinstance(times, (int)) else 0
 
     @property
     def feeding_plan_state(self) -> bool:
@@ -134,11 +136,13 @@ class GranarySmartFeeder(Device):  # Inherit directly from Device
 
     @property
     def wifi_rssi(self) -> int:
-        return self._data.get("realInfo", {}).get("wifiRssi", -100)
+        wifi_rssi = self._data.get("realInfo", {}).get("wifiRssi")
+        return wifi_rssi if isinstance(wifi_rssi, int) else -100
 
     @property
-    def electric_quantity(self) -> int:
-        return self._data.get("realInfo", {}).get("electricQuantity", 0)
+    def electric_quantity(self) -> float:
+        quantity = self._data.get("realInfo", {}).get("electricQuantity")
+        return quantity if isinstance(quantity, (float, int)) else 0
 
     @property
     def enable_feeding_plan(self) -> bool:
@@ -179,7 +183,8 @@ class GranarySmartFeeder(Device):  # Inherit directly from Device
 
     @property
     def close_door_time_sec(self) -> int:
-        return self._data.get("realInfo", {}).get("closeDoorTimeSec", 0)
+        time_sec = self._data.get("realInfo", {}).get("closeDoorTimeSec")
+        return time_sec if isinstance(time_sec, int) else 0
 
     @property
     def screen_display_switch(self) -> bool:
@@ -215,7 +220,7 @@ class GranarySmartFeeder(Device):  # Inherit directly from Device
         return None
 
     @property
-    def last_feed_quantity(self) -> int | None:
+    def last_feed_quantity(self) -> int:
         """Return the last feed amount."""
         raw = self._data.get("workRecord", [])
         if raw and isinstance(raw, list):
@@ -223,7 +228,8 @@ class GranarySmartFeeder(Device):  # Inherit directly from Device
                 for record in day_entry.get("workRecords", []):
                     _LOGGER.debug("Evaluating record type: %s", record.get("type"))
                     if record.get("type") == "GRAIN_OUTPUT_SUCCESS":
-                        return record.get("actualGrainNum") or 0
+                        actualGrainNum = record.get("actualGrainNum")
+                        return actualGrainNum if isinstance(actualGrainNum, int) else 0
         return 0
 
     @property
@@ -301,13 +307,14 @@ class GranarySmartFeeder(Device):  # Inherit directly from Device
         return None
 
     @property
-    def next_feed_quantity(self) -> int | None:
+    def next_feed_quantity(self) -> int:
         """Return the next scheduled feed amount."""
         next_feed = self.get_next_feed.copy()
         if next_feed and (plan_id := next_feed.get("id")):
             feeding_plan = self.feeding_plan_data.get(str(plan_id), {})
             if feeding_plan:
-                return feeding_plan.get("grainNum", 0)
+                grainNum = feeding_plan.get("grainNum")
+                return grainNum if isinstance(grainNum, int) else 0
         return 0
 
     @property
@@ -319,7 +326,8 @@ class GranarySmartFeeder(Device):  # Inherit directly from Device
 
     @property
     def desiccant_frequency(self) -> float:
-        return self._data.get("realInfo", {}).get("changeDesiccantFrequency", 0)
+        frequency = self._data.get("realInfo", {}).get("changeDesiccantFrequency")
+        return frequency if isinstance(frequency, (float, int)) else 0
 
     # Error-handling updated for set_feeding_plan
     async def set_feeding_plan(self, value: bool) -> None:

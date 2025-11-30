@@ -73,17 +73,20 @@ class DockstreamSmartFountain(Device):
     @property
     def wifi_rssi(self) -> int:
         """Get the Wi-Fi signal strength."""
-        return self._data.get("realInfo", {}).get("wifiRssi", -100)
+        wifi_rssi = self._data.get("realInfo", {}).get("wifiRssi")
+        return wifi_rssi if isinstance(wifi_rssi, int) else -100
     
     @property
     def weight(self) -> float:
         """Get the current weight of the water (in grams)."""
-        return self._data.get("realInfo", {}).get("weight", 0.0)
+        weight = self._data.get("realInfo", {}).get("weight")
+        return weight if isinstance(weight, (int, float)) else 0
     
     @property
-    def weight_percent(self) -> int:
+    def weight_percent(self) -> int | float:
         """Get the current weight percentage of water."""
-        return self._data.get("realInfo", {}).get("weightPercent", 0)
+        weight_percent = self._data.get("realInfo", {}).get("weightPercent")
+        return weight_percent if isinstance(weight_percent, (int, float)) else 0
     
     @property
     def remaining_filter_days(self) -> float | None:
@@ -149,7 +152,7 @@ class DockstreamSmartFountain(Device):
         await self.refresh()
 
     @property
-    def water_dispensing_mode(self) -> int:
+    def water_dispensing_mode(self) -> str:
         """Return the user-friendly water dispensing mode (mapped directly from the API value)."""
         api_value = self._data.get("realInfo", {}).get("useWaterType", 0)
         
@@ -163,7 +166,8 @@ class DockstreamSmartFountain(Device):
 
     @property
     def water_interval(self) -> float:
-        return self._data.get("realInfo", {}).get("useWaterInterval", 0)
+        water_interval = self._data.get("realInfo", {}).get("useWaterInterval")
+        return water_interval if isinstance(water_interval, (int, float)) else 0
 
     async def set_water_interval(self, value: float) -> None:
         _LOGGER.debug(f"Setting water interval to {value} for {self.serial}")
@@ -178,7 +182,8 @@ class DockstreamSmartFountain(Device):
 
     @property
     def water_dispensing_duration(self) -> float:
-        return self._data.get("realInfo", {}).get("useWaterDuration", 0)
+        duration = self._data.get("realInfo", {}).get("useWaterDuration")
+        return duration if isinstance(duration, (int, float)) else 0
 
     async def set_water_dispensing_duration(self, value: float) -> None:
         _LOGGER.debug(f"Setting water dispensing duration to {value} for {self.serial}")
@@ -193,7 +198,8 @@ class DockstreamSmartFountain(Device):
 
     @property
     def cleaning_cycle(self) -> float:
-        return self._data.get("realInfo", {}).get("machineCleaningFrequency", 0)
+        cleaning_cycle = self._data.get("realInfo", {}).get("machineCleaningFrequency")
+        return cleaning_cycle if isinstance(cleaning_cycle, (int, float)) else 0
 
     async def set_cleaning_cycle(self, value: float) -> None:
         _LOGGER.debug(f"Setting cleaning cycle to {value} for {self.serial}")
@@ -207,7 +213,8 @@ class DockstreamSmartFountain(Device):
 
     @property
     def filter_cycle(self) -> float:
-        return self._data.get("realInfo", {}).get("filterReplacementFrequency", 0)
+        filter_cycle = self._data.get("realInfo", {}).get("filterReplacementFrequency")
+        return filter_cycle if isinstance(filter_cycle, (int, float)) else 0
 
     async def set_filter_cycle(self, value: float) -> None:
         _LOGGER.debug(f"Setting filter cycle to {value} for {self.serial}")
@@ -238,54 +245,64 @@ class DockstreamSmartFountain(Device):
             raise PetLibroAPIError(f"Error triggering filter reset: {err}")
 
     @property
-    def today_drinking_amount(self) -> int:
+    def today_drinking_amount(self) -> float:
         """Get the total milliliters of water used today."""
-        return self._data.get("getDrinkWater", {}).get("todayTotalMl", 0)
+        amount = self._data.get("getDrinkWater", {}).get("todayTotalMl")
+        return amount if isinstance(amount, (int, float)) else 0
     
     @property
     def today_drinking_count(self) -> int:
         """Get the total count of times drank today."""
-        return self._data.get("getDrinkWater", {}).get("todayTotalTimes", 0)
+        drinking_count = self._data.get("getDrinkWater", {}).get("todayTotalTimes")
+        return drinking_count if isinstance(drinking_count, int) else 0
 
     @property
     def today_drinking_time(self) -> int:
         """Get the total time spent drinking today."""
-        return self._data.get("getDrinkWater", {}).get("petEatingTime", 0)
+        drinking_time = self._data.get("getDrinkWater", {}).get("petEatingTime")
+        return drinking_time if isinstance(drinking_time, int) else 0
 
     @property
     def today_avg_time(self) -> int:
         """Get the average time spent drinking in a session today."""
-        return self._data.get("getDrinkWater", {}).get("avgDrinkDuration", 0)
+        avg_time = self._data.get("getDrinkWater", {}).get("avgDrinkDuration")
+        return avg_time if isinstance(avg_time, int) else 0
 
     @property
-    def yesterday_drinking_amount(self) -> int:
+    def yesterday_drinking_amount(self) -> float:
         """Get the total milliliters of water used yesterday."""
-        return self._data.get("getDrinkWater", {}).get("yesterdayTotalMl", 0)
+        amount = self._data.get("getDrinkWater", {}).get("yesterdayTotalMl")
+        return amount if isinstance(amount, (int, float)) else 0
     
     @property
     def yesterday_drinking_count(self) -> int:
         """Get the total count of times drank yesterday."""
-        return self._data.get("getDrinkWater", {}).get("yesterdayTotalTimes", 0)
+        drinking_count = self._data.get("getDrinkWater", {}).get("yesterdayTotalTimes")
+        return drinking_count if isinstance(drinking_count, int) else 0
 
     @property
     def use_water_interval(self) -> int:
         """Get the water usage interval."""
-        return self._data.get("realInfo", {}).get("useWaterInterval", 0)
+        water_interval = self._data.get("realInfo", {}).get("useWaterInterval")
+        return water_interval if isinstance(water_interval, int) else 0
     
     @property
     def use_water_duration(self) -> int:
         """Get the water usage duration."""
-        return self._data.get("realInfo", {}).get("useWaterDuration", 0)
+        water_duration = self._data.get("realInfo", {}).get("useWaterDuration", 0)
+        return water_duration if isinstance(water_duration, int) else 0
     
     @property
     def filter_replacement_frequency(self) -> int:
         """Get the filter replacement frequency."""
-        return self._data.get("realInfo", {}).get("filterReplacementFrequency", 0)
+        frequency = self._data.get("realInfo", {}).get("filterReplacementFrequency")
+        return frequency if isinstance(frequency, int) else 0
     
     @property
     def machine_cleaning_frequency(self) -> int:
         """Get the machine cleaning frequency."""
-        return self._data.get("realInfo", {}).get("machineCleaningFrequency", 0)
+        frequency = self._data.get("realInfo", {}).get("machineCleaningFrequency")
+        return frequency if isinstance(frequency, int) else 0
 
     # Method for indicator turn on
     async def set_light_on(self) -> None:

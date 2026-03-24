@@ -13,10 +13,11 @@
 # https://api.us.petlibro.com/device/feedingPlan/list
 # https://api.us.petlibro.com/device/wetFeedingPlan/wetListV3
 
+import asyncio
 from logging import getLogger
 from hashlib import md5
 from urllib.parse import urljoin
-from typing import Any, Dict, List, TypeAlias
+from typing import Any
 from datetime import datetime, timedelta, timezone
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.exceptions import ConfigEntryAuthFailed
@@ -30,7 +31,7 @@ async def make_api_call(session, url, data):
     async with session.post(url, json=data) as response:
         return await response.json()
 
-JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
+type JSON = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 _LOGGER = getLogger(__name__)
 
 class PetLibroSession:
@@ -93,7 +94,7 @@ class PetLibroSession:
             _LOGGER.debug(f"Received response status: {resp.status}")
             try:
                 data = await resp.json()
-            except Exception as e:
+            except (ValueError, KeyError, aiohttp.ContentTypeError) as e:
                 raise PetLibroAPIError(f"Error parsing response JSON: {e}")
 
             _LOGGER.debug(f"Response data: {data}")
@@ -169,9 +170,11 @@ class PetLibroSession:
             _LOGGER.error(f"Re-login failed due to a client error: {e}")
             raise PetLibroAPIError(f"Client error during re-login: {e}")
 
+        except PetLibroAPIError:
+            raise
         except Exception as e:
-            _LOGGER.error(f"Re-login attempt failed due to an unexpected error: {e}")
-            raise PetLibroAPIError(f"Unexpected error during re-login: {e}")
+            _LOGGER.error("Re-login attempt failed due to an unexpected error: %s", e)
+            raise PetLibroAPIError(f"Unexpected error during re-login: {e}") from e
 
 class PetLibroAPI:
     """PetLibro API class"""
@@ -236,9 +239,11 @@ class PetLibroAPI:
             _LOGGER.debug("Login successful, token: %s...", self.session.token[:8] if self.session.token else "None")
             return self.session.token
 
-        except Exception as e:
-            _LOGGER.error(f"Login failed: {e}")
-            raise PetLibroAPIError(f"Login attempt failed: {e}")
+        except PetLibroAPIError:
+            raise
+        except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Login failed: %s", e)
+            raise PetLibroAPIError(f"Login attempt failed: {e}") from e
 
     async def _cached_request(
         self,
@@ -286,9 +291,11 @@ class PetLibroAPI:
             self._last_api_call_times[cache_key] = now
             self._cached_responses[cache_key] = response
             return response
-        except Exception as e:
+        except PetLibroAPIError:
+            raise
+        except (aiohttp.ClientError, asyncio.TimeoutError) as e:
             _LOGGER.error("Error fetching %s: %s", cache_key, e)
-            raise PetLibroAPIError(f"Error fetching {cache_key}: {e}")
+            raise PetLibroAPIError(f"Error fetching {cache_key}: {e}") from e
 
     async def get_device_real_info(self, device_id: str) -> dict:
         """Fetch real-time information for a device, with caching."""
@@ -332,8 +339,17 @@ class PetLibroAPI:
             json={"id": device_id},
         )
 
-    async def get_device_work_record(self, device_id: str) -> dict:
-        """Fetch work record for a device, with caching."""
+    async def get_device_work_record(
+        self, device_id: str, record_types: list[str] | None = None
+    ) -> dict:
+        """Fetch work record for a device, with caching.
+
+        :param device_id: Device serial number.
+        :param record_types: Event types to filter (e.g. ["GRAIN_OUTPUT_SUCCESS"] for
+            feeders, ["DRINK"] for fountains). Defaults to feeder type for backward compat.
+        """
+        if record_types is None:
+            record_types = ["GRAIN_OUTPUT_SUCCESS"]
         now = datetime.now(timezone.utc)
         thirty_days_ago = now - timedelta(days=30)
         return await self._cached_request(
@@ -343,7 +359,7 @@ class PetLibroAPI:
                 "startTime": int(thirty_days_ago.timestamp() * 1000),
                 "endTime": int(now.timestamp() * 1000),
                 "size": 25,
-                "type": ["GRAIN_OUTPUT_SUCCESS"],
+                "type": record_types,
             },
         )
 
@@ -370,7 +386,7 @@ class PetLibroAPI:
         self.session.token = None
         _LOGGER.debug("Logout successful, token cleared.")
 
-    async def list_devices(self) -> List[dict]:
+    async def list_devices(self) -> list[dict]:
         """
         List all account devices.
 
@@ -380,37 +396,37 @@ class PetLibroAPI:
         _LOGGER.debug("Requesting list of devices")
         return await self.session.post("/device/device/list", json={})  # Ensure JSON is passed here
 
-    async def device_base_info(self, serial: str) -> Dict[str, Any]:
+    async def device_base_info(self, serial: str) -> dict[str, Any]:
         return await self.session.post_serial("/device/device/baseInfo", serial)
 
-    async def device_real_info(self, serial: str) -> Dict[str, Any]:
+    async def device_real_info(self, serial: str) -> dict[str, Any]:
         return await self.session.post_serial("/device/device/realInfo", serial)
 
-    async def device_data_real_info(self, serial: str) -> Dict[str, Any]:
+    async def device_data_real_info(self, serial: str) -> dict[str, Any]:
         return await self.session.post_serial("/data/data/realInfo", serial)
 
-    async def device_drink_water(self, serial: str) -> Dict[str, Any]:
+    async def device_drink_water(self, serial: str) -> dict[str, Any]:
         return await self.session.post_serial("/data/deviceDrinkWater/todayDrinkData", serial)
 
-    async def device_attribute_settings(self, serial: str) -> Dict[str, Any]:
+    async def device_attribute_settings(self, serial: str) -> dict[str, Any]:
         return await self.session.post_serial("/device/setting/getAttributeSetting", serial)
 
-    async def device_events(self, serial: str) -> Dict[str, Any]:
+    async def device_events(self, serial: str) -> dict[str, Any]:
         return await self.session.post_serial("/data/event/deviceEventsV2", serial)
 
-    async def device_upgrade(self, serial: str) -> Dict[str, Any]:
+    async def device_upgrade(self, serial: str) -> dict[str, Any]:
         return await self.session.post_serial("/device/ota/getUpgrade", serial)
 
-    async def device_grain_status(self, serial: str) -> Dict[str, Any]:
+    async def device_grain_status(self, serial: str) -> dict[str, Any]:
         return await self.session.post_serial("/device/data/grainStatus", serial)
 
-    async def device_feeding_plan_today_new(self, serial: str) -> Dict[str, Any]:
+    async def device_feeding_plan_today_new(self, serial: str) -> dict[str, Any]:
         return await self.session.post_serial("/device/feedingPlan/todayNew", serial)
 
-    async def device_feeding_plan_list(self, serial: str) -> List[Dict[str, Any]]:
+    async def device_feeding_plan_list(self, serial: str) -> list[dict[str, Any]]:
         return await self.session.post_serial("/device/feedingPlan/list", serial)
 
-    async def device_wet_feeding_plan(self, serial: str) -> Dict[str, Any]:
+    async def device_wet_feeding_plan(self, serial: str) -> dict[str, Any]:
         return await self.session.post_serial("/device/wetFeedingPlan/wetListV3", serial)
 
     # Support for new switch functions
@@ -466,8 +482,8 @@ class PetLibroAPI:
             )
             _LOGGER.debug(f"Desiccant cycle set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set desiccant cycle for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set desiccant cycle for device %s: %s", serial, e)
             raise
 
     async def set_sound_switch(self, serial: str, enable: bool):
@@ -487,8 +503,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Sound level set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set sound level for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set sound level for device %s: %s", serial, e)
             raise
 
     async def set_lid_close_time(self, serial: str, value: float):
@@ -503,8 +519,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Lid close time set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set lid close time for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set lid close time for device %s: %s", serial, e)
             raise
 
 
@@ -520,8 +536,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Lid speed set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set lid speed for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set lid speed for device %s: %s", serial, e)
             raise
 
     async def set_vacuum_mode(self, serial: str, value: str):
@@ -540,8 +556,8 @@ class PetLibroAPI:
             # Check if response is already parsed (since response is an integer here)\
             _LOGGER.debug(f"Vacuum mode successful, returned code: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set water dispensing mode for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set water dispensing mode for device %s: %s", serial, e)
             raise
 
 
@@ -566,8 +582,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"execCmdService({action}) returned: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to exec command {action} for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to exec command %s for device %s: %s", action, serial, e)
             raise
 
     async def trigger_manual_clean(self, serial: str):
@@ -609,8 +625,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Clean mode update returned code: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set clean mode for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set clean mode for device %s: %s", serial, e)
             raise
 
     async def set_deodorization_setting(self, serial: str, mode: str, switch: bool):
@@ -624,8 +640,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Deodorization setting returned code: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set deodorization for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set deodorization for device %s: %s", serial, e)
             raise
 
     async def set_volume(self, serial: str, volume: int):
@@ -638,8 +654,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Volume setting returned code: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set volume for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set volume for device %s: %s", serial, e)
             raise
 
     # Not supported by the dockstream device firmware yet. hoping that maybe it will be in the future, so leaving code here.
@@ -673,8 +689,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Water low threshold set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set water low threshold for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set water low threshold for device %s: %s", serial, e)
             raise
 
     async def set_water_interval(self, serial: str, value: float, current_mode: int, current_duration: float):
@@ -692,8 +708,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Water interval set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set water interval for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set water interval for device %s: %s", serial, e)
             raise
 
     async def set_water_dispensing_duration(self, serial: str, value: float, current_mode: int, current_interval: float):
@@ -711,8 +727,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Water dispensing duration set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set water dispensing duration for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set water dispensing duration for device %s: %s", serial, e)
             raise
 
     async def set_cleaning_cycle(self, serial: str, value: float, key: str) -> JSON:
@@ -732,8 +748,8 @@ class PetLibroAPI:
             )
             _LOGGER.debug(f"Machine cleaning cycle set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set machine cleaning cycle for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set machine cleaning cycle for device %s: %s", serial, e)
             raise
 
     async def set_filter_cycle(self, serial: str, value: float, key: str) -> JSON:
@@ -753,8 +769,8 @@ class PetLibroAPI:
             )
             _LOGGER.debug(f"Filter cycle set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set filter cycle for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set filter cycle for device %s: %s", serial, e)
             raise
 
     async def set_lid_mode(self, serial: str, value: str):
@@ -769,8 +785,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Lid mode set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set lid mode for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set lid mode for device %s: %s", serial, e)
             raise
 
     async def set_water_mode_off(self, serial: str):
@@ -783,8 +799,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"OFF set successfully: {resp}")
             return resp
-        except Exception as e:
-            _LOGGER.error(f"Failed to set OFF for {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set OFF for %s: %s", serial, e)
             raise
 
     async def set_water_mode_on(self, serial: str):
@@ -797,8 +813,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"ON set successfully: {resp}")
             return resp
-        except Exception as e:
-            _LOGGER.error(f"Failed to set ON for {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set ON for %s: %s", serial, e)
             raise
 
     async def set_water_mode_radar_near(self, serial: str, interval: int, duration: int | None = None, *, currently_off: bool | None = None):
@@ -824,8 +840,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Sensed mode (Near) set: {mode_resp}")
             return mode_resp
-        except Exception as e:
-            _LOGGER.error(f"Failed to set Sensed Near for {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set Sensed Near for %s: %s", serial, e)
             raise
 
     async def set_water_mode_radar_far(self, serial: str, interval: int, duration: int | None = None, *, currently_off: bool | None = None):
@@ -851,8 +867,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Sensed mode (Far) set: {mode_resp}")
             return mode_resp
-        except Exception as e:
-            _LOGGER.error(f"Failed to set Sensed Far for {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set Sensed Far for %s: %s", serial, e)
             raise
 
     async def set_new_water_mode_intermittent(self, serial: str, interval: int, duration: int  | None = None, *, currently_off: bool | None = None):
@@ -872,8 +888,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Intermittent set successfully: {resp}")
             return resp
-        except Exception as e:
-            _LOGGER.error(f"Failed to set Intermittent for {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set Intermittent for %s: %s", serial, e)
             raise
 
     async def set_new_water_mode_constant(self, serial: str, interval: int, duration: int | None = None, *, currently_off: bool | None = None):
@@ -893,8 +909,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Constant set successfully: {resp}")
             return resp
-        except Exception as e:
-            _LOGGER.error(f"Failed to set Constant for {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set Constant for %s: %s", serial, e)
             raise
 
     async def set_water_mode_intermittent(self, serial: str, interval: int, duration: int  | None = None):
@@ -911,8 +927,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Intermittent set successfully: {resp}")
             return resp
-        except Exception as e:
-            _LOGGER.error(f"Failed to set Intermittent for {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set Intermittent for %s: %s", serial, e)
             raise
 
     async def set_water_mode_constant(self, serial: str, interval: int, duration: int | None = None):
@@ -929,8 +945,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Constant set successfully: {resp}")
             return resp
-        except Exception as e:
-            _LOGGER.error(f"Failed to set Constant for {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set Constant for %s: %s", serial, e)
             raise
 
     async def set_display_icon(self, serial: str, value: float):
@@ -945,8 +961,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Display icon set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set display icon for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set display icon for device %s: %s", serial, e)
             raise
 
     async def set_display_text(self, serial: str, value: str):
@@ -961,8 +977,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Display text set successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to set display text for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to set display text for device %s: %s", serial, e)
             raise
 
     async def set_manual_feed(self, serial: str, feed_value=1) -> JSON: # Provide a default argument for the feed value just in case this works differently with other feeders
@@ -1110,8 +1126,8 @@ class PetLibroAPI:
             })
             _LOGGER.debug(f"Firmware upgrade triggered successfully: {response}")
             return response
-        except Exception as e:
-            _LOGGER.error(f"Failed to trigger firmware upgrade for device {serial}: {e}")
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
+            _LOGGER.error("Failed to trigger firmware upgrade for device %s: %s", serial, e)
             raise
 
     async def set_cleaning_reset(self, serial: str) -> JSON:
@@ -1283,7 +1299,7 @@ class PetLibroAPI:
 
         try:
             data = await self.session.post("/member/member/info", json={})
-        except Exception as exc:
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as exc:
             _LOGGER.exception("Failed to fetch member information")
             raise PetLibroAPIError("Failed to fetch member information") from exc
 
@@ -1314,7 +1330,7 @@ class PetLibroAPI:
             """Helper to send settings and handle logging."""
             try:
                 result = await self.session.post(endpoint, json=payload or {})
-            except Exception:
+            except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError):
                 _LOGGER.exception("Failed to update via %s", endpoint)
                 return False
             _LOGGER.debug("%s response (should be None): %s", endpoint, result)

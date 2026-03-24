@@ -6,6 +6,7 @@ from collections.abc import Callable
 from datetime import datetime
 from .const import DOMAIN, VALID_UNIT_TYPES, Unit, APIKey as API
 from homeassistant.components.sensor.const import SensorStateClass, SensorDeviceClass
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.const import UnitOfMass, UnitOfVolume, UnitOfTime, SIGNAL_STRENGTH_DECIBELS_MILLIWATT, PERCENTAGE
 from homeassistant.core import HomeAssistant
@@ -1141,6 +1142,43 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
             state_class=SensorStateClass.MEASUREMENT,
             name="Remaining Filter Days"
         ),
+        PetLibroSensorEntityDescription[DockstreamSmartFountain](
+            key="weight_state",
+            translation_key="weight_state",
+            icon="mdi:water-alert",
+            name="Water State",
+        ),
+        PetLibroSensorEntityDescription[DockstreamSmartFountain](
+            key="remaining_water_ml",
+            translation_key="remaining_water_ml",
+            icon="mdi:water",
+            native_unit_of_measurement="mL",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Remaining Water",
+        ),
+        PetLibroSensorEntityDescription[DockstreamSmartFountain](
+            key="tank_total_ml",
+            translation_key="tank_total_ml",
+            icon="mdi:water",
+            native_unit_of_measurement="mL",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Tank Capacity",
+        ),
+        PetLibroSensorEntityDescription[DockstreamSmartFountain](
+            key="exception_message",
+            translation_key="exception_message",
+            icon="mdi:alert-circle",
+            name="Alert Message",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[DockstreamSmartFountain](
+            key="volume_level",
+            translation_key="volume_level",
+            icon="mdi:volume-high",
+            native_unit_of_measurement="%",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Volume Level",
+        ),
     ],
     DockstreamSmartRFIDFountain: [
         PetLibroSensorEntityDescription[DockstreamSmartRFIDFountain](
@@ -1218,6 +1256,43 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
             device_class=SensorDeviceClass.DURATION,
             state_class=SensorStateClass.MEASUREMENT,
             name="Remaining Filter Days"
+        ),
+        PetLibroSensorEntityDescription[DockstreamSmartRFIDFountain](
+            key="weight_state",
+            translation_key="weight_state",
+            icon="mdi:water-alert",
+            name="Water State",
+        ),
+        PetLibroSensorEntityDescription[DockstreamSmartRFIDFountain](
+            key="remaining_water_ml",
+            translation_key="remaining_water_ml",
+            icon="mdi:water",
+            native_unit_of_measurement="mL",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Remaining Water",
+        ),
+        PetLibroSensorEntityDescription[DockstreamSmartRFIDFountain](
+            key="tank_total_ml",
+            translation_key="tank_total_ml",
+            icon="mdi:water",
+            native_unit_of_measurement="mL",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Tank Capacity",
+        ),
+        PetLibroSensorEntityDescription[DockstreamSmartRFIDFountain](
+            key="exception_message",
+            translation_key="exception_message",
+            icon="mdi:alert-circle",
+            name="Alert Message",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[DockstreamSmartRFIDFountain](
+            key="volume_level",
+            translation_key="volume_level",
+            icon="mdi:volume-high",
+            native_unit_of_measurement="%",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Volume Level",
         ),
     ],
     Dockstream2SmartCordlessFountain: [
@@ -1336,6 +1411,81 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
             state_class=SensorStateClass.TOTAL_INCREASING,
             name="Yesterday Drinking Times"
         ),
+        PetLibroSensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="weight_state",
+            translation_key="weight_state",
+            icon="mdi:water-alert",
+            name="Water State",
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="remaining_water_ml",
+            translation_key="remaining_water_ml",
+            icon="mdi:water",
+            native_unit_of_measurement="mL",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Remaining Water",
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="tank_total_ml",
+            translation_key="tank_total_ml",
+            icon="mdi:water",
+            native_unit_of_measurement="mL",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Tank Capacity",
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="exception_message",
+            translation_key="exception_message",
+            icon="mdi:alert-circle",
+            name="Alert Message",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="power_state",
+            translation_key="power_state",
+            icon="mdi:power-plug",
+            name="Power Source",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="radar_sensing_level",
+            translation_key="radar_sensing_level",
+            icon="mdi:radar",
+            name="Radar Sensing Level",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="radar_gain",
+            translation_key="radar_gain",
+            icon="mdi:radar",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Radar Gain",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="radar_sensing_threshold",
+            translation_key="radar_sensing_threshold",
+            icon="mdi:radar",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Radar Sensing Threshold",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="human_sensitivity_level",
+            translation_key="human_sensitivity_level",
+            icon="mdi:account-eye",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Human Detection Sensitivity",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="volume_level",
+            translation_key="volume_level",
+            icon="mdi:volume-high",
+            native_unit_of_measurement="%",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Volume Level",
+        ),
     ],
     Dockstream2SmartFountain: [
         PetLibroSensorEntityDescription[Dockstream2SmartFountain](
@@ -1431,6 +1581,81 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
             icon="mdi:history",
             state_class=SensorStateClass.TOTAL_INCREASING,
             name="Yesterday Drinking Times"
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartFountain](
+            key="weight_state",
+            translation_key="weight_state",
+            icon="mdi:water-alert",
+            name="Water State",
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartFountain](
+            key="remaining_water_ml",
+            translation_key="remaining_water_ml",
+            icon="mdi:water",
+            native_unit_of_measurement="mL",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Remaining Water",
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartFountain](
+            key="tank_total_ml",
+            translation_key="tank_total_ml",
+            icon="mdi:water",
+            native_unit_of_measurement="mL",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Tank Capacity",
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartFountain](
+            key="exception_message",
+            translation_key="exception_message",
+            icon="mdi:alert-circle",
+            name="Alert Message",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartFountain](
+            key="power_state",
+            translation_key="power_state",
+            icon="mdi:power-plug",
+            name="Power Source",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartFountain](
+            key="radar_sensing_level",
+            translation_key="radar_sensing_level",
+            icon="mdi:radar",
+            name="Radar Sensing Level",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartFountain](
+            key="radar_gain",
+            translation_key="radar_gain",
+            icon="mdi:radar",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Radar Gain",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartFountain](
+            key="radar_sensing_threshold",
+            translation_key="radar_sensing_threshold",
+            icon="mdi:radar",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Radar Sensing Threshold",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartFountain](
+            key="human_sensitivity_level",
+            translation_key="human_sensitivity_level",
+            icon="mdi:account-eye",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Human Detection Sensitivity",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[Dockstream2SmartFountain](
+            key="volume_level",
+            translation_key="volume_level",
+            icon="mdi:volume-high",
+            native_unit_of_measurement="%",
+            state_class=SensorStateClass.MEASUREMENT,
+            name="Volume Level",
         ),
     ],
     LumaSmartLitterBox: [

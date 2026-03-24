@@ -17,7 +17,7 @@ class DockstreamSmartFountain(Fountain):
 
             data_real_info = await self.api.device_data_real_info(self.serial)
             get_upgrade = await self.api.get_device_upgrade(self.serial)
-            get_work_record = await self.api.get_device_work_record(self.serial)
+            get_work_record = await self.api.get_device_work_record(self.serial, record_types=["DRINK"])
             get_feeding_plan_today = await self.api.device_feeding_plan_today_new(self.serial)
             get_drink_water = await self.api.get_device_drink_water(self.serial)
 

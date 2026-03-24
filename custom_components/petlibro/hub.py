@@ -4,7 +4,7 @@ from logging import getLogger
 from asyncio import gather
 from collections.abc import Mapping
 import sys
-from typing import List, Any, Optional
+from typing import Any
 from datetime import datetime, timedelta, timezone
 from .const import UPDATE_INTERVAL_SECONDS
 from homeassistant.core import HomeAssistant
@@ -30,7 +30,7 @@ class PetLibroHub:
         self.hass = hass
         self.entry = config_entry
         self._data = self.entry.data
-        self.devices: List[Device] = []  # Initialize devices as an instance variable
+        self.devices: list[Device] = []  # Initialize devices as an instance variable
         self.member: Member = None
         self.last_refresh_times = {}  # Track the last refresh time for the member & each device
         self.loaded_device_sn = set()  # Track device serial numbers that have already been loaded
@@ -61,7 +61,7 @@ class PetLibroHub:
             _LOGGER.error("Region is missing in the configuration entry.")
             raise ValueError("Region is required to initialize PetLibroAPI.")
 
-        _LOGGER.debug(f"Initializing PetLibroAPI with email: {email}, region: {region}")
+        _LOGGER.debug("Initializing PetLibroAPI with email: %s, region: %s", email, region)
 
         # Initialize the PetLibro API instance
         self.api = PetLibroAPI(
@@ -77,6 +77,7 @@ class PetLibroHub:
         self.coordinator = DataUpdateCoordinator(
             hass,
             _LOGGER,
+            config_entry=config_entry,
             name="petlibro_data",
             update_method=self.refresh_data,  # Calls the refresh_data method
             update_interval=timedelta(seconds=UPDATE_INTERVAL_SECONDS),  # Use defined interval
@@ -86,7 +87,7 @@ class PetLibroHub:
         """Load devices from the API and initialize them."""
         try:
             device_list = await self.api.list_devices()
-            _LOGGER.debug(f"Fetched {len(device_list)} devices from the API.")
+            _LOGGER.debug("Fetched %d devices from the API.", len(device_list))
 
             if not device_list:
                 _LOGGER.warning("No devices found in the API response.")
@@ -95,29 +96,29 @@ class PetLibroHub:
             for device_data in device_list:
                 device_sn = device_data.get("deviceSn", "unknown")
                 device_name = device_data.get("productName", "unknown")
-                _LOGGER.debug(f"Processing device: {device_name} (Serial: {device_sn})")
+                _LOGGER.debug("Processing device: %s (Serial: %s)", device_name, device_sn)
 
                 # Check if the device is already loaded
                 if device_sn in self.loaded_device_sn:
-                    _LOGGER.debug(f"Device {device_sn} is already loaded, skipping further initialization.")
+                    _LOGGER.debug("Device %s is already loaded, skipping further initialization.", device_sn)
                     continue
 
                 # Create a new device and add it without calling refresh immediately
                 if device_name in product_name_map:
-                    _LOGGER.debug(f"Loading new device: {device_name} (Serial: {device_sn})")
+                    _LOGGER.debug("Loading new device: %s (Serial: %s)", device_name, device_sn)
                     device = product_name_map[device_name](device_data, self.member, self.api)
                     self.devices.append(device)  # Add to device list
-                    _LOGGER.debug(f"Successfully loaded device: {device_name} (Serial: {device_sn})")
+                    _LOGGER.debug("Successfully loaded device: %s (Serial: %s)", device_name, device_sn)
                 else:
-                    _LOGGER.error(f"Unsupported device found: {device_name} (Serial: {device_sn})")
+                    _LOGGER.error("Unsupported device found: %s (Serial: %s)", device_name, device_sn)
 
                 # Mark the device as loaded to prevent duplicate API calls
                 self.loaded_device_sn.add(device_sn)
                 self.last_refresh_times[device_sn] = datetime.now(timezone.utc)  # Set the last refresh time to now
 
-            _LOGGER.debug(f"Final devices loaded: {len(self.devices)} devices")
-        except Exception as ex:
-            _LOGGER.error(f"Error while loading devices: {ex}", exc_info=True)
+            _LOGGER.debug("Final devices loaded: %d devices", len(self.devices))
+        except (PetLibroAPIError, ClientResponseError, ClientConnectorError) as ex:
+            _LOGGER.error("Error while loading devices: %s", ex, exc_info=True)
 
     async def load_member(self) -> None:
         """Load Petlibro account from the API and initialize it."""
@@ -128,7 +129,7 @@ class PetLibroHub:
 
         try:
             member_info = await self.api.member_info()
-        except Exception:
+        except (PetLibroAPIError, ClientResponseError, ClientConnectorError):
             _LOGGER.exception("Error fetching member info.")
             return
 
@@ -241,15 +242,15 @@ class PetLibroHub:
                 self.member.force_refresh = False
             self.last_refresh_times[identifier] = now
             _LOGGER.debug("Refresh complete for %s: %s", obj_type_str, identifier)
-        except Exception:
+        except (PetLibroAPIError, ClientResponseError, ClientConnectorError):
             _LOGGER.exception("Error refreshing %s: %s", obj_type_str, identifier)
             raise
 
-    async def get_device(self, serial: str) -> Optional[Device]:
+    async def get_device(self, serial: str) -> Device | None:
         """Return the device with the specified serial number."""
         device = next((device for device in self.devices if device.serial == serial), None)
         if not device:
-            _LOGGER.debug(f"Device with serial {serial} not found.")
+            _LOGGER.debug("Device with serial %s not found.", serial)
         return device
 
     def update_options(self, new_options: Mapping[str, Any]) -> None:
@@ -258,7 +259,7 @@ class PetLibroHub:
             self.entry,
             options={**self.entry.options, **new_options},
         )
-        _LOGGER.debug(f"Config entry options updated with: {new_options}")
+        _LOGGER.debug("Config entry options updated with: %s", new_options)
 
     async def async_refresh(self, force_member: bool = False) -> None:
         """Force a manual data refresh if enough time has passed.

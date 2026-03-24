@@ -3,7 +3,7 @@ import ast
 from zoneinfo import ZoneInfo
 import aiohttp
 
-from typing import Optional, cast
+from typing import cast
 from logging import getLogger
 from datetime import datetime, timedelta, time
 
@@ -62,7 +62,7 @@ class Feeder(Device):
     @property
     def unit_type_name(self) -> str | None:
         """The device unit type as a human-readable string."""
-        unit: Optional[str] = None
+        unit: str | None = None
         if unit_id := self.unit_id:
             unit = UNITS.get(unit_id)
         return unit

@@ -17,7 +17,7 @@ class DockstreamSmartRFIDFountain(Fountain):
 
             # RFID fountain does not fetch data_real_info or drink_water
             get_upgrade = await self.api.get_device_upgrade(self.serial)
-            get_work_record = await self.api.get_device_work_record(self.serial)
+            get_work_record = await self.api.get_device_work_record(self.serial, record_types=["DRINK"])
             get_feeding_plan_today = await self.api.device_feeding_plan_today_new(self.serial)
 
             self.update_data({

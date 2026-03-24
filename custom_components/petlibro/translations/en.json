@@ -244,6 +244,36 @@
             },
             "yesterday_drinking_amount": {
                 "name": "Yesterday's Water Consumption"
+            },
+            "weight_state": {
+                "name": "Water State"
+            },
+            "remaining_water_ml": {
+                "name": "Remaining Water"
+            },
+            "tank_total_ml": {
+                "name": "Tank Capacity"
+            },
+            "exception_message": {
+                "name": "Alert Message"
+            },
+            "power_state": {
+                "name": "Power Source"
+            },
+            "radar_sensing_level": {
+                "name": "Radar Sensing Level"
+            },
+            "radar_gain": {
+                "name": "Radar Gain"
+            },
+            "radar_sensing_threshold": {
+                "name": "Radar Sensing Threshold"
+            },
+            "human_sensitivity_level": {
+                "name": "Human Detection Sensitivity"
+            },
+            "volume_level": {
+                "name": "Volume Level"
             }
         },
         "switch": {
@@ -364,6 +394,18 @@
             },
             "water_state": {
                 "name": "Water Dispensing State"
+            },
+            "water_low": {
+                "name": "Water Low"
+            },
+            "device_stopped_working": {
+                "name": "Device Fault"
+            },
+            "filter_led_switch": {
+                "name": "Filter LED"
+            },
+            "battery_supply_8_hours": {
+                "name": "Battery 8-Hour Supply"
             }
         },
         "number": {

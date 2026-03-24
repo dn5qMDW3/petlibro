@@ -1,26 +1,16 @@
 """Support for PETLIBRO switches."""
 from __future__ import annotations
-from .api import make_api_call
-import aiohttp
-from aiohttp import ClientSession, ClientError
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from functools import cached_property
 from typing import Any, Generic
 import logging
-from .const import DOMAIN
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.const import EntityCategory
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.config_entries import ConfigEntry  # Added ConfigEntry import
-from .hub import PetLibroHub  # Adjust the import path as necessary
 
 _LOGGER = logging.getLogger(__name__)
 
-from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription
+from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription, create_platform_setup
 from .devices import Device
-from .devices.device import Device
 from .devices.feeders.feeder import Feeder
 from .devices.feeders.air_smart_feeder import AirSmartFeeder
 from .devices.feeders.granary_smart_feeder import GranarySmartFeeder
@@ -120,47 +110,7 @@ class PetLibroSwitchEntity(PetLibroEntity[_DeviceT], SwitchEntity):
         """Turn the switch off."""
         await self.entity_description.set_fn(self.device, False)
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up PETLIBRO switches using config entry."""
-    # Retrieve the hub from hass.data that was set up in __init__.py
-    hub = hass.data[DOMAIN].get(entry.entry_id)
-
-    if not hub:
-        _LOGGER.error("Hub not found for entry: %s", entry.entry_id)
-        return
-
-    # Ensure that the devices are loaded
-    if not hub.devices:
-        _LOGGER.warning("No devices found in hub during switch setup.")
-        return
-
-    # Log the contents of the hub data for debugging
-    _LOGGER.debug("Hub data: %s", hub)
-
-    devices = hub.devices  # Devices should already be loaded in the hub
-    _LOGGER.debug("Devices in hub: %s", devices)
-
-    # Create switch entities for each device based on the switch map
-    entities = [
-        PetLibroSwitchEntity(device, hub, description)
-        for device in devices  # Iterate through devices from the hub
-        for device_type, entity_descriptions in DEVICE_SWITCH_MAP.items()
-        if isinstance(device, device_type)
-        for description in entity_descriptions
-    ]
-
-    if not entities:
-        _LOGGER.debug("No switches added, entities list is empty!")
-    else:
-        # Log the number of entities and their details
-        _LOGGER.debug("Adding %d PetLibro switches", len(entities))
-        for entity in entities:
-            _LOGGER.debug("Adding switch entity: %s for device %s", entity.entity_description.name, entity.device.name)
-
-        # Add switch entities to Home Assistant
-        async_add_entities(entities)
+async_setup_entry = create_platform_setup(
+    PetLibroSwitchEntity, DEVICE_SWITCH_MAP, "switch"
+)
 

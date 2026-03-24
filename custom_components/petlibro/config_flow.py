@@ -58,13 +58,14 @@ class PetlibroConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            # Prevent duplicate entries for the same email
-            self._async_abort_entries_match({CONF_EMAIL: user_input[CONF_EMAIL]})
-
             # Store user input values
             self.email = user_input[CONF_EMAIL]
             self.password = user_input[CONF_PASSWORD]
             self.region = user_input[CONF_REGION]
+
+            # Set unique ID based on email and abort if already configured
+            await self.async_set_unique_id(self.email.lower())
+            self._abort_if_unique_id_configured()
 
             # Validate input and login to the API
             if not (error := await self._validate_input()):
@@ -126,6 +127,40 @@ class PetlibroConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+    async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Handle reconfiguration of the integration."""
+        errors: dict[str, str] = {}
+        entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+
+        if user_input is not None:
+            self.email = user_input[CONF_EMAIL]
+            self.password = user_input[CONF_PASSWORD]
+            self.region = user_input[CONF_REGION]
+
+            if not (error := await self._validate_input()):
+                return self.async_update_reload_and_abort(
+                    entry,
+                    data={
+                        CONF_REGION: self.region,
+                        CONF_EMAIL: self.email,
+                        CONF_PASSWORD: self.password,
+                        CONF_API_TOKEN: self.token,
+                    },
+                )
+            errors["base"] = error
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_REGION, default=entry.data.get(CONF_REGION, "US")): vol.In(["US"]),
+                    vol.Required(CONF_EMAIL, default=entry.data.get(CONF_EMAIL, "")): str,
+                    vol.Required(CONF_PASSWORD): str,
+                }
+            ),
+            errors=errors,
+        )
+
     async def _validate_input(self) -> str:
         """Validate the user input allows us to connect.
 
@@ -183,7 +218,7 @@ class PetlibroOptionsFlow(OptionsFlow):
         self.translations = await async_get_translations(
             self.hass, self.hass.config.language, "common")
         self.entry = self.config_entry
-        self.hub = self.hass.data[DOMAIN][self.handler]
+        self.hub = self.entry.runtime_data
         self.api = self.hub.api
         self.member = self.hub.member
         self._data.clear()

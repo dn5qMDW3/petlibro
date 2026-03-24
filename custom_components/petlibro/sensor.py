@@ -18,7 +18,6 @@ from .member import MemberEntity
 _LOGGER = getLogger(__name__)
 
 from .devices import Device
-from .devices.device import Device
 from .devices.feeders.feeder import Feeder
 from .devices.feeders.air_smart_feeder import AirSmartFeeder
 from .devices.feeders.granary_smart_feeder import GranarySmartFeeder
@@ -1592,7 +1591,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up PETLIBRO sensors using config entry."""
     # Retrieve the hub from hass.data that was set up in __init__.py
-    hub = hass.data[DOMAIN].get(entry.entry_id)
+    hub = getattr(entry, "runtime_data", None)
 
     if not hub:
         _LOGGER.error("Hub not found for entry: %s", entry.entry_id)

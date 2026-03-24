@@ -2,17 +2,23 @@
 
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+import logging
+from typing import Any, Generic, TypeVar
 from functools import cached_property
 
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.helpers.entity import EntityDescription
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 
 from .devices import Device
 from .devices.event import EVENT_UPDATE
 from .const import DOMAIN, APIKey
 from .hub import PetLibroHub
+
+_LOGGER = logging.getLogger(__name__)
 
 _DeviceT = TypeVar("_DeviceT", bound=Device)
 
@@ -58,3 +64,44 @@ class PetLibroEntity(
 
 class PetLibroEntityDescription(EntityDescription, Generic[_DeviceT]):
     """PETLIBRO Entity description"""
+
+
+def create_platform_setup(
+    entity_class: type[PetLibroEntity[Any]],
+    device_map: dict[type[Device], list[Any]],
+    platform_name: str,
+):
+    """Create a standard async_setup_entry for a platform.
+
+    This factory eliminates the duplicated setup boilerplate across
+    switch, button, binary_sensor, number, select, text, and update platforms.
+    """
+
+    async def async_setup_entry(
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
+    ) -> None:
+        hub: PetLibroHub | None = getattr(entry, "runtime_data", None)
+
+        if not hub:
+            _LOGGER.error("Hub not found for entry: %s", entry.entry_id)
+            return
+
+        if not hub.devices:
+            _LOGGER.warning("No devices found in hub during %s setup.", platform_name)
+            return
+
+        entities = [
+            entity_class(device, hub, description)
+            for device in hub.devices
+            for device_type, entity_descriptions in device_map.items()
+            if isinstance(device, device_type)
+            for description in entity_descriptions
+        ]
+
+        if entities:
+            _LOGGER.debug("Adding %d PetLibro %s entities", len(entities), platform_name)
+            async_add_entities(entities)
+
+    return async_setup_entry

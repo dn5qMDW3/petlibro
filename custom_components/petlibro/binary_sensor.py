@@ -1,29 +1,20 @@
 """Support for PETLIBRO binary sensors."""
 from __future__ import annotations
-from .api import make_api_call
-import aiohttp
-from aiohttp import ClientSession, ClientError
 from dataclasses import dataclass
 from collections.abc import Callable
 from functools import cached_property
 from typing import Optional
 import logging
-from .const import DOMAIN
 from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorEntityDescription,
     BinarySensorDeviceClass,
 )
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.config_entries import ConfigEntry  # Added ConfigEntry import
-from .hub import PetLibroHub  # Adjust the import path as necessary
 
 
 _LOGGER = logging.getLogger(__name__)
 
 from .devices import Device
-from .devices.device import Device
 from .devices.feeders.feeder import Feeder
 from .devices.feeders.air_smart_feeder import AirSmartFeeder
 from .devices.feeders.granary_smart_feeder import GranarySmartFeeder
@@ -36,7 +27,7 @@ from .devices.fountains.dockstream_smart_rfid_fountain import DockstreamSmartRFI
 from .devices.fountains.dockstream_2_smart_cordless_fountain import Dockstream2SmartCordlessFountain
 from .devices.fountains.dockstream_2_smart_fountain import Dockstream2SmartFountain
 from .devices.litterboxes.luma_smart_litter_box import LumaSmartLitterBox
-from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription
+from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription, create_platform_setup
 
 
 @dataclass(frozen=True)
@@ -605,47 +596,7 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
     ],
 }
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,  # Use ConfigEntry
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up PETLIBRO binary sensors using config entry."""
-    # Retrieve the hub from hass.data that was set up in __init__.py
-    hub = hass.data[DOMAIN].get(entry.entry_id)
-
-    if not hub:
-        _LOGGER.error("Hub not found for entry: %s", entry.entry_id)
-        return
-
-    # Ensure that the devices are loaded (if load_devices is not already called elsewhere)
-    if not hub.devices:
-        _LOGGER.warning("No devices found in hub during binary sensor setup.")
-        return
-
-    # Log the contents of the hub data for debugging
-    _LOGGER.debug("Hub data: %s", hub)
-
-    devices = hub.devices  # Devices should already be loaded in the hub
-    _LOGGER.debug("Devices in hub: %s", devices)
-
-    # Create binary sensor entities for each device based on the binary sensor map
-    entities = [
-        PetLibroBinarySensorEntity(device, hub, description)
-        for device in devices  # Iterate through devices from the hub
-        for device_type, entity_descriptions in DEVICE_BINARY_SENSOR_MAP.items()
-        if isinstance(device, device_type)
-        for description in entity_descriptions
-    ]
-
-    if not entities:
-        _LOGGER.warning("No binary sensors added, entities list is empty!")
-    else:
-        # Log the number of entities and their details
-        _LOGGER.debug("Adding %d PetLibro binary sensors", len(entities))
-        for entity in entities:
-            _LOGGER.debug("Adding binary sensor entity: %s for device %s", entity.entity_description.name, entity.device.name)
-
-        # Add binary sensor entities to Home Assistant
-        async_add_entities(entities)
+async_setup_entry = create_platform_setup(
+    PetLibroBinarySensorEntity, DEVICE_BINARY_SENSOR_MAP, "binary_sensor"
+)
 

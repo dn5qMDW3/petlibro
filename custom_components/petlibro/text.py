@@ -1,31 +1,18 @@
 """Support for PETLIBRO text entities."""
 from __future__ import annotations
-from .api import make_api_call
-import aiohttp
-from aiohttp import ClientSession, ClientError
-from dataclasses import dataclass
 from dataclasses import dataclass, field
 from collections.abc import Callable
-from functools import cached_property
-from typing import Optional
 from typing import Any
-from typing import List, Awaitable
 import logging
-from .const import DOMAIN
 from homeassistant.components.text import (
     TextEntity,
     TextEntityDescription,
 )
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.config_entries import ConfigEntry  # Added ConfigEntry import
-from .hub import PetLibroHub  # Adjust the import path as necessary
 
 
 _LOGGER = logging.getLogger(__name__)
 
 from .devices import Device
-from .devices.device import Device
 from .devices.feeders.feeder import Feeder
 from .devices.feeders.air_smart_feeder import AirSmartFeeder
 from .devices.feeders.granary_smart_feeder import GranarySmartFeeder
@@ -38,7 +25,7 @@ from .devices.fountains.dockstream_smart_rfid_fountain import DockstreamSmartRFI
 from .devices.fountains.dockstream_2_smart_cordless_fountain import Dockstream2SmartCordlessFountain
 from .devices.fountains.dockstream_2_smart_fountain import Dockstream2SmartFountain
 from .devices.litterboxes.luma_smart_litter_box import LumaSmartLitterBox
-from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription
+from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription, create_platform_setup
 
 @dataclass(frozen=True)
 class PetLibroTextEntityDescription(TextEntityDescription, PetLibroEntityDescription[_DeviceT]):
@@ -110,47 +97,7 @@ DEVICE_TEXT_MAP: dict[type[Device], list[PetLibroTextEntityDescription]] = {
     ],
 }
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,  # Use ConfigEntry
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up PETLIBRO text using config entry."""
-    # Retrieve the hub from hass.data that was set up in __init__.py
-    hub = hass.data[DOMAIN].get(entry.entry_id)
-
-    if not hub:
-        _LOGGER.error("Hub not found for entry: %s", entry.entry_id)
-        return
-
-    # Ensure that the devices are loaded (if load_devices is not already called elsewhere)
-    if not hub.devices:
-        _LOGGER.warning("No devices found in hub during text setup.")
-        return
-
-    # Log the contents of the hub data for debugging
-    _LOGGER.debug("Hub data: %s", hub)
-
-    devices = hub.devices  # Devices should already be loaded in the hub
-    _LOGGER.debug("Devices in hub: %s", devices)
-
-    # Create text entities for each device based on the text map
-    entities = [
-        PetLibroTextEntity(device, hub, description)
-        for device in devices  # Iterate through devices from the hub
-        for device_type, entity_descriptions in DEVICE_TEXT_MAP.items()
-        if isinstance(device, device_type)
-        for description in entity_descriptions
-    ]
-
-    if not entities:
-        _LOGGER.warning("No text entities added, entities list is empty!")
-    else:
-        # Log the text of entities and their details
-        _LOGGER.debug("Adding %d PetLibro text entities", len(entities))
-        for entity in entities:
-            _LOGGER.debug("Adding text entity: %s for device %s", entity.entity_description.name, entity.device.name)
-
-        # Add text entities to Home Assistant
-        async_add_entities(entities)
+async_setup_entry = create_platform_setup(
+    PetLibroTextEntity, DEVICE_TEXT_MAP, "text"
+)
 

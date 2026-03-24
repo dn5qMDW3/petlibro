@@ -1,34 +1,22 @@
 """Support for PETLIBRO selects."""
 from __future__ import annotations
 import math
-from .api import make_api_call
-import aiohttp
-from aiohttp import ClientSession, ClientError
-from dataclasses import dataclass
 from dataclasses import dataclass, field
 from collections.abc import Callable
-from functools import cached_property
-from typing import Optional
 from typing import Any
-from typing import List, Awaitable
 import logging
-from .const import DOMAIN, MANUAL_FEED_PORTIONS, DEFAULT_PORTIONS_IN_CUP, Unit, APIKey
+from .const import MANUAL_FEED_PORTIONS, DEFAULT_PORTIONS_IN_CUP, Unit, APIKey
 from homeassistant.components.select import (
     SelectEntity,
     SelectEntityDescription,
 )
-from homeassistant.core import HomeAssistant
 from homeassistant.core import callback
 from homeassistant.const import Platform
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.config_entries import ConfigEntry  # Added ConfigEntry import
-from .hub import PetLibroHub  # Adjust the import path as necessary
 
 
 _LOGGER = logging.getLogger(__name__)
 
 from .devices import Device
-from .devices.device import Device
 from .devices.feeders.feeder import Feeder
 from .devices.feeders.air_smart_feeder import AirSmartFeeder
 from .devices.feeders.granary_smart_feeder import GranarySmartFeeder
@@ -41,7 +29,7 @@ from .devices.fountains.dockstream_smart_rfid_fountain import DockstreamSmartRFI
 from .devices.fountains.dockstream_2_smart_cordless_fountain import Dockstream2SmartCordlessFountain
 from .devices.fountains.dockstream_2_smart_fountain import Dockstream2SmartFountain
 from .devices.litterboxes.luma_smart_litter_box import LumaSmartLitterBox
-from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription
+from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription, create_platform_setup
 
 
 async def _apply_and_refresh(device, action_coro):
@@ -67,8 +55,8 @@ async def _apply_with_cached_schedule(device, builder):
 @dataclass(frozen=True)
 class PetLibroSelectEntityDescription(SelectEntityDescription, PetLibroEntityDescription[_DeviceT]):
     """A class that describes device select entities."""
-    method: Callable[[_DeviceT, str], Any] = field(default=lambda d,_: True)  # Default lambda function
-    current_selection: Callable[[_DeviceT], str] | None = lambda _: None  # Default to None
+    method: Callable[[_DeviceT, str], Any] = field(default=lambda d, _: None)
+    current_selection: Callable[[_DeviceT], str | None] = lambda _: None
     petlibro_unit: APIKey | str | None = None
 
 class PetLibroSelectEntity(PetLibroEntity[_DeviceT], SelectEntity):
@@ -393,47 +381,7 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
     ],
 }
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,  # Use ConfigEntry
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up PETLIBRO select using config entry."""
-    # Retrieve the hub from hass.data that was set up in __init__.py
-    hub = hass.data[DOMAIN].get(entry.entry_id)
-
-    if not hub:
-        _LOGGER.error("Hub not found for entry: %s", entry.entry_id)
-        return
-
-    # Ensure that the devices are loaded (if load_devices is not already called elsewhere)
-    if not hub.devices:
-        _LOGGER.warning("No devices found in hub during select setup.")
-        return
-
-    # Log the contents of the hub data for debugging
-    _LOGGER.debug("Hub data: %s", hub)
-
-    devices = hub.devices  # Devices should already be loaded in the hub
-    _LOGGER.debug("Devices in hub: %s", devices)
-
-    # Create select entities for each device based on the select map
-    entities = [
-        PetLibroSelectEntity(device, hub, description)
-        for device in devices  # Iterate through devices from the hub
-        for device_type, entity_descriptions in DEVICE_SELECT_MAP.items()
-        if isinstance(device, device_type)
-        for description in entity_descriptions
-    ]
-
-    if not entities:
-        _LOGGER.warning("No select entities added, entities list is empty!")
-    else:
-        # Log the select of entities and their details
-        _LOGGER.debug("Adding %d PetLibro select entities", len(entities))
-        for entity in entities:
-            _LOGGER.debug("Adding select entity: %s for device %s", entity.entity_description.name, entity.device.name)
-
-        # Add select entities to Home Assistant
-        async_add_entities(entities)
+async_setup_entry = create_platform_setup(
+    PetLibroSelectEntity, DEVICE_SELECT_MAP, "select"
+)
 

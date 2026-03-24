@@ -3,24 +3,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from collections.abc import Callable
 import logging
-from .const import DOMAIN, Unit, APIKey, MANUAL_FEED_PORTIONS
+from .const import Unit, APIKey, MANUAL_FEED_PORTIONS
 from homeassistant.components.number import (
     NumberEntity,
     NumberEntityDescription,
     NumberMode
 )
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import callback
 from homeassistant.const import UnitOfVolume, Platform
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.config_entries import ConfigEntry  # Added ConfigEntry import
 from homeassistant.util.unit_conversion import VolumeConverter
-from .hub import PetLibroHub  # Adjust the import path as necessary
 
 
 _LOGGER = logging.getLogger(__name__)
 
 from .devices import Device
-from .devices.device import Device
 from .devices.feeders.feeder import Feeder
 from .devices.feeders.air_smart_feeder import AirSmartFeeder
 from .devices.feeders.granary_smart_feeder import GranarySmartFeeder
@@ -33,13 +29,13 @@ from .devices.fountains.dockstream_smart_rfid_fountain import DockstreamSmartRFI
 from .devices.fountains.dockstream_2_smart_cordless_fountain import Dockstream2SmartCordlessFountain
 from .devices.fountains.dockstream_2_smart_fountain import Dockstream2SmartFountain
 from .devices.litterboxes.luma_smart_litter_box import LumaSmartLitterBox
-from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription
+from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription, create_platform_setup
 
 @dataclass(frozen=True)
 class PetLibroNumberEntityDescription(NumberEntityDescription, PetLibroEntityDescription[_DeviceT]):
     """A class that describes device number entities."""
     value_fn: Callable[[_DeviceT], float] = lambda _: 0
-    method: Callable[[_DeviceT, float], float] = lambda d, v: None
+    method: Callable[[_DeviceT, float], None] = lambda d, v: None
     petlibro_unit: APIKey | str | None = None
 
 class PetLibroNumberEntity(PetLibroEntity[_DeviceT], NumberEntity):
@@ -535,46 +531,6 @@ DEVICE_NUMBER_MAP: dict[type[Device], list[PetLibroNumberEntityDescription]] = {
     ],
 }
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,  # Use ConfigEntry
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up PETLIBRO number using config entry."""
-    # Retrieve the hub from hass.data that was set up in __init__.py
-    hub = hass.data[DOMAIN].get(entry.entry_id)
-
-    if not hub:
-        _LOGGER.error("Hub not found for entry: %s", entry.entry_id)
-        return
-
-    # Ensure that the devices are loaded (if load_devices is not already called elsewhere)
-    if not hub.devices:
-        _LOGGER.warning("No devices found in hub during number setup.")
-        return
-
-    # Log the contents of the hub data for debugging
-    _LOGGER.debug("Hub data: %s", hub)
-
-    devices = hub.devices  # Devices should already be loaded in the hub
-    _LOGGER.debug("Devices in hub: %s", devices)
-
-    # Create number entities for each device based on the number map
-    entities = [
-        PetLibroNumberEntity(device, hub, description)
-        for device in devices  # Iterate through devices from the hub
-        for device_type, entity_descriptions in DEVICE_NUMBER_MAP.items()
-        if isinstance(device, device_type)
-        for description in entity_descriptions
-    ]
-
-    if not entities:
-        _LOGGER.warning("No number entities added, entities list is empty!")
-    else:
-        # Log the number of entities and their details
-        _LOGGER.debug("Adding %d PetLibro number entities", len(entities))
-        for entity in entities:
-            _LOGGER.debug("Adding number entity: %s for device %s", entity.entity_description.name, entity.device.name)
-
-        # Add number entities to Home Assistant
-        async_add_entities(entities)
+async_setup_entry = create_platform_setup(
+    PetLibroNumberEntity, DEVICE_NUMBER_MAP, "number"
+)

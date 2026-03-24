@@ -5,7 +5,7 @@ from asyncio import gather
 from collections.abc import Mapping
 import sys
 from typing import List, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from .const import UPDATE_INTERVAL_SECONDS
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_REGION, CONF_API_TOKEN, Platform
@@ -113,7 +113,7 @@ class PetLibroHub:
 
                 # Mark the device as loaded to prevent duplicate API calls
                 self.loaded_device_sn.add(device_sn)
-                self.last_refresh_times[device_sn] = datetime.utcnow()  # Set the last refresh time to now
+                self.last_refresh_times[device_sn] = datetime.now(timezone.utc)  # Set the last refresh time to now
 
             _LOGGER.debug(f"Final devices loaded: {len(self.devices)} devices")
         except Exception as ex:
@@ -143,7 +143,7 @@ class PetLibroHub:
 
         # Create the member object.
         self.member = Member(member_info, self.api)
-        self.last_refresh_times[member_email] = datetime.utcnow()
+        self.last_refresh_times[member_email] = datetime.now(timezone.utc)
         _LOGGER.debug("Member loaded successfully: %s", member_email)
         
     async def _initialize_helpers(self) -> None:
@@ -162,7 +162,7 @@ class PetLibroHub:
         if not self.member:
             _LOGGER.warning("No member to refresh.")
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         refresh_tasks, data_objects = [], []
         _LOGGER.debug("Refreshing devices and member info.")
 

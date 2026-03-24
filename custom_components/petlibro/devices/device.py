@@ -1,5 +1,3 @@
-# Error Mode - Used for pulling API for new devices. Enable Error Mode and Disable Debug Mode.
-
 from logging import getLogger
 from typing import cast
 
@@ -41,26 +39,11 @@ class Device(Event):
         try:
             data = {}
             data.update(await self.api.device_base_info(self.serial))
-            data.update(await self.api.device_real_info(self.serial))
-            data.update(await self.api.device_attribute_settings(self.serial))
+            data["realInfo"] = await self.api.device_real_info(self.serial) or {}
+            data["getAttributeSetting"] = await self.api.device_attribute_settings(self.serial) or {}
             self.update_data(data)
         except Exception as e:
-            _LOGGER.error(f"Failed to refresh device data: {e}")
-            
-    # def update_data(self, data: dict) -> None:
-    #     """Save the device info from a data dictionary."""
-    #     _LOGGER.error("Updating data with: %s", data)
-    #     self._data.update(data)
-    #     self.emit(EVENT_UPDATE)
-    #     _LOGGER.error("Data after update: %s", self._data)
-
-    # async def refresh(self):
-    #     """Refresh the device data from the API."""
-    #     data = {}
-    #     data.update(await self.api.device_base_info(self.serial))
-    #     data.update(await self.api.device_real_info(self.serial))
-    #     data.update(await self.api.device_attribute_settings(self.serial))
-    #     self.update_data(data)
+            _LOGGER.error("Failed to refresh device data: %s", e)
 
     @property
     def serial(self) -> str:
@@ -90,91 +73,34 @@ class Device(Event):
     def hardware_version(self) -> str:
         return cast(str, self._data.get("hardwareVersion"))
 
-# Debug Mode - No more errors in HA logs.
-#
-# from logging import getLogger
-# from typing import cast
-# from ..api import PetLibroAPI
-# from .event import Event, EVENT_UPDATE
+    @property
+    def update_available(self) -> bool:
+        """Return True if an update is available, False otherwise."""
+        return bool(self._data.get("getUpgrade", {}).get("jobItemId"))
 
-# _LOGGER = getLogger(__name__)
+    @property
+    def update_release_notes(self) -> str | None:
+        """Return release notes if available, else None."""
+        upgrade_data = self._data.get("getUpgrade")
+        return upgrade_data.get("upgradeDesc") if upgrade_data else None
 
-# class Device(Event):
-    # def __init__(self, data: dict, api: PetLibroAPI):
-        # super().__init__()
-        # self._data: dict = {}
-        # self.api = api
+    @property
+    def update_version(self) -> str | None:
+        """Return target version if available, else None."""
+        upgrade_data = self._data.get("getUpgrade")
+        return upgrade_data.get("targetVersion") if upgrade_data else None
 
-        ##Initialize the device data with the update_data method
-        # self.update_data(data)
+    @property
+    def update_name(self) -> str | None:
+        """Return update job name if available, else None."""
+        upgrade_data = self._data.get("getUpgrade")
+        return upgrade_data.get("jobName") if upgrade_data else None
 
-    # def update_data(self, data: dict) -> None:
-        # """Save the device info from a data dictionary."""
-        # try:
-            ##Log the update at debug level for better context
-            # _LOGGER.debug("Updating data with new information: %s", data)
-
-            ##Automatically update _data with any new keys, ensuring no data loss
-            # for key, value in data.items():
-                # if isinstance(value, dict):
-                    ##If the value is a dictionary, merge it deeply
-                    # self._data[key] = {**self._data.get(key, {}), **value}
-                # else:
-                    ##Otherwise, simply update or add the key
-                    # self._data[key] = value
-
-            ##Emit an event after updating data
-            # self.emit(EVENT_UPDATE)
-            # _LOGGER.debug("Data updated successfully: %s", self._data)
-
-        # except Exception as e:
-            # _LOGGER.error(f"Error updating data: {e}")
-            # _LOGGER.debug(f"Partial data update: {data.get('deviceSn', 'Unknown Serial')}")
-
-    # async def refresh(self):
-        # """Refresh the device data from the API."""
-        # try:
-            # data = {}
-
-            ##Fetch base info and real info from API
-            # base_info = await self.api.device_base_info(self.serial)
-            # real_info = await self.api.device_real_info(self.serial)
-            # attribute_settings = await self.api.device_attribute_settings(self.serial)
-
-            ##Update with the fetched data
-            # data.update(base_info)
-            # data.update(real_info)
-            # data.update(attribute_settings)
-
-            # self.update_data(data)
-
-        # except Exception as e:
-            # _LOGGER.error(f"Failed to refresh device data: {e}")
-
-    # @property
-    # def serial(self) -> str:
-        # return cast(str, self._data.get("deviceSn"))
-
-    # @property
-    # def model(self) -> str:
-        # return cast(str, self._data.get("productIdentifier"))
-
-    # @property
-    # def model_name(self) -> str:
-        # return cast(str, self._data.get("productName"))
-
-    # @property
-    # def name(self) -> str:
-        # return cast(str, self._data.get("name"))
-
-    # @property
-    # def mac(self) -> str:
-        # return cast(str, self._data.get("mac"))
-
-    # @property
-    # def software_version(self) -> str:
-        # return cast(str, self._data.get("softwareVersion"))
-
-    # @property
-    # def hardware_version(self) -> str:
-        # return cast(str, self._data.get("hardwareVersion"))
+    @property
+    def update_progress(self) -> float:
+        """Return update progress as a float, or 0 if not updating."""
+        upgrade_data = self._data.get("getUpgrade")
+        if not upgrade_data:
+            return 0.0
+        progress = upgrade_data.get("progress")
+        return float(progress) if progress is not None else 0.0

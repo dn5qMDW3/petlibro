@@ -17,7 +17,7 @@ from logging import getLogger
 from hashlib import md5
 from urllib.parse import urljoin
 from typing import Any, Dict, List, TypeAlias
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from .exceptions import PetLibroAPIError, PetLibroInvalidAuth
@@ -84,7 +84,7 @@ class PetLibroSession:
 
         if self.token is not None:
             kwargs["headers"]["token"] = self.token
-            _LOGGER.debug(f"Using token: {self.token}")
+            _LOGGER.debug("Using token: %s...", self.token[:8] if self.token else "None")
         else:
             _LOGGER.warning("No token available for request. Attempting to log in...")
 
@@ -106,7 +106,7 @@ class PetLibroSession:
                 # Trigger a re-login and get the new token
                 new_token = await self.re_login()
                 kwargs["headers"]["token"] = new_token
-                _LOGGER.debug(f"Retrying request with new token: {new_token}")
+                _LOGGER.debug("Retrying request with new token: %s...", new_token[:8] if new_token else "None")
 
                 # Retry the request with the new token
                 async with self.websession.request(method, joined_url, **kwargs) as retry_resp:
@@ -157,7 +157,7 @@ class PetLibroSession:
 
                 # Save the new token in the config entry
                 if hasattr(self, 'api') and self.api.hass and self.api.config_entry:
-                    _LOGGER.debug(f"Saving new token to config entry: {self.token}")
+                    _LOGGER.debug("Saving new token to config entry")
                     self.api.hass.config_entries.async_update_entry(
                         self.api.config_entry,
                         data={**self.api.config_entry.data, "token": self.token}
@@ -199,7 +199,7 @@ class PetLibroAPI:
         # Load the saved token if available
         if config_entry and "token" in config_entry.data:
             self.token = config_entry.data["token"]
-            _LOGGER.debug(f"Loaded saved token: {self.token}")
+            _LOGGER.debug("Loaded saved token: %s...", self.token[:8] if self.token else "None")
 
         self._last_api_call_times = {}  # To store last call time per device
         self._cached_responses = {}  # To store cached responses for short periods
@@ -233,265 +233,136 @@ class PetLibroAPI:
                 raise PetLibroAPIError("No token found during login.")
 
             self.session.token = data["token"]
-            _LOGGER.debug(f"Login successful, token: {self.session.token}")
+            _LOGGER.debug("Login successful, token: %s...", self.session.token[:8] if self.session.token else "None")
             return self.session.token
 
         except Exception as e:
             _LOGGER.error(f"Login failed: {e}")
             raise PetLibroAPIError(f"Login attempt failed: {e}")
 
-    async def get_device_real_info(self, device_id: str) -> dict:
-        """Fetch real-time information for a device, with caching to prevent frequent requests."""
-        now = datetime.utcnow()
-        last_call_time = self._last_api_call_times.get(f"{device_id}_realInfo")
+    async def _cached_request(
+        self,
+        cache_key: str,
+        method: str,
+        path: str,
+        *,
+        json: dict | None = None,
+        params: dict | None = None,
+        headers: dict | None = None,
+        ttl_seconds: int = 10,
+    ) -> dict:
+        """Make an API request with caching to prevent frequent duplicate calls.
 
-        # If we made the request within the last 10 seconds, return cached response
-        if last_call_time and (now - last_call_time) < timedelta(seconds=10):
-            _LOGGER.debug(f"Skipping realInfo request for {device_id}, using cached response.")
-            return self._cached_responses.get(f"{device_id}_realInfo", {})
-
-        # Otherwise, make the API call and update cache
-        try:
-            response = await self.session.request("POST", "/device/device/realInfo", json={
-                "id": device_id,
-                "deviceSn": device_id
-            })
-
-            # Store the time of the API call and the cached response
-            self._last_api_call_times[f"{device_id}_realInfo"] = now
-            self._cached_responses[f"{device_id}_realInfo"] = response
-
-            return response
-        except Exception as e:
-            _LOGGER.error(f"Error fetching realInfo for device {device_id}: {e}")
-            raise PetLibroAPIError(f"Error fetching realInfo for device {device_id}: {e}")
-
-    async def get_device_data_real_info(self, device_id: str) -> dict:
-        """Fetch real-time information for a device, with caching to prevent frequent requests."""
-        now = datetime.utcnow()
-        last_call_time = self._last_api_call_times.get(f"{device_id}_dataRealInfo")
-
-        # If we made the request within the last 10 seconds, return cached response
-        if last_call_time and (now - last_call_time) < timedelta(seconds=10):
-            _LOGGER.debug(f"Skipping dataRealInfo request for {device_id}, using cached response.")
-            return self._cached_responses.get(f"{device_id}_dataRealInfo", {})
-
-        # Otherwise, make the API call and update cache
-        try:
-            response = await self.session.request("POST", "/data/data/realInfo", json={
-                "id": device_id,
-                "deviceSn": device_id
-            })
-
-            # Store the time of the API call and the cached response
-            self._last_api_call_times[f"{device_id}_dataRealInfo"] = now
-            self._cached_responses[f"{device_id}_dataRealInfo"] = response
-
-            return response
-        except Exception as e:
-            _LOGGER.error(f"Error fetching _dataRealInfo for device {device_id}: {e}")
-            raise PetLibroAPIError(f"Error fetching _dataRealInfo for device {device_id}: {e}")
-
-    async def get_device_drink_water(self, device_id: str) -> dict:
-        """Fetch real-time information for a device, with caching to prevent frequent requests."""
-        now = datetime.utcnow()
-        last_call_time = self._last_api_call_times.get(f"{device_id}_drinkWater")
-
-        # If we made the request within the last 10 seconds, return cached response
-        if last_call_time and (now - last_call_time) < timedelta(seconds=10):
-            _LOGGER.debug(f"Skipping drinkWater request for {device_id}, using cached response.")
-            return self._cached_responses.get(f"{device_id}_drinkWater", {})
-
-        # Otherwise, make the API call and update cache
-        try:
-            response = await self.session.request("POST", "/data/deviceDrinkWater/todayDrinkData", json={
-                "id": device_id,
-                "deviceSn": device_id
-            })
-
-            # Store the time of the API call and the cached response
-            self._last_api_call_times[f"{device_id}_drinkWater"] = now
-            self._cached_responses[f"{device_id}_drinkWater"] = response
-
-            return response
-        except Exception as e:
-            _LOGGER.error(f"Error fetching _drinkWater for device {device_id}: {e}")
-            raise PetLibroAPIError(f"Error fetching _drinkWater for device {device_id}: {e}")
-
-    async def get_device_attribute_settings(self, device_id: str) -> dict:
-        """Fetch real-time information for a device, with caching to prevent frequent requests."""
-        now = datetime.utcnow()
-        last_call_time = self._last_api_call_times.get(f"{device_id}_getAttributeSetting")
-
-        # If we made the request within the last 10 seconds, return cached response
-        if last_call_time and (now - last_call_time) < timedelta(seconds=10):
-            _LOGGER.debug(f"Skipping getAttributeSetting request for {device_id}, using cached response.")
-            return self._cached_responses.get(f"{device_id}_getAttributeSetting", {})
-
-        # Otherwise, make the API call and update cache
-        try:
-            response = await self.session.request("POST", "/device/setting/getAttributeSetting", json={
-                "id": device_id,
-            })
-
-            # Store the time of the API call and the cached response
-            self._last_api_call_times[f"{device_id}_getAttributeSetting"] = now
-            self._cached_responses[f"{device_id}_getAttributeSetting"] = response
-
-            return response
-        except Exception as e:
-            _LOGGER.error(f"Error fetching getAttributeSetting for device {device_id}: {e}")
-            raise PetLibroAPIError(f"Error fetching getAttributeSetting for device {device_id}: {e}")
-
-    async def get_device_upgrade(self, device_id: str) -> dict:
-        """Fetch real-time information for a device, with caching to prevent frequent requests."""
-        now = datetime.utcnow()
-        last_call_time = self._last_api_call_times.get(f"{device_id}_getUpgrade")
-
-        # If we made the request within the last 10 seconds, return cached response
-        if last_call_time and (now - last_call_time) < timedelta(seconds=10):
-            _LOGGER.debug(f"Skipping getUpgrade request for {device_id}, using cached response.")
-            return self._cached_responses.get(f"{device_id}_getUpgrade", {})
-
-        # Otherwise, make the API call and update cache
-        try:
-            response = await self.session.request("POST", "/device/ota/getUpgrade", json={
-                "id": device_id,
-            })
-
-            # Store the time of the API call and the cached response
-            self._last_api_call_times[f"{device_id}_getUpgrade"] = now
-            self._cached_responses[f"{device_id}_getUpgrade"] = response
-
-            return response
-        except Exception as e:
-            _LOGGER.error(f"Error fetching getUpgrade for device {device_id}: {e}")
-            raise PetLibroAPIError(f"Error fetching getUpgrade for device {device_id}: {e}")
-
-    async def get_device_base_info(self, device_id: str) -> dict:
-        """Fetch real-time information for a device, with caching to prevent frequent requests."""
-        now = datetime.utcnow()
-        last_call_time = self._last_api_call_times.get(f"{device_id}_baseInfo")
-
-        # If we made the request within the last 10 seconds, return cached response
-        if last_call_time and (now - last_call_time) < timedelta(seconds=10):
-            _LOGGER.debug(f"Skipping baseInfo request for {device_id}, using cached response.")
-            return self._cached_responses.get(f"{device_id}_baseInfo", {})
-
-        # Otherwise, make the API call and update cache
-        try:
-            response = await self.session.request("POST", "/device/setting/baseInfo", json={
-                "id": device_id,
-            })
-
-            # Store the time of the API call and the cached response
-            self._last_api_call_times[f"{device_id}_baseInfo"] = now
-            self._cached_responses[f"{device_id}_baseInfo"] = response
-
-            return response
-        except Exception as e:
-            _LOGGER.error(f"Error fetching baseInfo for device {device_id}: {e}")
-            raise PetLibroAPIError(f"Error fetching baseInfo for device {device_id}: {e}")
-
-    async def get_device_work_record(self, device_id: str) -> dict:
-        """Fetch real-time information for a device, with caching to prevent frequent requests."""
-        now = datetime.utcnow()
-        last_call_time = self._last_api_call_times.get(f"{device_id}_work_record")
-
-        if last_call_time and (now - last_call_time) < timedelta(seconds=10):
-            _LOGGER.debug(f"Skipping workRecord request for {device_id}, using cached response.")
-            return self._cached_responses.get(f"{device_id}_work_record", {})
-
-        try:
-            thirty_days_ago = now - timedelta(days=30)
-            start_time = int(thirty_days_ago.timestamp() * 1000)
-            end_time = int(now.timestamp() * 1000)
-
-            # Make the actual POST request
-            response_data = await self.session.request("POST", "/device/workRecord/list", json={
-                "deviceSn": device_id,
-                "startTime": start_time,
-                "endTime": end_time,
-                "size": 25,
-                "type": ["GRAIN_OUTPUT_SUCCESS"]
-            })
-
-            # Log and inspect what actually came back
-            _LOGGER.debug("Raw response_data from workRecord: %s", response_data)
-            _LOGGER.debug("Type of response_data: %s", type(response_data))
-
-            # Just save whatever we got — don't attempt .json()
-            self._last_api_call_times[f"{device_id}_work_record"] = now
-            self._cached_responses[f"{device_id}_work_record"] = response_data
-
-            return response_data
-
-        except Exception as e:
-            _LOGGER.error(f"Error fetching workRecord for device {device_id}: {e}")
-            raise PetLibroAPIError(f"Error fetching workRecord for device {device_id}: {e}")
-
-    async def get_device_events(self, device_id: str) -> dict:
-        """Fetch real-time information for a device, with caching to prevent frequent requests."""
-        now = datetime.utcnow()
-        last_call_time = self._last_api_call_times.get(f"{device_id}_events")
-
-        # If we made the request within the last 10 seconds, return cached response
-        if last_call_time and (now - last_call_time) < timedelta(seconds=10):
-            _LOGGER.debug(f"Skipping deviceEvents request for {device_id}, using cached response.")
-            return self._cached_responses.get(f"{device_id}_events", {})
-
-        # Otherwise, make the API call and update cache
-        try:
-            response = await self.session.request("POST", "/data/event/deviceEventsV2", json={
-                "id": device_id,
-            })
-
-            # Store the time of the API call and the cached response
-            self._last_api_call_times[f"{device_id}_events"] = now
-            self._cached_responses[f"{device_id}_events"] = response
-
-            return response
-        except Exception as e:
-            _LOGGER.error(f"Error fetching deviceEvents for device {device_id}: {e}")
-            raise PetLibroAPIError(f"Error fetching deviceEvents for device {device_id}: {e}")
-
-    async def get_default_matrix(self, device_sn: str) -> dict:
+        :param cache_key: Unique key for the cache entry (e.g. "{device_id}_realInfo").
+        :param method: HTTP method ("POST" or "GET").
+        :param path: API endpoint path.
+        :param json: JSON body for POST requests.
+        :param params: Query parameters for GET requests.
+        :param headers: Extra headers to merge.
+        :param ttl_seconds: Cache TTL in seconds (default 10).
+        :return: Parsed API response data.
         """
-        Fetch the default matrix for a device using a GET request.
-        
-        :param device_sn: The serial number of the device.
-        :return: The default matrix data.
-        """
-        # Check cache for recently fetched data
-        now = datetime.utcnow()
-        cache_key = f"{device_sn}_getDefaultMatrix"
+        now = datetime.now(timezone.utc)
         last_call_time = self._last_api_call_times.get(cache_key)
 
-        if last_call_time and (now - last_call_time) < timedelta(seconds=10):
-            _LOGGER.debug(f"Using cached response for getDefaultMatrix: {device_sn}")
+        if last_call_time and (now - last_call_time) < timedelta(seconds=ttl_seconds):
+            _LOGGER.debug("Skipping %s request, using cached response.", cache_key)
             return self._cached_responses.get(cache_key, {})
 
-        # Make the API call
         try:
-            # Copy the default headers to include them in the request
-            headers = self.session.headers.copy()
-            headers.update({
-                "accept-encoding": "gzip",
-            })
+            kwargs: dict = {}
+            if json is not None:
+                kwargs["json"] = json
+            if params is not None:
+                kwargs["params"] = params
+            if headers is not None:
+                kwargs["headers"] = headers
 
-            response = await self.session.get(
-                path="/device/device/getDefaultMatrix",
-                params={"deviceSn": device_sn},
-                headers=headers
-            )
+            if method == "GET":
+                response = await self.session.get(path=path, **kwargs)
+            else:
+                response = await self.session.request(method, path, **kwargs)
 
-            # Cache the response
             self._last_api_call_times[cache_key] = now
             self._cached_responses[cache_key] = response
             return response
         except Exception as e:
-            _LOGGER.error(f"Error fetching default matrix for device {device_sn}: {e}")
-            raise PetLibroAPIError(f"Failed to fetch default matrix: {e}")
+            _LOGGER.error("Error fetching %s: %s", cache_key, e)
+            raise PetLibroAPIError(f"Error fetching {cache_key}: {e}")
+
+    async def get_device_real_info(self, device_id: str) -> dict:
+        """Fetch real-time information for a device, with caching."""
+        return await self._cached_request(
+            f"{device_id}_realInfo", "POST", "/device/device/realInfo",
+            json={"id": device_id, "deviceSn": device_id},
+        )
+
+    async def get_device_data_real_info(self, device_id: str) -> dict:
+        """Fetch data real-time information for a device, with caching."""
+        return await self._cached_request(
+            f"{device_id}_dataRealInfo", "POST", "/data/data/realInfo",
+            json={"id": device_id, "deviceSn": device_id},
+        )
+
+    async def get_device_drink_water(self, device_id: str) -> dict:
+        """Fetch drink water data for a device, with caching."""
+        return await self._cached_request(
+            f"{device_id}_drinkWater", "POST", "/data/deviceDrinkWater/todayDrinkData",
+            json={"id": device_id, "deviceSn": device_id},
+        )
+
+    async def get_device_attribute_settings(self, device_id: str) -> dict:
+        """Fetch attribute settings for a device, with caching."""
+        return await self._cached_request(
+            f"{device_id}_getAttributeSetting", "POST", "/device/setting/getAttributeSetting",
+            json={"id": device_id},
+        )
+
+    async def get_device_upgrade(self, device_id: str) -> dict:
+        """Fetch upgrade info for a device, with caching."""
+        return await self._cached_request(
+            f"{device_id}_getUpgrade", "POST", "/device/ota/getUpgrade",
+            json={"id": device_id},
+        )
+
+    async def get_device_base_info(self, device_id: str) -> dict:
+        """Fetch base info for a device, with caching."""
+        return await self._cached_request(
+            f"{device_id}_baseInfo", "POST", "/device/setting/baseInfo",
+            json={"id": device_id},
+        )
+
+    async def get_device_work_record(self, device_id: str) -> dict:
+        """Fetch work record for a device, with caching."""
+        now = datetime.now(timezone.utc)
+        thirty_days_ago = now - timedelta(days=30)
+        return await self._cached_request(
+            f"{device_id}_work_record", "POST", "/device/workRecord/list",
+            json={
+                "deviceSn": device_id,
+                "startTime": int(thirty_days_ago.timestamp() * 1000),
+                "endTime": int(now.timestamp() * 1000),
+                "size": 25,
+                "type": ["GRAIN_OUTPUT_SUCCESS"],
+            },
+        )
+
+    async def get_device_events(self, device_id: str) -> dict:
+        """Fetch device events, with caching."""
+        return await self._cached_request(
+            f"{device_id}_events", "POST", "/data/event/deviceEventsV2",
+            json={"id": device_id},
+        )
+
+    async def get_default_matrix(self, device_sn: str) -> dict:
+        """Fetch the default matrix for a device using a GET request, with caching."""
+        extra_headers = self.session.headers.copy()
+        extra_headers["accept-encoding"] = "gzip"
+        return await self._cached_request(
+            f"{device_sn}_getDefaultMatrix", "GET", "/device/device/getDefaultMatrix",
+            params={"deviceSn": device_sn},
+            headers=extra_headers,
+        )
 
     async def logout(self):
         """Logout of the API and reset the token"""
@@ -552,31 +423,17 @@ class PetLibroAPI:
 
     async def set_child_lock(self, serial: str, enable: bool):
         """Enable or disable the child lock functionality."""
-        try:
-            response = await self.session.post(
-                "/device/setting/updateChildLockSwitch",
-                json={"deviceSn": serial, "enable": enable}
-            )
-
-            _LOGGER.debug(f"Child lock response status: {response.status}")
-            _LOGGER.debug(f"Child lock response data: {await response.text()}")
-
-            response.raise_for_status()
-        except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to set child lock for device {serial}: {err}")
-            raise PetLibroAPIError(f"Error setting child lock: {err}")
+        await self.session.post(
+            "/device/setting/updateChildLockSwitch",
+            json={"deviceSn": serial, "enable": enable}
+        )
 
     async def set_light_enable(self, serial: str, enable: bool):
-        """Enable or disable the light functionality with error handling."""
-        try:
-            response = await self.session.post(
-                "/device/setting/updateLightEnableSwitch",
-                json={"deviceSn": serial, "enable": enable}
-            )
-            response.raise_for_status()
-        except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to set light enable for device {serial}: {err}")
-            raise PetLibroAPIError(f"Error setting light enable: {err}")
+        """Enable or disable the light functionality."""
+        await self.session.post(
+            "/device/setting/updateLightEnableSwitch",
+            json={"deviceSn": serial, "enable": enable}
+        )
 
     async def set_light_switch(self, serial: str, enable: bool):
         """Turn the light on or off."""
@@ -587,13 +444,10 @@ class PetLibroAPI:
 
     async def set_sound_enable(self, serial: str, enable: bool):
         """Enable or disable the sound functionality."""
-        try:
-            response = await self.session.post("/device/setting/updateSoundEnableSwitch", json={"deviceSn": serial, "enable": enable}
-            )
-            response.raise_for_status()
-        except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to set sound enable for device {serial}: {err}")
-            raise PetLibroAPIError(f"Error setting sound enable: {err}")
+        await self.session.post(
+            "/device/setting/updateSoundEnableSwitch",
+            json={"deviceSn": serial, "enable": enable}
+        )
 
     async def set_desiccant_cycle(self, serial: str, value: float, key: str) -> JSON:
         """Set the desiccant cycle."""
@@ -1394,26 +1248,6 @@ class PetLibroAPI:
             "soundAgingType": 1,
             "soundStartTime": None,
             "soundEndTime": None
-        })
-
-    async def set_light_on(self, serial: str):
-        """Trigger turn light on"""
-        await self.session.post("/device/setting/updateLightingSetting", json={
-            "deviceSn": serial,
-            "lightSwitch": True,
-            "lightAgingType": 1,
-            "soundStartTime": None,
-            "soundEndTime": None
-        })
-    
-    async def set_light_off(self, serial: str):
-        """Trigger turn light off"""
-        await self.session.post("/device/setting/updateLightingSetting", json={
-            "deviceSn": serial,
-            "lightSwitch": False,
-            "lightAgingType": 1,
-            "lightingStartTime": None,
-            "lightingEndTime": None
         })
 
     async def set_sleep_on(self, serial: str):

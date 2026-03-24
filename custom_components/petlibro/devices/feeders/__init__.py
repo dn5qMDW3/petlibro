@@ -1,1 +1,1 @@
-from .. import Device
+from .feeder import Feeder

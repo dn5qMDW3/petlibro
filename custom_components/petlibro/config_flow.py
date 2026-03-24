@@ -176,7 +176,7 @@ class PetlibroConfigFlow(ConfigFlow, domain=DOMAIN):
             )
 
             self.token = await api.login(self.email, self.password)
-            _LOGGER.debug(f"Login successful, token: {self.token}")
+            _LOGGER.debug("Login successful, token: %s...", self.token[:8] if self.token else "None")
         except PetLibroCannotConnect:
             return "cannot_connect"
         except PetLibroInvalidAuth:

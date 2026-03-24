@@ -26,15 +26,11 @@ class LumaSmartLitterBox(Device):
         try:
             await super().refresh()
 
-            real_info = await self.api.device_real_info(self.serial)
             data_real_info = await self.api.device_data_real_info(self.serial)
-            attribute_settings = await self.api.device_attribute_settings(self.serial)
             get_upgrade = await self.api.get_device_upgrade(self.serial)
 
             self.update_data({
-                "realInfo": real_info or {},
                 "dataRealInfo": data_real_info or {},
-                "getAttributeSetting": attribute_settings or {},
                 "getUpgrade": get_upgrade or {},
             })
         except PetLibroAPIError as err:
@@ -348,36 +344,6 @@ class LumaSmartLitterBox(Device):
     @property
     def disable_hardware_button(self) -> bool:
         return bool(self._data.get("getAttributeSetting", {}).get("disableHardwareButton", False))
-
-    # ── Firmware / OTA ────────────────────────────────────────
-
-    @property
-    def update_available(self) -> bool:
-        upgrade = self._data.get("getUpgrade")
-        return bool(upgrade and upgrade.get("jobItemId"))
-
-    @property
-    def update_release_notes(self) -> str | None:
-        upgrade = self._data.get("getUpgrade")
-        return upgrade.get("upgradeDesc") if upgrade else None
-
-    @property
-    def update_version(self) -> str | None:
-        upgrade = self._data.get("getUpgrade")
-        return upgrade.get("targetVersion") if upgrade else None
-
-    @property
-    def update_name(self) -> str | None:
-        upgrade = self._data.get("getUpgrade")
-        return upgrade.get("jobName") if upgrade else None
-
-    @property
-    def update_progress(self) -> float:
-        upgrade = self._data.get("getUpgrade")
-        if not upgrade:
-            return 0.0
-        progress = upgrade.get("progress")
-        return float(progress) if progress is not None else 0.0
 
     # ── Control Methods ───────────────────────────────────────
 

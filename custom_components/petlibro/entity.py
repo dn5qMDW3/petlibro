@@ -41,6 +41,8 @@ class PetLibroEntity(
         self.entity_description = description
         self.key = description.key
         self._attr_unique_id = f"{self.device.serial}-{description.key}"
+        if self.device.icon_url:
+            self._attr_entity_picture = self.device.icon_url
 
     @cached_property
     def device_info(self) -> DeviceInfo | None:
@@ -82,7 +84,7 @@ def create_platform_setup(
         entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
     ) -> None:
-        hub: PetLibroHub | None = getattr(entry, "runtime_data", None)
+        hub: PetLibroHub | None = entry.runtime_data
 
         if not hub:
             _LOGGER.error("Hub not found for entry: %s", entry.entry_id)

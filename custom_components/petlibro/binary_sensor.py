@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from collections.abc import Callable
 from functools import cached_property
-from typing import Optional
 import logging
 from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
@@ -27,6 +26,7 @@ from .devices.fountains.dockstream_smart_rfid_fountain import DockstreamSmartRFI
 from .devices.fountains.dockstream_2_smart_cordless_fountain import Dockstream2SmartCordlessFountain
 from .devices.fountains.dockstream_2_smart_fountain import Dockstream2SmartFountain
 from .devices.litterboxes.luma_smart_litter_box import LumaSmartLitterBox
+from homeassistant.helpers.entity import EntityCategory
 from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription, create_platform_setup
 
 
@@ -36,7 +36,7 @@ class PetLibroBinarySensorEntityDescription(BinarySensorEntityDescription, PetLi
 
     device_class_fn: Callable[[_DeviceT], BinarySensorDeviceClass | None] = lambda _: None
     should_report: Callable[[_DeviceT], bool] = lambda _: True
-    device_class: Optional[BinarySensorDeviceClass] = None
+    device_class: BinarySensorDeviceClass | None = None
 
 class PetLibroBinarySensorEntity(PetLibroEntity[_DeviceT], BinarySensorEntity):
     """PETLIBRO sensor entity."""
@@ -440,6 +440,22 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             should_report=lambda device: device.light_switch is not None,
             name="Indicator"
         ),
+        PetLibroBinarySensorEntityDescription[DockstreamSmartFountain](
+            key="water_low",
+            translation_key="water_low",
+            icon="mdi:water-off",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            should_report=lambda device: device.water_low is not None,
+            name="Water Low",
+        ),
+        PetLibroBinarySensorEntityDescription[DockstreamSmartFountain](
+            key="device_stopped_working",
+            translation_key="device_stopped_working",
+            icon="mdi:alert-octagon",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            should_report=lambda device: device.device_stopped_working is not None,
+            name="Device Fault",
+        ),
     ],
     DockstreamSmartRFIDFountain: [
         PetLibroBinarySensorEntityDescription[DockstreamSmartRFIDFountain](
@@ -456,6 +472,22 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             icon="mdi:lightbulb",
             should_report=lambda device: device.light_switch is not None,
             name="Indicator"
+        ),
+        PetLibroBinarySensorEntityDescription[DockstreamSmartRFIDFountain](
+            key="water_low",
+            translation_key="water_low",
+            icon="mdi:water-off",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            should_report=lambda device: device.water_low is not None,
+            name="Water Low",
+        ),
+        PetLibroBinarySensorEntityDescription[DockstreamSmartRFIDFountain](
+            key="device_stopped_working",
+            translation_key="device_stopped_working",
+            icon="mdi:alert-octagon",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            should_report=lambda device: device.device_stopped_working is not None,
+            name="Device Fault",
         ),
     ],
     Dockstream2SmartCordlessFountain: [
@@ -490,6 +522,36 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             should_report=lambda device: device.water_state is not None,
             name="Water Dispensing State"
         ),
+        PetLibroBinarySensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="water_low",
+            translation_key="water_low",
+            icon="mdi:water-off",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            should_report=lambda device: device.water_low is not None,
+            name="Water Low",
+        ),
+        PetLibroBinarySensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="device_stopped_working",
+            translation_key="device_stopped_working",
+            icon="mdi:alert-octagon",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            should_report=lambda device: device.device_stopped_working is not None,
+            name="Device Fault",
+        ),
+        PetLibroBinarySensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="filter_led_switch",
+            translation_key="filter_led_switch",
+            icon="mdi:led-on",
+            name="Filter LED",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroBinarySensorEntityDescription[Dockstream2SmartCordlessFountain](
+            key="battery_supply_8_hours",
+            translation_key="battery_supply_8_hours",
+            icon="mdi:battery-clock",
+            name="Battery 8-Hour Supply",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
     ],
     Dockstream2SmartFountain: [
         PetLibroBinarySensorEntityDescription[Dockstream2SmartFountain](
@@ -514,6 +576,36 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             device_class=BinarySensorDeviceClass.MOISTURE,
             should_report=lambda device: device.water_state is not None,
             name="Water Dispensing State"
+        ),
+        PetLibroBinarySensorEntityDescription[Dockstream2SmartFountain](
+            key="water_low",
+            translation_key="water_low",
+            icon="mdi:water-off",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            should_report=lambda device: device.water_low is not None,
+            name="Water Low",
+        ),
+        PetLibroBinarySensorEntityDescription[Dockstream2SmartFountain](
+            key="device_stopped_working",
+            translation_key="device_stopped_working",
+            icon="mdi:alert-octagon",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            should_report=lambda device: device.device_stopped_working is not None,
+            name="Device Fault",
+        ),
+        PetLibroBinarySensorEntityDescription[Dockstream2SmartFountain](
+            key="filter_led_switch",
+            translation_key="filter_led_switch",
+            icon="mdi:led-on",
+            name="Filter LED",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroBinarySensorEntityDescription[Dockstream2SmartFountain](
+            key="battery_supply_8_hours",
+            translation_key="battery_supply_8_hours",
+            icon="mdi:battery-clock",
+            name="Battery 8-Hour Supply",
+            entity_category=EntityCategory.DIAGNOSTIC,
         ),
     ],
     LumaSmartLitterBox: [

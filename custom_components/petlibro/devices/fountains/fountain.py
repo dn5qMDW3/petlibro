@@ -154,6 +154,56 @@ class Fountain(Device):
         drinking_count = self._data.get("getDrinkWater", {}).get("yesterdayTotalTimes")
         return drinking_count if isinstance(drinking_count, int) else 0
 
+    # ── state / alert properties ─────────────────────────────────
+
+    @property
+    def weight_state(self) -> str:
+        """Get the water weight state (e.g. 'NORMAL', 'LACK_WATER')."""
+        return self._data.get("realInfo", {}).get("weightState", "unknown")
+
+    @property
+    def water_low(self) -> bool:
+        """Return True if the fountain is low on water."""
+        return self._data.get("realInfo", {}).get("weightState") == "LACK_WATER"
+
+    @property
+    def remaining_water_ml(self) -> float:
+        """Get the remaining water in the tank (ml) from getDrinkWater."""
+        value = self._data.get("getDrinkWater", {}).get("remainTotalMl")
+        return value if isinstance(value, (int, float)) else 0
+
+    @property
+    def tank_total_ml(self) -> float:
+        """Get the total tank capacity (ml) from getDrinkWater."""
+        value = self._data.get("getDrinkWater", {}).get("tankTotalMl")
+        return value if isinstance(value, (int, float)) else 0
+
+    @property
+    def exception_message(self) -> str | None:
+        """Get the current exception/alert message."""
+        return self._data.get("realInfo", {}).get("exceptionMessage") or None
+
+    @property
+    def last_online_time(self) -> int | None:
+        """Get the last online timestamp (epoch ms)."""
+        return self._data.get("realInfo", {}).get("lastOnlineTime")
+
+    @property
+    def water_box_present(self) -> bool:
+        """Return True if the water box/tank is present (waterBoxStatus == 1)."""
+        return self._data.get("realInfo", {}).get("waterBoxStatus") == 1
+
+    @property
+    def device_stopped_working(self) -> bool:
+        """Return True if the device has stopped working."""
+        return bool(self._data.get("realInfo", {}).get("deviceStoppedWorking", False))
+
+    @property
+    def volume_level(self) -> int:
+        """Get the device volume level (0-100)."""
+        value = self._data.get("realInfo", {}).get("volume")
+        return value if isinstance(value, int) else 0
+
     # ── setter methods ────────────────────────────────────────────
 
     async def set_light_switch(self, value: bool):

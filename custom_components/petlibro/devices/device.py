@@ -2,6 +2,7 @@ from logging import getLogger
 from typing import cast
 
 from ..api import PetLibroAPI
+from ..exceptions import PetLibroAPIError
 from .event import Event, EVENT_UPDATE
 from ..member import Member
 from ..const import DEFAULT_MAX_FEED_PORTIONS
@@ -30,19 +31,23 @@ class Device(Event):
             self._data.update(data)
             self.emit(EVENT_UPDATE)
             _LOGGER.debug("Data updated successfully.")
-        except Exception as e:
-            _LOGGER.error(f"Error updating data: {e}")
+        except (TypeError, KeyError, AttributeError) as e:
+            _LOGGER.error("Error updating data: %s", e)
             # Optionally log specific fields instead of the entire data
-            _LOGGER.debug(f"Partial data: {data.get('deviceSn', 'Unknown Serial')}")
+            _LOGGER.debug("Partial data: %s", data.get('deviceSn', 'Unknown Serial'))
     async def refresh(self):
         """Refresh the device data from the API."""
         try:
             data = {}
-            data.update(await self.api.device_base_info(self.serial))
+            base_info = await self.api.device_base_info(self.serial)
+            # Filter out empty strings so they don't overwrite valid values
+            # set during initial device load (e.g. baseInfo returns name="" but
+            # device list returns the correct name).
+            data.update({k: v for k, v in base_info.items() if v != ""})
             data["realInfo"] = await self.api.device_real_info(self.serial) or {}
             data["getAttributeSetting"] = await self.api.device_attribute_settings(self.serial) or {}
             self.update_data(data)
-        except Exception as e:
+        except PetLibroAPIError as e:
             _LOGGER.error("Failed to refresh device data: %s", e)
 
     @property
@@ -72,6 +77,11 @@ class Device(Event):
     @property
     def hardware_version(self) -> str:
         return cast(str, self._data.get("hardwareVersion"))
+
+    @property
+    def icon_url(self) -> str | None:
+        """Return the product icon URL from the API."""
+        return self._data.get("icon")
 
     @property
     def update_available(self) -> bool:

@@ -2,7 +2,7 @@
 
 from enum import IntEnum, StrEnum
 
-from homeassistant.const import UnitOfMass, UnitOfVolume
+from homeassistant.const import Platform, UnitOfMass, UnitOfVolume
 
 type _Unit = Unit
 SENTINEL = object()
@@ -17,7 +17,16 @@ CONF_API_TOKEN = "api_token"
 CONF_REGION = "region"
 
 # Supported platforms
-PLATFORMS = ["sensor", "switch", "button", "binary_sensor", "number", "select", "text", "update"]  # Add any other platforms as needed
+PLATFORMS = [
+    Platform.SENSOR,
+    Platform.SWITCH,
+    Platform.BUTTON,
+    Platform.BINARY_SENSOR,
+    Platform.NUMBER,
+    Platform.SELECT,
+    Platform.TEXT,
+    Platform.UPDATE,
+]
 
 # Update interval for device data in seconds
 UPDATE_INTERVAL_SECONDS = 60  # You can adjust this value based on your needs

@@ -98,27 +98,24 @@ class PetlibroConfigFlow(ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input:
-            entry_id = self.context["entry_id"]
-            if entry := self.hass.config_entries.async_get_entry(entry_id):
-                user_input = user_input | {CONF_EMAIL: self.email, CONF_REGION: self.region}
-                self.password = user_input[CONF_PASSWORD]
+            entry = self._get_reauth_entry()
+            user_input = user_input | {CONF_EMAIL: self.email, CONF_REGION: self.region}
+            self.password = user_input[CONF_PASSWORD]
 
-                # Validate input and login to the API again
-                if not (error := await self._validate_input()):
-                    # Update the config entry with the new token and password after re-auth
-                    self.hass.config_entries.async_update_entry(
-                        entry,
-                        data={
-                            CONF_EMAIL: self.email,
-                            CONF_REGION: self.region,
-                            CONF_PASSWORD: self.password,  # Ensure password is updated
-                            CONF_API_TOKEN: self.token
-                        },
-                    )
-                    await self.hass.config_entries.async_reload(entry.entry_id)
-                    return self.async_abort(reason="reauth_successful")
+            # Validate input and login to the API again
+            if not (error := await self._validate_input()):
+                # Update the config entry with the new token and password after re-auth
+                return self.async_update_reload_and_abort(
+                    entry,
+                    data={
+                        CONF_EMAIL: self.email,
+                        CONF_REGION: self.region,
+                        CONF_PASSWORD: self.password,
+                        CONF_API_TOKEN: self.token,
+                    },
+                )
 
-                errors["base"] = error
+            errors["base"] = error
 
         return self.async_show_form(
             step_id="reauth_confirm",
@@ -130,7 +127,7 @@ class PetlibroConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle reconfiguration of the integration."""
         errors: dict[str, str] = {}
-        entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+        entry = self._get_reconfigure_entry()
 
         if user_input is not None:
             self.email = user_input[CONF_EMAIL]
@@ -187,9 +184,9 @@ class PetlibroConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return ""
 
-    @staticmethod
+    @classmethod
     @callback
-    def async_get_options_flow(config_entry: ConfigEntry) -> PetlibroOptionsFlow:
+    def async_get_options_flow(cls, config_entry: ConfigEntry) -> PetlibroOptionsFlow:
         """Get the options flow for this handler."""
         return PetlibroOptionsFlow()
 

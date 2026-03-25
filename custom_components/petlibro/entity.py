@@ -41,8 +41,6 @@ class PetLibroEntity(
         self.entity_description = description
         self.key = description.key
         self._attr_unique_id = f"{self.device.serial}-{description.key}"
-        if self.device.icon_url:
-            self._attr_entity_picture = self.device.icon_url
 
     @cached_property
     def device_info(self) -> DeviceInfo | None:
@@ -57,6 +55,7 @@ class PetLibroEntity(
             sw_version=self.device.software_version,
             hw_version=self.device.hardware_version,
             serial_number=self.device.serial,
+            configuration_url=self.device.icon_url,
         )
 
     async def async_added_to_hass(self) -> None:

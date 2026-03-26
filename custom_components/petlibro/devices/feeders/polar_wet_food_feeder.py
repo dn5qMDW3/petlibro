@@ -2,7 +2,6 @@ import aiohttp
 import asyncio
 from datetime import datetime
 
-from typing import cast
 from logging import getLogger
 from ...exceptions import PetLibroAPIError
 from .feeder import Feeder
@@ -33,46 +32,23 @@ class PolarWetFoodFeeder(Feeder):
             _LOGGER.error(f"Error refreshing data for PolarWetFoodFeeder: {err}")
 
     # ------------------------------------------------------------------
-    # Overrides: Polar reads these from different data paths
-    # ------------------------------------------------------------------
-
-    @property
-    def battery_state(self) -> str:
-        return cast(str, self._data.get("batteryState", "unknown"))
-
-    @property
-    def device_sn(self) -> str:
-        """Returns the serial number of the device."""
-        return self._data.get("deviceSn", "unknown")
-
-    @property
-    def electric_quantity(self) -> float:
-        """Electric quantity (battery percentage or power state)."""
-        quantity = self._data.get("electricQuantity")
-        return quantity if isinstance(quantity, (float, int)) else 0
-
-    @property
-    def food_low(self) -> bool:
-        return not bool(self._data.get("surplusGrain", True))
-
-    @property
-    def mac_address(self) -> str:
-        """Returns the MAC address of the device."""
-        return self._data.get("mac", "unknown")
-
-    @property
-    def online(self) -> bool:
-        """Returns the online status of the device."""
-        return self._data.get("online", False)
-
-    @property
-    def wifi_rssi(self) -> int:
-        wifi_rssi = self._data.get("wifiRssi")
-        return wifi_rssi if isinstance(wifi_rssi, int) else -100
-
-    # ------------------------------------------------------------------
     # Polar-specific properties
     # ------------------------------------------------------------------
+
+    @property
+    def volume(self) -> int:
+        """Speaker volume (0-100)."""
+        return self._data.get("realInfo", {}).get("volume", 50)
+
+    @property
+    def remaining_cleaning_days(self) -> int:
+        """Days until next cleaning (negative = overdue)."""
+        return self._data.get("realInfo", {}).get("remainingCleaningDays", 0)
+
+    @property
+    def weight_state(self) -> str:
+        """Weight/food status (NORMAL, LACK_WATER, etc)."""
+        return self._data.get("realInfo", {}).get("weightState", "unknown")
 
     @property
     def door_blocked(self) -> bool:
@@ -129,10 +105,8 @@ class PolarWetFoodFeeder(Feeder):
 
     @property
     def temperature(self) -> float:
-        """Returns the current temperature in Fahrenheit, rounded to 1 decimal place."""
-        celsius = self._data.get("realInfo", {}).get("temperature", 0.0)
-        fahrenheit = celsius * 9 / 5 + 32
-        return round(fahrenheit, 1)
+        """Returns the current temperature in Celsius."""
+        return self._data.get("realInfo", {}).get("temperature", 0.0)
 
     # ------------------------------------------------------------------
     # Polar-specific methods

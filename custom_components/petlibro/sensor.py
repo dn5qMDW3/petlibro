@@ -147,8 +147,8 @@ class PetLibroSensorEntity(PetLibroEntity[_DeviceT], SensorEntity):
         """Return the native unit of measurement to use in the frontend, if any."""
         match self.key:
             case "temperature":
-                # For temperature, display as Fahrenheit
-                return "°F"
+                # Report in Celsius; HA converts to user's preferred unit
+                return "°C"
             case key if key in (
                 "today_eating_time", 
                 "today_drinking_time", 
@@ -896,7 +896,7 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
             key="temperature",
             translation_key="temperature",
             icon="mdi:thermometer",
-            native_unit_of_measurement="°F",
+            native_unit_of_measurement="°C",
             device_class=SensorDeviceClass.TEMPERATURE,
             state_class=SensorStateClass.MEASUREMENT,
             name="Temperature"
@@ -907,6 +907,32 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
             icon="mdi:rotate-3d-variant",
             name="Plate Position",
             should_report=lambda device: device.plate_position is not None,
+        ),
+        PetLibroSensorEntityDescription[PolarWetFoodFeeder](
+            key="volume",
+            translation_key="volume_level",
+            icon="mdi:volume-high",
+            native_unit_of_measurement="%",
+            name="Volume Level"
+        ),
+        PetLibroSensorEntityDescription[PolarWetFoodFeeder](
+            key="remaining_cleaning_days",
+            translation_key="remaining_cleaning_days",
+            icon="mdi:broom",
+            native_unit_of_measurement="days",
+            name="Remaining Cleaning Days"
+        ),
+        PetLibroSensorEntityDescription[PolarWetFoodFeeder](
+            key="weight_state",
+            translation_key="weight_state",
+            icon="mdi:weight",
+            name="Weight State"
+        ),
+        PetLibroSensorEntityDescription[PolarWetFoodFeeder](
+            key="running_state",
+            translation_key="running_state",
+            icon="mdi:state-machine",
+            name="Running State"
         ),
     ],
     SpaceSmartFeeder: [

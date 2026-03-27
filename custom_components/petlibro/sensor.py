@@ -535,6 +535,41 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
             icon="mdi:lock",
             name="Buttons Lock"
         ),
+        PetLibroSensorEntityDescription[GranarySmartFeeder](
+            key="bowl_mode",
+            translation_key="bowl_mode",
+            icon="mdi:bowl-mix",
+            name="Bowl Mode"
+        ),
+        PetLibroSensorEntityDescription[GranarySmartFeeder](
+            key="motor_state",
+            translation_key="motor_state",
+            icon="mdi:engine",
+            name="Motor State",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[GranarySmartFeeder](
+            key="volume",
+            translation_key="volume_level",
+            icon="mdi:volume-high",
+            native_unit_of_measurement="%",
+            name="Volume Level"
+        ),
+        PetLibroSensorEntityDescription[GranarySmartFeeder](
+            key="auto_threshold",
+            translation_key="auto_threshold",
+            icon="mdi:battery-charging",
+            native_unit_of_measurement="%",
+            name="Auto-Switch Threshold",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetLibroSensorEntityDescription[GranarySmartFeeder](
+            key="last_online_time",
+            translation_key="last_online_time",
+            icon="mdi:clock-check",
+            device_class=SensorDeviceClass.TIMESTAMP,
+            name="Last Online"
+        ),
     ],
     GranarySmartCameraFeeder: [
         PetLibroSensorEntityDescription[GranarySmartCameraFeeder](

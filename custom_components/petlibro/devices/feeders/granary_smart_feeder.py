@@ -1,4 +1,5 @@
 import aiohttp
+from datetime import datetime, timezone
 
 from logging import getLogger
 from ...exceptions import PetLibroAPIError
@@ -8,6 +9,50 @@ _LOGGER = getLogger(__name__)
 
 
 class GranarySmartFeeder(Feeder):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Use API-provided max portions if available (e.g. 48 for PLAF103)
+        max_cup = self._data.get("maxFeedingCup")
+        if max_cup and isinstance(max_cup, int):
+            self.max_feed_portions = max_cup
+
+    # ------------------------------------------------------------------
+    # Granary-specific properties
+    # ------------------------------------------------------------------
+
+    @property
+    def bowl_mode(self) -> str:
+        """Bowl configuration (SINGLE_BOWL, DUAL_BOWL, etc)."""
+        return self._data.get("realInfo", {}).get("bowlMode", "unknown")
+
+    @property
+    def grain_outlet_state(self) -> bool:
+        """Whether the grain outlet is clear/operational."""
+        return bool(self._data.get("realInfo", {}).get("grainOutletState", True))
+
+    @property
+    def motor_state(self) -> int:
+        """Motor state (diagnostic)."""
+        return self._data.get("realInfo", {}).get("motorState", 0)
+
+    @property
+    def volume(self) -> int:
+        """Speaker volume (0-100)."""
+        return self._data.get("realInfo", {}).get("volume", 50)
+
+    @property
+    def auto_threshold(self) -> int:
+        """Battery auto-switch threshold percentage."""
+        return self._data.get("realInfo", {}).get("autoThreshold", 0)
+
+    @property
+    def last_online_time(self) -> datetime | None:
+        """Last online timestamp."""
+        ts = self._data.get("realInfo", {}).get("lastOnlineTime")
+        if ts and isinstance(ts, (int, float)):
+            return datetime.fromtimestamp(ts / 1000, tz=timezone.utc)
+        return None
+
     async def refresh(self):
         """Refresh the device data from the API."""
         try:

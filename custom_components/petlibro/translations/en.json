@@ -274,6 +274,18 @@
             },
             "volume_level": {
                 "name": "Volume Level"
+            },
+            "bowl_mode": {
+                "name": "Bowl Mode"
+            },
+            "motor_state": {
+                "name": "Motor State"
+            },
+            "auto_threshold": {
+                "name": "Auto-Switch Threshold"
+            },
+            "last_online_time": {
+                "name": "Last Online"
             }
         },
         "switch": {
@@ -350,6 +362,9 @@
             }
         },
         "binary_sensor": {
+            "grain_outlet_state": {
+                "name": "Grain Outlet"
+            },
             "door_state": {
                 "name": "Lid"
             },

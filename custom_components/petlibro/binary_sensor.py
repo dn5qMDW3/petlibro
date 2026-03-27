@@ -177,6 +177,13 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             should_report=lambda device: device.light_switch is not None,
             name="Indicator"
         ),
+        PetLibroBinarySensorEntityDescription[GranarySmartFeeder](
+            key="grain_outlet_state",
+            translation_key="grain_outlet_state",
+            icon="mdi:grain",
+            should_report=lambda device: device.grain_outlet_state is not None,
+            name="Grain Outlet"
+        ),
     ],
     GranarySmartCameraFeeder: [
         PetLibroBinarySensorEntityDescription[GranarySmartCameraFeeder](

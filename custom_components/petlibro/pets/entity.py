@@ -32,7 +32,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     dataclass,
 )
-from homeassistant.components.sensor.const import SensorDeviceClass, SensorStateClass
+from homeassistant.components.sensor.const import SensorDeviceClass
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.update_coordinator import (
@@ -499,7 +499,6 @@ PET_ENTITY_MAP: dict[PL_PetEntity, tuple[PL_PetEntityDescription]] = {
                 PetAPI.NAME: pet.name,
                 PetAPI.SEX: pet.gender.value,
                 PetAPI.STERILIZATION: 1 if pet.sterilization else 2,
-                PetAPI.TODAY_EAT_AMOUNT: pet.todayEatNum,
                 "status": pet._data.get("status"),
                 PetAPI.RFID: pet.rfid,
                 "mainPet": pet._data.get("mainPet"),
@@ -516,69 +515,6 @@ PET_ENTITY_MAP: dict[PL_PetEntity, tuple[PL_PetEntityDescription]] = {
             name="Breed",
             translation_key="breed_name",
             icon_fn=lambda pet: pet.type.icon,
-        ),
-        PL_PetSensorEntityDescription(
-            key="todayFeedTimes",
-            translation_key="today_feeding_times",
-            name="Today's Feeding Times",
-            icon="mdi:history",
-            state_class=SensorStateClass.TOTAL_INCREASING,
-        ),
-        PL_PetSensorEntityDescription(
-            key=f"{PetAPI.TODAY_EAT_AMOUNT}_weight",
-            translation_key="today_feeding_quantity_weight",
-            name="Today's Feeding Quantity (Weight)",
-            icon="mdi:scale",
-            value_fn=lambda pet: Unit.convert_feed(
-                value=pet.todayEatNum,
-                from_unit=None,
-                to_unit=Unit.GRAMS,
-                rounded=True,
-            ),
-            native_unit_of_measurement=UnitOfMass.GRAMS,
-            suggested_unit_of_measurement_fn=lambda member: getattr(
-                UnitOfMass, member.feedUnitType.name, None
-            ),
-            device_class=SensorDeviceClass.WEIGHT,
-            state_class=SensorStateClass.TOTAL_INCREASING,
-            extra_state_attributes_fn=lambda pet: {
-                unit.symbol: Unit.convert_feed(
-                    value=pet.todayEatNum,
-                    from_unit=None,
-                    to_unit=unit,
-                    rounded=True,
-                )
-                for unit in (Unit.GRAMS, Unit.OUNCES)
-            },
-            petlibro_unit=API.FEED_UNIT,
-        ),
-        PL_PetSensorEntityDescription(
-            key=f"{PetAPI.TODAY_EAT_AMOUNT}_volume",
-            translation_key="today_feeding_quantity_volume",
-            name="Today's Feeding Quantity (Volume)",
-            icon="mdi:scale",
-            value_fn=lambda pet: Unit.convert_feed(
-                value=pet.todayEatNum,
-                from_unit=None,
-                to_unit=Unit.MILLILITERS,
-                rounded=True,
-            ),
-            native_unit_of_measurement=UnitOfVolume.MILLILITERS,
-            suggested_unit_of_measurement_fn=lambda member: getattr(
-                UnitOfVolume, member.feedUnitType.name, None
-            ),
-            device_class=SensorDeviceClass.VOLUME,
-            state_class=SensorStateClass.TOTAL_INCREASING,
-            extra_state_attributes_fn=lambda pet: {
-                unit.symbol: Unit.convert_feed(
-                    value=pet.todayEatNum,
-                    from_unit=None,
-                    to_unit=unit,
-                    rounded=True,
-                )
-                for unit in (Unit.CUPS, Unit.MILLILITERS)
-            },
-            petlibro_unit=API.FEED_UNIT,
         ),
         PL_PetSensorEntityDescription(
             key=PetAPI.RFID,
@@ -610,7 +546,7 @@ PET_ENTITY_MAP: dict[PL_PetEntity, tuple[PL_PetEntityDescription]] = {
             key="age",
             name="Age",
             icon="mdi:cake-variant",
-            value_fn=lambda pet: pet.age.years,
+            value_fn=lambda pet: getattr(pet.age, "years", None),
             extra_state_attributes_fn=lambda pet: {
                 "years": pet.age.years,
                 "months": pet.age.months,
@@ -619,7 +555,7 @@ PET_ENTITY_MAP: dict[PL_PetEntity, tuple[PL_PetEntityDescription]] = {
                 if (bday := pet.birthday.replace(year=(today := date.today()).year))
                 >= today
                 else (bday.replace(year=today.year + 1) - today).days,
-            },
+            } if pet.age else None,
         ),
     ),
     PL_PetImageEntity: (

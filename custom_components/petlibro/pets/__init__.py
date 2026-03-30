@@ -199,8 +199,6 @@ class Pet(Event):
         try:
             pet_type = PetType(self._data.get(API.PET_TYPE) or 0)
             return pet_type
-
-            # return self.breedName.lower() or ""
         except ValueError:
             _LOGGER.error("Unknown pet type value: %s", self._data.get(API.PET_TYPE))
             return PetType.CUSTOM
@@ -300,15 +298,3 @@ class Pet(Event):
     def walkingGoal(self) -> float:
         """Walking goal of pet in minutes per day."""
         return self._data.get("walkingGoal") or 0
-
-    # --- Activity
-
-    @property
-    def todayFeedTimes(self) -> int:
-        """Number of times the pet ate today."""
-        return self._data.get("todayFeedTimes") or 0
-
-    @property
-    def todayEatNum(self) -> float:
-        """Amount pet ate today in portions."""
-        return self._data.get(API.TODAY_EAT_AMOUNT) or 0

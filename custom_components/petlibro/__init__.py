@@ -1,11 +1,9 @@
 import logging
 
-from datetime import timedelta  # For managing the update interval
 from homeassistant.core import HomeAssistant
 from homeassistant.const import Platform
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.device_registry import DeviceEntry
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed  # For coordinator and update handling
 from .devices import Device
 from .devices.feeders.feeder import Feeder
 from .devices.feeders.air_smart_feeder import AirSmartFeeder
@@ -18,137 +16,43 @@ from .devices.fountains.dockstream_smart_fountain import DockstreamSmartFountain
 from .devices.fountains.dockstream_smart_rfid_fountain import DockstreamSmartRFIDFountain
 from .devices.fountains.dockstream_2_smart_cordless_fountain import Dockstream2SmartCordlessFountain
 from .devices.fountains.dockstream_2_smart_fountain import Dockstream2SmartFountain
-from .devices.litterboxes.litter_box import LitterBox
 from .devices.litterboxes.luma_smart_litter_box import LumaSmartLitterBox
-from .const import DOMAIN, CONF_EMAIL, CONF_PASSWORD, PLATFORMS, UPDATE_INTERVAL_SECONDS  # Assuming UPDATE_INTERVAL_SECONDS is defined in const
+from .const import DOMAIN, CONF_EMAIL, CONF_PASSWORD, PLATFORMS
 from .hub import PetLibroHub
 from .services import async_setup_services, async_unload_services
 
 _LOGGER = logging.getLogger(__name__)
 
+type PetLibroConfigEntry = ConfigEntry[PetLibroHub]
 
-# Define the platforms for each device type
+# All device types currently support the same set of platforms
+DEFAULT_PLATFORMS = (
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+    Platform.SWITCH,
+    Platform.BUTTON,
+    Platform.NUMBER,
+    Platform.SELECT,
+    Platform.TEXT,
+    Platform.UPDATE,
+)
+
 PLATFORMS_BY_TYPE = {
-    Feeder: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    AirSmartFeeder: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    GranarySmartFeeder: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    GranarySmartCameraFeeder: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    OneRFIDSmartFeeder: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    PolarWetFoodFeeder: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    SpaceSmartFeeder: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    DockstreamSmartFountain: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    DockstreamSmartRFIDFountain: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    Dockstream2SmartCordlessFountain: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    Dockstream2SmartFountain: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
-    LumaSmartLitterBox: (
-        Platform.SENSOR,
-        Platform.BINARY_SENSOR,
-        Platform.SWITCH,
-        Platform.BUTTON,
-        Platform.NUMBER,
-        Platform.SELECT,
-        Platform.TEXT,
-        Platform.UPDATE
-    ),
+    cls: DEFAULT_PLATFORMS
+    for cls in [
+        Feeder,
+        AirSmartFeeder,
+        GranarySmartFeeder,
+        GranarySmartCameraFeeder,
+        OneRFIDSmartFeeder,
+        PolarWetFoodFeeder,
+        SpaceSmartFeeder,
+        DockstreamSmartFountain,
+        DockstreamSmartRFIDFountain,
+        Dockstream2SmartCordlessFountain,
+        Dockstream2SmartFountain,
+        LumaSmartLitterBox,
+    ]
 }
 
 
@@ -163,82 +67,59 @@ def get_platforms_for_devices(devices: list[Device]) -> set[Platform]:
     }
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: PetLibroConfigEntry) -> bool:
     """Set up platform from a ConfigEntry."""
     email = entry.data.get(CONF_EMAIL)
     password = entry.data.get(CONF_PASSWORD)
 
-    # Ensure email and password exist
     if not email or not password:
-        _LOGGER.error("Email or password is missing in the configuration entry. Cannot proceed.")
+        _LOGGER.error("Email or password is missing in the configuration entry.")
         return False
 
-    # Initialize PetLibroHub
     try:
         hub = PetLibroHub(hass, entry)
+        entry.runtime_data = hub
 
-        # Store the hub in hass.data
+        # Also store in hass.data for backward compatibility with services
         hass.data.setdefault(DOMAIN, {})[entry.entry_id] = hub
 
-        # Initialize Helpers
         await hub._initialize_helpers()
-
-        # Load member only once here
         await hub.load_member()
-
-        # Load devices only once here
         await hub.load_devices()
-
-        # Load pets only once here
         await hub.load_pets()
-
-        # Start the coordinator for periodic updates
         await hub.coordinator.async_config_entry_first_refresh()
-
-        # Forward entry setups for each platform
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
         await async_setup_services(hass)
 
-        _LOGGER.info(f"Successfully set up PetLibro integration for {email}")
+        _LOGGER.info("Successfully set up PetLibro integration for %s", email)
         return True
 
     except Exception as err:
-        _LOGGER.error(f"Failed to set up PetLibro integration: {err}", exc_info=True)
+        _LOGGER.error("Failed to set up PetLibro integration: %s", err, exc_info=True)
         return False
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: PetLibroConfigEntry) -> bool:
     """Unload a config entry."""
-    # Get the hub from Home Assistant's domain data
-    hub = hass.data[DOMAIN].pop(entry.entry_id, None)
-
-    if hub is None:
-        _LOGGER.warning(f"PetLibro hub for entry {entry.entry_id} not found.")
-        return False
-
-    # Unload platforms associated with the entry
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     if unload_ok:
-        _LOGGER.info(f"Successfully unloaded PetLibro entry for {entry.data.get(CONF_EMAIL)}")
-        await hub.async_unload()  # If you have any cleanup to do in the hub
+        await entry.runtime_data.async_unload()
+        hass.data[DOMAIN].pop(entry.entry_id, None)
         await async_unload_services(hass)
+        _LOGGER.info("Successfully unloaded PetLibro entry for %s", entry.data.get(CONF_EMAIL))
     else:
-        _LOGGER.error(f"Failed to unload PetLibro entry for {entry.data.get(CONF_EMAIL)}")
+        _LOGGER.error("Failed to unload PetLibro entry for %s", entry.data.get(CONF_EMAIL))
 
     return unload_ok
 
 
-async def async_remove_config_entry_device(hass: HomeAssistant, entry: ConfigEntry, device_entry: DeviceEntry) -> bool:
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, entry: PetLibroConfigEntry, device_entry: DeviceEntry
+) -> bool:
     """Remove a config entry from a device."""
-    hub = hass.data[DOMAIN].get(entry.entry_id)
-    
-    if not hub:
-        _LOGGER.warning("No hub found for this entry during device removal.")
-        return False
+    hub = entry.runtime_data
 
-    # Match the serial number with devices in the hub
     return not any(
         identifier
         for identifier in device_entry.identifiers

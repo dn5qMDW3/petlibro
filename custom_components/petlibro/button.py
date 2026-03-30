@@ -1,28 +1,19 @@
 """Support for PETLIBRO buttons."""
 from __future__ import annotations
 import re
-from .api import make_api_call
-import aiohttp
-from aiohttp import ClientSession, ClientError
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from typing import Any, Generic
 from logging import getLogger
-from .const import DOMAIN
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.const import EntityCategory
-from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.config_entries import ConfigEntry
-from .hub import PetLibroHub
 
 _LOGGER = getLogger(__name__)
 
-from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription
+from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription, create_platform_setup
 from .devices import Device
-from .devices.device import Device
 from .devices.feeders.feeder import Feeder
 from .devices.feeders.air_smart_feeder import AirSmartFeeder
 from .devices.feeders.granary_smart_feeder import GranarySmartFeeder
@@ -851,42 +842,6 @@ class PetLibroButtonEntity(PetLibroEntity[_DeviceT], ButtonEntity):
             )
 
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up PETLIBRO buttons using config entry."""
-    hub: PetLibroHub = hass.data[DOMAIN].get(entry.entry_id)
-
-    if not hub:
-        _LOGGER.error("Hub not found for entry: %s", entry.entry_id)
-        return
-
-    if not hub.devices:
-        _LOGGER.warning("No devices found in hub during button setup.")
-        return
-
-    _LOGGER.debug("Hub data: %s", hub)
-    devices = hub.devices
-    _LOGGER.debug("Devices in hub: %s", devices)
-
-    entities = [
-        PetLibroButtonEntity(device, hub, description)
-        for device in devices.values()
-        for device_type, entity_descriptions in DEVICE_BUTTON_MAP.items()
-        if isinstance(device, device_type)
-        for description in entity_descriptions
-    ]
-
-    if not entities:
-        _LOGGER.warning("No buttons added, entities list is empty!")
-    else:
-        _LOGGER.debug("Adding %d PetLibro buttons", len(entities))
-        for entity in entities:
-            _LOGGER.debug(
-                "Adding button entity: %s for device %s",
-                entity.entity_description.name,
-                entity.device.name,
-            )
-        async_add_entities(entities)
+async_setup_entry = create_platform_setup(
+    PetLibroButtonEntity, DEVICE_BUTTON_MAP, "button"
+)

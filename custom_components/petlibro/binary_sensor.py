@@ -1,28 +1,21 @@
 """Support for PETLIBRO binary sensors."""
 from __future__ import annotations
-from .api import make_api_call
-import aiohttp
-from aiohttp import ClientSession, ClientError
 from dataclasses import dataclass
 from collections.abc import Callable
 from functools import cached_property
 from typing import Optional
 import logging
-from .const import DOMAIN, Unit, APIKey as API, VALID_UNIT_TYPES
+from .const import Unit, APIKey as API, VALID_UNIT_TYPES
 from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorEntityDescription,
     BinarySensorDeviceClass,
 )
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.config_entries import ConfigEntry
-from .hub import PetLibroHub
 
 _LOGGER = logging.getLogger(__name__)
 
+from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription, create_platform_setup
 from .devices import Device
-from .devices.device import Device
 from .devices.feeders.feeder import Feeder
 from .devices.feeders.air_smart_feeder import AirSmartFeeder
 from .devices.feeders.granary_smart_feeder import GranarySmartFeeder
@@ -735,42 +728,6 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
 }
 
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up PETLIBRO binary sensors using config entry."""
-    hub: PetLibroHub = hass.data[DOMAIN].get(entry.entry_id)
-
-    if not hub:
-        _LOGGER.error("Hub not found for entry: %s", entry.entry_id)
-        return
-
-    if not hub.devices:
-        _LOGGER.warning("No devices found in hub during binary sensor setup.")
-        return
-
-    _LOGGER.debug("Hub data: %s", hub)
-    devices = hub.devices
-    _LOGGER.debug("Devices in hub: %s", devices)
-
-    entities = [
-        PetLibroBinarySensorEntity(device, hub, description)
-        for device in devices.values()
-        for device_type, entity_descriptions in DEVICE_BINARY_SENSOR_MAP.items()
-        if isinstance(device, device_type)
-        for description in entity_descriptions
-    ]
-
-    if not entities:
-        _LOGGER.warning("No binary sensors added, entities list is empty!")
-    else:
-        _LOGGER.debug("Adding %d PetLibro binary sensors", len(entities))
-        for entity in entities:
-            _LOGGER.debug(
-                "Adding binary sensor entity: %s for device %s",
-                entity.entity_description.name,
-                entity.device.name,
-            )
-        async_add_entities(entities)
+async_setup_entry = create_platform_setup(
+    PetLibroBinarySensorEntity, DEVICE_BINARY_SENSOR_MAP, "binary_sensor"
+)

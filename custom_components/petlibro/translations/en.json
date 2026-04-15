@@ -274,6 +274,54 @@
             },
             "rfid": {
                 "name": "RFID Collar"
+            },
+            "remaining_replacement_days": {
+                "name": "Filter Replacement Days"
+            },
+            "remaining_mat_days": {
+                "name": "Mat Replacement Days"
+            },
+            "filter_state": {
+                "name": "Filter State"
+            },
+            "clean_state": {
+                "name": "Cleanliness State"
+            },
+            "mat_state": {
+                "name": "Mat State"
+            },
+            "door_state_sensor": {
+                "name": "Door State"
+            },
+            "throw_mode": {
+                "name": "Throw Mode"
+            },
+            "deodorization_mode": {
+                "name": "Deodorization Mode"
+            },
+            "garbage_warehouse_state": {
+                "name": "Waste Bin State"
+            },
+            "running_state": {
+                "name": "Running State"
+            },
+            "exception_message": {
+                "name": "Exception Message"
+            },
+            "clean_mode": {
+                "name": "Clean Mode"
+            },
+            "volume": {
+                "name": "Volume"
+            },
+            "today_potty_times": {
+                "name": "Today Potty Times"
+            },
+            "today_potty_duration": {
+                "name": "Today Potty Duration"
+            },
+            "deodorization_wind_speed": {
+                "name": "Deodorization Wind Speed"
             }
         },
         "image": {
@@ -301,6 +349,27 @@
             },
             "sterilization": {
                 "name": "Neutered/Spayed"
+            },
+            "sound_switch": {
+                "name": "Sound"
+            },
+            "light_switch": {
+                "name": "Light"
+            },
+            "deodorization_mode_switch": {
+                "name": "Deodorization"
+            },
+            "after_deodorization_switch": {
+                "name": "After-Use Deodorization"
+            },
+            "avoid_repeat_clean": {
+                "name": "Avoid Repeat Clean"
+            },
+            "enable_auto_clean_in_sleep_mode": {
+                "name": "Auto Clean in Sleep Mode"
+            },
+            "enable_deodorization_in_sleep_mode": {
+                "name": "Deodorize in Sleep Mode"
             }
         },
         "button": {
@@ -381,6 +450,36 @@
             },
             "feeding_plan_today_disable_all": {
                 "name": "Disable Today's Feeding Schedule"
+            },
+            "trigger_clean": {
+                "name": "Start Clean Cycle"
+            },
+            "trigger_empty_waste": {
+                "name": "Empty Waste Bin"
+            },
+            "trigger_level_litter": {
+                "name": "Level Litter"
+            },
+            "trigger_stop_action": {
+                "name": "Stop Current Action"
+            },
+            "trigger_open_door": {
+                "name": "Open Door"
+            },
+            "trigger_close_door": {
+                "name": "Close Door"
+            },
+            "trigger_vacuum": {
+                "name": "Run Air Purifier"
+            },
+            "reset_filter": {
+                "name": "Reset Filter Timer"
+            },
+            "reset_cleaning": {
+                "name": "Reset Cleaning Timer"
+            },
+            "reset_mat": {
+                "name": "Reset Mat Timer"
             }
         },
         "binary_sensor": {
@@ -434,6 +533,27 @@
             },
             "feeding_schedule": {
                 "name": "Feeding Schedule"
+            },
+            "rubbish_full_state": {
+                "name": "Waste Bin Full"
+            },
+            "rubbish_inplace_state": {
+                "name": "Waste Bin Installed"
+            },
+            "deodorization_state_on": {
+                "name": "Deodorization Active"
+            },
+            "door_open": {
+                "name": "Door"
+            },
+            "device_stopped_working": {
+                "name": "Device Error"
+            },
+            "barn_door_error": {
+                "name": "Door Error"
+            },
+            "battery_supply_8_hours": {
+                "name": "Battery 8-Hour Supply"
             }
         },
         "number": {
@@ -484,6 +604,15 @@
             },
             "walking_goal": {
                 "name": "Walking Goal"
+            },
+            "volume_control": {
+                "name": "Volume"
+            },
+            "auto_delay_sec": {
+                "name": "Auto Clean Delay"
+            },
+            "duration_after_deodorization": {
+                "name": "Post-Use Deodorization Duration"
             }
         },
         "select": {
@@ -521,6 +650,12 @@
                     "male": "Male",
                     "female": "Female"
                 }
+            },
+            "clean_mode_select": {
+                "name": "Clean Mode"
+            },
+            "deodorization_wind_speed_select": {
+                "name": "Deodorization Wind Speed"
             }
         },
         "text": {

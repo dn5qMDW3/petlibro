@@ -15,16 +15,12 @@ class DockstreamSmartRFIDFountain(Device):
     async def refresh(self):
         """Refresh the device data from the API."""
         try:
-            await super().refresh()  # Call the refresh method from the parent class (Device)
-        
-            # Fetch real info from the API
             real_info = await self.api.device_real_info(self.serial)
             attribute_settings = await self.api.device_attribute_settings(self.serial)
             get_upgrade = await self.api.get_device_upgrade(self.serial)
-            get_work_record = await self.api.get_device_work_record(self.serial)
+            get_work_record = await self.api.get_device_work_record(self.serial, record_types=["DRINK"])
             get_feeding_plan_today = await self.api.device_feeding_plan_today_new(self.serial)
 
-            # Update internal data with fetched API data
             self.update_data({
                 "realInfo": real_info or {},
                 "getAttributeSetting": attribute_settings or {},
@@ -33,12 +29,11 @@ class DockstreamSmartRFIDFountain(Device):
                 "workRecord": get_work_record if get_work_record is not None else []
             })
         except PetLibroAPIError as err:
-            _LOGGER.error(f"Error refreshing data for DockstreamSmartRFIDFountain: {err}")
+            _LOGGER.error("Error refreshing data for DockstreamSmartRFIDFountain: %s", err)
 
     @property
     def available(self) -> bool:
-        _LOGGER.debug(f"Device {self.device.name} availability: {self.device.online}")
-        return self.device.online if hasattr(self.device, 'online') else True
+        return self.online
 
     @property
     def device_sn(self) -> str:
@@ -166,14 +161,14 @@ class DockstreamSmartRFIDFountain(Device):
         return water_interval if isinstance(water_interval, (int, float)) else 0
 
     async def set_water_interval(self, value: float) -> None:
-        _LOGGER.debug(f"Setting water interval to {value} for {self.serial}")
+        _LOGGER.debug("Setting water interval to %s for %s", value, self.serial)
         try:
             current_mode = self._data.get("realInfo", {}).get("useWaterType", 0)
             current_duration = self._data.get("realInfo", {}).get("useWaterDuration", 0)
             await self.api.set_water_interval(self.serial, value, current_mode, current_duration)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to set water interval using {current_mode} & {current_duration} for {self.serial}: {err}")
+            _LOGGER.error("Failed to set water interval using %s & %s for %s: %s", current_mode, current_duration, self.serial, err)
             raise PetLibroAPIError(f"Error setting water interval using {current_mode} & {current_duration}: {err}")
 
     @property
@@ -182,14 +177,14 @@ class DockstreamSmartRFIDFountain(Device):
         return duration if isinstance(duration, (int, float)) else 0
 
     async def set_water_dispensing_duration(self, value: float) -> None:
-        _LOGGER.debug(f"Setting water dispensing duration to {value} for {self.serial}")
+        _LOGGER.debug("Setting water dispensing duration to %s for %s", value, self.serial)
         try:
             current_mode = self._data.get("realInfo", {}).get("useWaterType", 0)
             current_interval = self._data.get("realInfo", {}).get("useWaterInterval", 0)
             await self.api.set_water_dispensing_duration(self.serial, value, current_mode, current_interval)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to set water dispensing duration using {current_mode} & {current_interval} for {self.serial}: {err}")
+            _LOGGER.error("Failed to set water dispensing duration using %s & %s for %s: %s", current_mode, current_interval, self.serial, err)
             raise PetLibroAPIError(f"Error setting water dispensing duration using {current_mode} & {current_interval}: {err}")
 
     @property
@@ -198,13 +193,13 @@ class DockstreamSmartRFIDFountain(Device):
         return cleaning_cycle if isinstance(cleaning_cycle, (int, float)) else 0
 
     async def set_cleaning_cycle(self, value: float) -> None:
-        _LOGGER.debug(f"Setting machine cleaning cycle to {value} for {self.serial}")
+        _LOGGER.debug("Setting machine cleaning cycle to %s for %s", value, self.serial)
         try:
             key = "MACHINE_CLEANING"
             await self.api.set_filter_cycle(self.serial, value, key)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to set cleaning cycle using {key} for {self.serial}: {err}")
+            _LOGGER.error("Failed to set cleaning cycle using %s for %s: %s", key, self.serial, err)
             raise PetLibroAPIError(f"Error setting cleaning cycle using {key}: {err}")
 
     @property
@@ -213,31 +208,31 @@ class DockstreamSmartRFIDFountain(Device):
         return filter_cycle if isinstance(filter_cycle, (int, float)) else 0
 
     async def set_filter_cycle(self, value: float) -> None:
-        _LOGGER.debug(f"Setting filter cycle to {value} for {self.serial}")
+        _LOGGER.debug("Setting filter cycle to %s for %s", value, self.serial)
         try:
             key = "FILTER_ELEMENT"
             await self.api.set_filter_cycle(self.serial, value, key)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to set filter cycle using {key} for {self.serial}: {err}")
+            _LOGGER.error("Failed to set filter cycle using %s for %s: %s", key, self.serial, err)
             raise PetLibroAPIError(f"Error setting filter cycle using {key}: {err}")
 
     async def set_cleaning_reset(self) -> None:
-        _LOGGER.debug(f"Triggering machine cleaning reset for {self.serial}")
+        _LOGGER.debug("Triggering machine cleaning reset for %s", self.serial)
         try:
             await self.api.set_cleaning_reset(self.serial)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to trigger machine cleaning reset for {self.serial}: {err}")
+            _LOGGER.error("Failed to trigger machine cleaning reset for %s: %s", self.serial, err)
             raise PetLibroAPIError(f"Error triggering machine cleaning reset: {err}")
 
     async def set_filter_reset(self) -> None:
-        _LOGGER.debug(f"Triggering filter reset for {self.serial}")
+        _LOGGER.debug("Triggering filter reset for %s", self.serial)
         try:
             await self.api.set_filter_reset(self.serial)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to trigger filter reset for {self.serial}: {err}")
+            _LOGGER.error("Failed to trigger filter reset for %s: %s", self.serial, err)
             raise PetLibroAPIError(f"Error triggering filter reset: {err}")
     
     @property
@@ -266,22 +261,22 @@ class DockstreamSmartRFIDFountain(Device):
 
     # Method for indicator turn on
     async def set_light_on(self) -> None:
-        _LOGGER.debug(f"Turning on the indicator for {self.serial}")
+        _LOGGER.debug("Turning on the indicator for %s", self.serial)
         try:
             await self.api.set_light_on(self.serial)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to turn on the indicator for {self.serial}: {err}")
+            _LOGGER.error("Failed to turn on the indicator for %s: %s", self.serial, err)
             raise PetLibroAPIError(f"Error turning on the indicator: {err}")
 
     # Method for indicator turn off
     async def set_light_off(self) -> None:
-        _LOGGER.debug(f"Turning off the indicator for {self.serial}")
+        _LOGGER.debug("Turning off the indicator for %s", self.serial)
         try:
             await self.api.set_light_off(self.serial)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to turn off the indicator for {self.serial}: {err}")
+            _LOGGER.error("Failed to turn off the indicator for %s: %s", self.serial, err)
             raise PetLibroAPIError(f"Error turning off the indicator: {err}")
 
     @property

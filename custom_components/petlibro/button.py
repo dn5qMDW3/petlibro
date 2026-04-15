@@ -771,6 +771,24 @@ DEVICE_BUTTON_MAP: dict[type[Device], list[PetLibroButtonEntityDescription]] = {
             set_fn=lambda device: device.trigger_vacuum(),
             name="Run Air Purifier",
         ),
+        PetLibroButtonEntityDescription[LumaSmartLitterBox](
+            key="reset_filter",
+            translation_key="reset_filter",
+            set_fn=lambda device: device.reset_filter(),
+            name="Reset Filter Timer",
+        ),
+        PetLibroButtonEntityDescription[LumaSmartLitterBox](
+            key="reset_cleaning",
+            translation_key="reset_cleaning",
+            set_fn=lambda device: device.reset_cleaning(),
+            name="Reset Cleaning Timer",
+        ),
+        PetLibroButtonEntityDescription[LumaSmartLitterBox](
+            key="reset_mat",
+            translation_key="reset_mat",
+            set_fn=lambda device: device.reset_mat(),
+            name="Reset Mat Timer",
+        ),
     ],
 }
 

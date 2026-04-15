@@ -38,7 +38,7 @@ _LOGGER = logging.getLogger(__name__)
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_REGION): vol.In(["US"]),
+        vol.Required(CONF_REGION): vol.In(["US", "CN"]),
         vol.Required(CONF_EMAIL): str,
         vol.Required(CONF_PASSWORD): str,
     }

@@ -88,7 +88,7 @@ class PetLibroSensorEntity(PetLibroEntity[_DeviceT], SensorEntity):
                 wifi_rssi = getattr(self.device, self.key, None)
                 if wifi_rssi is not None:
                     if self._last_sensor_state.get(self.key) != wifi_rssi:
-                        _LOGGER.debug(f"Raw {self.key} for device {self.device.serial}: {wifi_rssi}")
+                        _LOGGER.debug("Raw %s for device %s: %s", self.key, self.device.serial, wifi_rssi)
                         self._last_sensor_state[self.key] = wifi_rssi
                     return wifi_rssi
             case "remaining_water":
@@ -113,7 +113,7 @@ class PetLibroSensorEntity(PetLibroEntity[_DeviceT], SensorEntity):
                 if self.entity_description.should_report(self.device):
                     val = getattr(self.device, self.key, None)
                     if self._last_sensor_state.get(self.key) != val:
-                        _LOGGER.debug(f"Raw {self.key} for device {self.device.serial}: {val}")
+                        _LOGGER.debug("Raw %s for device %s: %s", self.key, self.device.serial, val)
                         self._last_sensor_state[self.key] = val
                     return val
         return super().native_value
@@ -1498,6 +1498,28 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
             native_unit_of_measurement="%",
             state_class=SensorStateClass.MEASUREMENT,
             name="Volume",
+        ),
+        PetLibroSensorEntityDescription[LumaSmartLitterBox](
+            key="today_potty_times",
+            translation_key="today_potty_times",
+            icon="mdi:counter",
+            state_class=SensorStateClass.TOTAL_INCREASING,
+            name="Today Potty Times",
+        ),
+        PetLibroSensorEntityDescription[LumaSmartLitterBox](
+            key="today_potty_duration",
+            translation_key="today_potty_duration",
+            icon="mdi:timer-outline",
+            native_unit_of_measurement="s",
+            device_class=SensorDeviceClass.DURATION,
+            state_class=SensorStateClass.TOTAL_INCREASING,
+            name="Today Potty Duration",
+        ),
+        PetLibroSensorEntityDescription[LumaSmartLitterBox](
+            key="deodorization_wind_speed",
+            translation_key="deodorization_wind_speed",
+            icon="mdi:fan",
+            name="Deodorization Wind Speed",
         ),
     ],
 }

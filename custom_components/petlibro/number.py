@@ -73,14 +73,14 @@ class PetLibroNumberEntity(PetLibroEntity[_DeviceT], NumberEntity):
 
         state = getattr(self.device, self.key, None)
         if state is None:
-            _LOGGER.warning(f"Value '{self.key}' is None for device {self.device.name}")
+            _LOGGER.warning("Value '%s' is None for device %s", self.key, self.device.name)
             return None
-        _LOGGER.debug(f"Retrieved value for '{self.key}', {self.device.name}: {state}")
+        _LOGGER.debug("Retrieved value for '%s', %s: %s", self.key, self.device.name, state)
         return float(state)
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the value of the number."""
-        _LOGGER.debug(f"Setting value {value} for {self.device.name}")
+        _LOGGER.debug("Setting value %s for %s", value, self.device.name)
         
         try:
             match self.key:
@@ -93,21 +93,21 @@ class PetLibroNumberEntity(PetLibroEntity[_DeviceT], NumberEntity):
                         value, self.member.waterUnitType.symbol, UnitOfVolume.MILLILITERS)))
                 case _:
                     # Regular case for sound_level or other methods that only need a value
-                    _LOGGER.debug(f"Calling method with value={value} for {self.device.name}")
+                    _LOGGER.debug("Calling method with value=%s for %s", value, self.device.name)
                     await self.entity_description.method(self.device, value)
                     
             self.async_write_ha_state()
-            _LOGGER.debug(f"Value {value} set successfully for {self.device.name}")
+            _LOGGER.debug("Value %s set successfully for %s", value, self.device.name)
         except Exception as e:
-            _LOGGER.error(f"Error setting value {value} for {self.device.name}: {e}")
+            _LOGGER.error("Error setting value %s for %s: %s", value, self.device.name, e)
 
     @property
     def native_unit_of_measurement(self) -> str | None:
         """Return the native unit of measurement."""
         match self.key:
-            case "manual_feed_quantity": 
-                return self.member.feedUnitType.symbol if not self.portions_enabled else "portions",
-            case "water_low_threshold": 
+            case "manual_feed_quantity":
+                return self.member.feedUnitType.symbol if not self.portions_enabled else "portions"
+            case "water_low_threshold":
                 return self.member.waterUnitType.symbol
         return super().native_unit_of_measurement
 
@@ -548,6 +548,42 @@ DEVICE_NUMBER_MAP: dict[type[Device], list[PetLibroNumberEntityDescription]] = {
         ),
     ],
     LumaSmartLitterBox: [
+        PetLibroNumberEntityDescription[LumaSmartLitterBox](
+            key="volume",
+            translation_key="volume_control",
+            icon="mdi:volume-high",
+            native_unit_of_measurement="%",
+            native_max_value=100,
+            native_min_value=0,
+            native_step=10,
+            value_fn=lambda device: device.volume,
+            method=lambda device, value: device.set_volume(int(value)),
+            name="Volume"
+        ),
+        PetLibroNumberEntityDescription[LumaSmartLitterBox](
+            key="auto_delay_sec",
+            translation_key="auto_delay_sec",
+            icon="mdi:timer-cog-outline",
+            native_unit_of_measurement="s",
+            native_max_value=600,
+            native_min_value=10,
+            native_step=10,
+            value_fn=lambda device: device.auto_delay_sec,
+            method=lambda device, value: device.set_auto_delay_sec(int(value)),
+            name="Auto Clean Delay"
+        ),
+        PetLibroNumberEntityDescription[LumaSmartLitterBox](
+            key="duration_after_deodorization",
+            translation_key="duration_after_deodorization",
+            icon="mdi:air-purifier",
+            native_unit_of_measurement="min",
+            native_max_value=30,
+            native_min_value=1,
+            native_step=1,
+            value_fn=lambda device: device.duration_after_deodorization,
+            method=lambda device, value: device.set_duration_after_deodorization(int(value)),
+            name="Post-Use Deodorization Duration"
+        ),
     ],
 }
 

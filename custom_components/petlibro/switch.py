@@ -59,6 +59,30 @@ DEVICE_SWITCH_MAP: dict[type[Device], list[PetLibroSwitchEntityDescription]] = {
             set_fn=lambda device, value: device.set_deodorization_switch(value),
             name="Deodorization",
         ),
+        PetLibroSwitchEntityDescription[LumaSmartLitterBox](
+            key="after_deodorization_switch",
+            translation_key="after_deodorization_switch",
+            set_fn=lambda device, value: device.set_after_deodorization_switch(value),
+            name="After-Use Deodorization",
+        ),
+        PetLibroSwitchEntityDescription[LumaSmartLitterBox](
+            key="avoid_repeat_clean",
+            translation_key="avoid_repeat_clean",
+            set_fn=lambda device, value: device.set_avoid_repeat_clean(value),
+            name="Avoid Repeat Clean",
+        ),
+        PetLibroSwitchEntityDescription[LumaSmartLitterBox](
+            key="enable_auto_clean_in_sleep_mode",
+            translation_key="enable_auto_clean_in_sleep_mode",
+            set_fn=lambda device, value: device.set_enable_auto_clean_in_sleep_mode(value),
+            name="Auto Clean in Sleep Mode",
+        ),
+        PetLibroSwitchEntityDescription[LumaSmartLitterBox](
+            key="enable_deodorization_in_sleep_mode",
+            translation_key="enable_deodorization_in_sleep_mode",
+            set_fn=lambda device, value: device.set_enable_deodorization_in_sleep_mode(value),
+            name="Deodorize in Sleep Mode",
+        ),
     ],
 }
 

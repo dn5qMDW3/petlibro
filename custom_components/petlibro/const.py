@@ -3,7 +3,7 @@
 from enum import IntEnum, StrEnum
 from typing import Any
 
-from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, UnitOfMass, UnitOfVolume
+from homeassistant.const import UnitOfMass, UnitOfVolume
 
 type _Unit = Unit
 SENTINEL = object()

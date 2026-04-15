@@ -20,7 +20,7 @@ class Event:
         for listener in self._listeners.get(event_name, []):
             try:
                 listener(*args, **kwargs)
-            except:  # pragma: no cover # pylint: disable=bare-except # noqa: E722
+            except Exception:  # pragma: no cover
                 pass
 
     def on(  # pylint: disable=invalid-name

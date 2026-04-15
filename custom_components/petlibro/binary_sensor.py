@@ -71,9 +71,9 @@ class PetLibroBinarySensorEntity(PetLibroEntity[_DeviceT], BinarySensorEntity):
             self._initial_log_done = True
         elif last_state != state:
             if state:
-                _LOGGER.info(f"Device {self.device.name} is online.")
+                _LOGGER.info("Device %s is online.", self.device.name)
             else:
-                _LOGGER.warning(f"Device {self.device.name} is offline.")
+                _LOGGER.warning("Device %s is offline.", self.device.name)
 
         self._last_state = state
         return bool(state)
@@ -723,6 +723,14 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             device_class=BinarySensorDeviceClass.PROBLEM,
             should_report=lambda device: device.barn_door_error is not None,
             name="Door Error"
+        ),
+        PetLibroBinarySensorEntityDescription[LumaSmartLitterBox](
+            key="battery_supply_8_hours",
+            translation_key="battery_supply_8_hours",
+            icon="mdi:battery-clock",
+            device_class=BinarySensorDeviceClass.POWER,
+            should_report=lambda device: device.battery_supply_8_hours is not None,
+            name="Battery 8-Hour Supply"
         ),
     ],
 }

@@ -51,7 +51,7 @@ class PetLibroHub:
             _LOGGER.error("Region is missing in the configuration entry.")
             raise ValueError("Region is required to initialize PetLibroAPI.")
 
-        _LOGGER.debug(f"Initializing PetLibroAPI with email: {email}, region: {region}")
+        _LOGGER.debug("Initializing PetLibroAPI with email: %s, region: %s", email, region)
 
         # Initialize the PetLibro API instance
         self.api = PetLibroAPI(
@@ -81,7 +81,7 @@ class PetLibroHub:
         """Load devices from the API and initialize them."""
         try:
             device_list = await self.api.list_devices()
-            _LOGGER.debug(f"Fetched {len(device_list)} devices from the API.")
+            _LOGGER.debug("Fetched %s devices from the API.", len(device_list))
 
             if not device_list:
                 _LOGGER.warning("No devices found in the API response.")
@@ -90,11 +90,11 @@ class PetLibroHub:
             for device_data in device_list:
                 device_sn = device_data.get("deviceSn", "unknown")
                 device_name = device_data.get("productName", "unknown")
-                _LOGGER.debug(f"Processing device: {device_name} (Serial: {device_sn})")
+                _LOGGER.debug("Processing device: %s (Serial: %s)", device_name, device_sn)
 
                 # Check if the device is already loaded
                 if device_sn in self.devices_helper.loaded_device_sn:
-                    _LOGGER.debug(f"Device {device_sn} is already loaded, skipping further initialization.")
+                    _LOGGER.debug("Device %s is already loaded, skipping further initialization.", device_sn)
                     continue
 
                 # Get pet ids bound to this device if it's shared and shared pets are enabled
@@ -115,12 +115,12 @@ class PetLibroHub:
 
                 # Create a new device and add it without calling refresh immediately
                 if device_name in product_name_map:
-                    _LOGGER.debug(f"Loading new device: {device_name} (Serial: {device_sn})")
+                    _LOGGER.debug("Loading new device: %s (Serial: %s)", device_name, device_sn)
                     device = product_name_map[device_name](device_data, self)
                     self.devices[device_sn] = device # Add to device dict
-                    _LOGGER.debug(f"Successfully loaded device: {device_name} (Serial: {device_sn})")
+                    _LOGGER.debug("Successfully loaded device: %s (Serial: %s)", device_name, device_sn)
                 else:
-                    _LOGGER.error(f"Unsupported device found: {device_name} (Serial: {device_sn})")
+                    _LOGGER.error("Unsupported device found: %s (Serial: %s)", device_name, device_sn)
 
                 # Mark the device as loaded to prevent duplicate API calls
                 self.devices_helper.loaded_device_sn.add(device_sn)
@@ -130,9 +130,9 @@ class PetLibroHub:
                 self.devices_helper.loaded_device_sn, keep=True
             )
 
-            _LOGGER.debug(f"Final devices loaded: {len(self.devices)} devices")
+            _LOGGER.debug("Final devices loaded: %s devices", len(self.devices))
         except Exception as ex:
-            _LOGGER.error(f"Error while loading devices: {ex}", exc_info=True)
+            _LOGGER.error("Error while loading devices: %s", ex, exc_info=True)
 
     async def load_member(self) -> None:
         """Load Petlibro account from the API and initialize it."""
@@ -175,7 +175,7 @@ class PetLibroHub:
                 for pet_id in self.pets_helper.shared_pet_ids:
                     pet_list.append(await self.api.pets.get_details(pet_id))
         
-            _LOGGER.debug(f"Fetched {len(pet_list)} pets from the API.")
+            _LOGGER.debug("Fetched %s pets from the API.", len(pet_list))
         except Exception:
             _LOGGER.exception("Error fetching pet info.")
             return
@@ -199,7 +199,7 @@ class PetLibroHub:
         for pet_data in pet_list:
             pet_name = pet_data.get("name")
             pet_id = pet_data.get("id")
-            _LOGGER.debug(f"Processing pet: {pet_name}")
+            _LOGGER.debug("Processing pet: %s", pet_name)
 
             # Check if the pet is already loaded
             if pet_id in self.pets_helper.loaded_pet_ids:
@@ -209,15 +209,15 @@ class PetLibroHub:
                 continue
 
             # Create a new pet and add it without calling refresh immediately
-            _LOGGER.debug(f"Loading new pet: {pet_name}")
+            _LOGGER.debug("Loading new pet: %s", pet_name)
             pet = Pet(pet_data, self)
             self.pets.update({str(pet_id): pet})  # Add to pet dict
-            _LOGGER.debug(f"Successfully loaded pet: {pet_name}")
+            _LOGGER.debug("Successfully loaded pet: %s", pet_name)
 
             # Mark the pet as loaded to prevent duplicate API calls
             self.pets_helper.loaded_pet_ids.add(pet_id)
             self.last_refresh_times[str(pet_id)] = utcnow() # Set the last refresh time to now
-            _LOGGER.debug(f"Final pets loaded: {len(self.pets)} pets")
+            _LOGGER.debug("Final pets loaded: %s pets", len(self.pets))
 
         await self.pets_helper.remove_pet_entries(
             self.pets_helper.loaded_pet_ids, keep=True
@@ -334,7 +334,7 @@ class PetLibroHub:
                 "Error refreshing %s: Object is not an instance of Member, Device or Pet",
                 refresh_obj,
             )
-            raise
+            return
 
         last_refresh = self.last_refresh_times.get(identifier)
         refresh_interval = timedelta(seconds=10)
@@ -389,7 +389,7 @@ class PetLibroHub:
             self.entry,
             options={**self.entry.options, **new_options},
         )
-        _LOGGER.debug(f"Config entry options updated with: {new_options}")
+        _LOGGER.debug("Config entry options updated with: %s", new_options)
 
     async def async_refresh(self, force_member: bool = False) -> None:
         """Force a manual data refresh if enough time has passed.

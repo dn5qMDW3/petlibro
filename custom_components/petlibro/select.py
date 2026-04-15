@@ -1,16 +1,9 @@
 """Support for PETLIBRO selects."""
 from __future__ import annotations
-import math
-from .api import make_api_call
-import aiohttp
-from aiohttp import ClientSession, ClientError
-from dataclasses import dataclass
 from dataclasses import dataclass, field
 from collections.abc import Callable
 from functools import cached_property
-from typing import Optional
 from typing import Any
-from typing import List, Awaitable
 import logging
 from .const import DOMAIN, DEFAULT_PORTIONS_IN_CUP, Unit, APIKey, IntegrationSetting
 from homeassistant.components.select import (
@@ -92,7 +85,7 @@ class PetLibroSelectEntity(PetLibroEntity[_DeviceT], SelectEntity):
         
         if not self.entity_description.options:
             # If there are no options, return an empty list and log an error.
-            _LOGGER.error(f"No options available for select entity {self.name}")
+            _LOGGER.error("No options available for select entity %s", self.name)
             return []
         return super().options 
 
@@ -121,9 +114,9 @@ class PetLibroSelectEntity(PetLibroEntity[_DeviceT], SelectEntity):
         return state if state in self.options else None
 
     async def async_select_option(self, current_selection: str) -> None:
-        _LOGGER.debug(f"Setting current option {current_selection} for {self.device.name}")
+        _LOGGER.debug("Setting current option %s for %s", current_selection, self.device.name)
         try:
-            _LOGGER.debug(f"Calling method with current option={current_selection} for {self.device.name}")
+            _LOGGER.debug("Calling method with current option=%s for %s", current_selection, self.device.name)
             match self.key:
                 case "manual_feed_quantity_cups":
                      await self.device.set_manual_feed_quantity(self.options.index(current_selection) + 1)
@@ -135,9 +128,9 @@ class PetLibroSelectEntity(PetLibroEntity[_DeviceT], SelectEntity):
             if current_selection in self.options:
                 self._attr_current_option = current_selection
                 self.async_write_ha_state()
-            _LOGGER.debug(f"Current option {current_selection} set successfully for {self.device.name}")
+            _LOGGER.debug("Current option %s set successfully for %s", current_selection, self.device.name)
         except Exception as e:
-            _LOGGER.error(f"Error setting current option {current_selection} for {self.device.name}: {e}")
+            _LOGGER.error("Error setting current option %s for %s: %s", current_selection, self.device.name, e)
 
     @property
     def available(self) -> bool:
@@ -450,6 +443,24 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
         ),
     ],
     LumaSmartLitterBox: [
+        PetLibroSelectEntityDescription[LumaSmartLitterBox](
+            key="clean_mode",
+            translation_key="clean_mode_select",
+            icon="mdi:cog",
+            current_selection=lambda device: device.clean_mode,
+            method=lambda device, opt: device.set_clean_mode(opt),
+            options=["AUTO", "MANUAL"],
+            name="Clean Mode"
+        ),
+        PetLibroSelectEntityDescription[LumaSmartLitterBox](
+            key="deodorization_wind_speed",
+            translation_key="deodorization_wind_speed_select",
+            icon="mdi:fan",
+            current_selection=lambda device: device.deodorization_wind_speed,
+            method=lambda device, opt: device.set_deodorization_wind_speed(opt),
+            options=["LOW", "MEDIUM", "HIGH"],
+            name="Deodorization Wind Speed"
+        ),
     ],
 }
 

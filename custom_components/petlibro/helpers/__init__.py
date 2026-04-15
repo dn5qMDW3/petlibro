@@ -29,4 +29,4 @@ def set_missing_config_options(hub) -> None:
         hass.config_entries.async_update_entry(
             entry, options={**options, **set_defaults}
         )
-        _LOGGER.debug(f"Config entry options updated with: {set_defaults}")
+        _LOGGER.debug("Config entry options updated with: %s", set_defaults)

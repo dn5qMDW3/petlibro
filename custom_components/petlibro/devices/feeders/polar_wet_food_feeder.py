@@ -15,17 +15,13 @@ class PolarWetFoodFeeder(Device):
     async def refresh(self):
         """Refresh the device data from the API."""
         try:
-            await super().refresh()  # This calls the refresh method in GranaryFeeder (which also inherits from Device)
-    
-            # Fetch specific data for this device
             grain_status = await self.api.device_grain_status(self.serial)
             real_info = await self.api.device_real_info(self.serial)
             attribute_settings = await self.api.device_attribute_settings(self.serial)
             get_upgrade = await self.api.get_device_upgrade(self.serial)
             wet_feeding_plan = await self.api.device_wet_feeding_plan(self.serial)
             get_feeding_plan_today = await self.api.device_feeding_plan_today_new(self.serial)
-    
-            # Update internal data with fetched API data
+
             self.update_data({
                 "grainStatus": grain_status or {},
                 "realInfo": real_info or {},
@@ -35,12 +31,11 @@ class PolarWetFoodFeeder(Device):
                 "getfeedingplantoday": get_feeding_plan_today or {}
             })
         except PetLibroAPIError as err:
-            _LOGGER.error(f"Error refreshing data for PolarWetFoodFeeder: {err}")
+            _LOGGER.error("Error refreshing data for PolarWetFoodFeeder: %s", err)
 
     @property
     def available(self) -> bool:
-        _LOGGER.debug(f"Device {self.device.name} availability: {self.device.online}")
-        return self.device.online if hasattr(self.device, 'online') else True
+        return self.online
 
     @property
     def battery_state(self) -> str:
@@ -183,15 +178,15 @@ class PolarWetFoodFeeder(Device):
         plate = plate if plate is not None else self.plate_position
         try:
             if start:
-                _LOGGER.debug(f"Triggering manual feed now for {self.serial} with plate no.{plate}")
+                _LOGGER.debug("Triggering manual feed now for %s with plate no.%s", self.serial, plate)
                 await self.api.set_manual_feed_now(self.serial, plate)
             else:
-                _LOGGER.debug(f"Triggering stop feed now for {self.serial}")
+                _LOGGER.debug("Triggering stop feed now for %s", self.serial)
                 await self.api.set_stop_feed_now(self.serial, self.manual_feed_id)
-            
+
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to trigger manual feed now for {self.serial} with plate no.{plate}: {err}")
+            _LOGGER.error("Failed to trigger manual feed now for %s with plate no.%s: %s", self.serial, plate, err)
             raise PetLibroAPIError(f"Error triggering manual feed now: {err}")
     
     async def set_plate_position(self, value: str | int) -> None:
@@ -223,47 +218,47 @@ class PolarWetFoodFeeder(Device):
         await self.refresh()
 
     async def rotate_food_bowl(self) -> None:
-        _LOGGER.debug(f"Triggering rotate food bowl for {self.serial}")
+        _LOGGER.debug("Triggering rotate food bowl for %s", self.serial)
 
         try:
             await self.api.set_rotate_food_bowl(self.serial)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to trigger rotate food bowl for {self.serial}: {err}")
+            _LOGGER.error("Failed to trigger rotate food bowl for %s: %s", self.serial, err)
             raise PetLibroAPIError(f"Error triggering rotate food bowl: {err}")
 
     async def feed_audio(self) -> None:
-        _LOGGER.debug(f"Triggering feed audio for {self.serial}")
+        _LOGGER.debug("Triggering feed audio for %s", self.serial)
 
         try:
             await self.api.set_feed_audio(self.serial)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to trigger feed audio for {self.serial}: {err}")
+            _LOGGER.error("Failed to trigger feed audio for %s: %s", self.serial, err)
             raise PetLibroAPIError(f"Error triggering feed audio: {err}")
 
     async def reposition_schedule(self) -> None:
-        _LOGGER.debug(f"Triggering reposition the schedule for {self.serial}")
+        _LOGGER.debug("Triggering reposition the schedule for %s", self.serial)
 
         if not self._data.get("wetFeedingPlan"):
-            _LOGGER.debug(f"Triggering device data refresh because wet feeding plan data is missing for {self.serial}")
+            _LOGGER.debug("Triggering device data refresh because wet feeding plan data is missing for %s", self.serial)
             # Refresh the state to ensure the wet feeding plan is already fetched
             try:
                 await self.refresh()
             except aiohttp.ClientError as err:
-                _LOGGER.error(f"Failed to refresh device data for triggering reposition the schedule for {self.serial}: {err}")
+                _LOGGER.error("Failed to refresh device data for triggering reposition the schedule for %s: %s", self.serial, err)
                 raise PetLibroAPIError(f"Error refresh device data for triggering reposition schedule: {err}")
 
         wet_plan = self._data.get("wetFeedingPlan", {})
         plan_name = wet_plan.get("templateName")
 
         if not plan_name:
-            _LOGGER.error(f"Missing template name in wetFeedingPlan for {self.serial}")
+            _LOGGER.error("Missing template name in wetFeedingPlan for %s", self.serial)
             raise PetLibroAPIError("Missing template name in wetFeedingPlan")
 
         plan_data = wet_plan.get("plan", [])
         if not isinstance(plan_data, list):
-            _LOGGER.error(f"Unexpected format for wet feeding plan: {plan_data}")
+            _LOGGER.error("Unexpected format for wet feeding plan: %s", plan_data)
             raise PetLibroAPIError("Invalid wet feeding plan format")
 
         current_feeding_plan = [
@@ -279,29 +274,29 @@ class PolarWetFoodFeeder(Device):
 
         try:
             await self.api.set_reposition_schedule(self.serial, current_feeding_plan, plan_name)
-            await self.refresh() # Refresh the state after the action
+            await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to trigger reposition the schedule for {self.serial}: {err}")
+            _LOGGER.error("Failed to trigger reposition the schedule for %s: %s", self.serial, err)
             raise PetLibroAPIError(f"Error triggering reposition schedule: {err}")
 
     # Method for indicator turn on
     async def set_light_on(self) -> None:
-        _LOGGER.debug(f"Turning on the indicator for {self.serial}")
+        _LOGGER.debug("Turning on the indicator for %s", self.serial)
         try:
             await self.api.set_light_on(self.serial)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to turn on the indicator for {self.serial}: {err}")
+            _LOGGER.error("Failed to turn on the indicator for %s: %s", self.serial, err)
             raise PetLibroAPIError(f"Error turning on the indicator: {err}")
 
     # Method for indicator turn off
     async def set_light_off(self) -> None:
-        _LOGGER.debug(f"Turning off the indicator for {self.serial}")
+        _LOGGER.debug("Turning off the indicator for %s", self.serial)
         try:
             await self.api.set_light_off(self.serial)
             await self.refresh()  # Refresh the state after the action
         except aiohttp.ClientError as err:
-            _LOGGER.error(f"Failed to turn off the indicator for {self.serial}: {err}")
+            _LOGGER.error("Failed to turn off the indicator for %s: %s", self.serial, err)
             raise PetLibroAPIError(f"Error turning off the indicator: {err}")
 
     @property

@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import logging
 from typing import Any, Generic, TypeVar
-from functools import cached_property
-
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
@@ -47,7 +45,7 @@ class PetLibroEntity(
         if not self.device.saved_to_options:
             self.device.save_to_options()
 
-    @cached_property
+    @property
     def device_info(self) -> DeviceInfo | None:
         """Return the device information for a PETLIBRO."""
         assert self.device.serial
@@ -60,7 +58,6 @@ class PetLibroEntity(
             sw_version=self.device.software_version,
             hw_version=self.device.hardware_version,
             serial_number=self.device.serial,
-            configuration_url=self.device.icon_url,
         )
 
     @property
@@ -93,7 +90,7 @@ def create_platform_setup(
         entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
     ) -> None:
-        hub: PetLibroHub | None = hass.data[DOMAIN].get(entry.entry_id)
+        hub: PetLibroHub | None = getattr(entry, "runtime_data", None)
 
         if not hub:
             _LOGGER.error("Hub not found for entry: %s", entry.entry_id)

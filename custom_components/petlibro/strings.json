@@ -25,5 +25,614 @@
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
       "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
     }
+  },
+  "entity": {
+    "sensor": {
+      "wifi_ssid": {
+        "name": "Wi-Fi SSID"
+      },
+      "wifi_rssi": {
+        "name": "Wi-Fi Signal Strength"
+      },
+      "remaining_desiccant": {
+        "name": "Desiccant Remaining Days"
+      },
+      "battery_state": {
+        "name": "Battery Level"
+      },
+      "electric_quantity": {
+        "name": "Battery / AC %"
+      },
+      "today_feeding_quantity_weight": {
+        "name": "Today's Feeding Quantity (Weight)"
+      },
+      "today_feeding_quantity_volume": {
+        "name": "Today's Feeding Quantity (Volume)"
+      },
+      "today_feeding_times": {
+        "name": "Today's Feeding Times"
+      },
+      "today_eating_times": {
+        "name": "Today's Eating Times"
+      },
+      "today_eating_time": {
+        "name": "Today's Total Eating Time"
+      },
+      "last_feed_time": {
+        "name": "Last Feed Time"
+      },
+      "last_feed_quantity_weight": {
+        "name": "Last Feed Quantity (Weight)"
+      },
+      "last_feed_quantity_volume": {
+        "name": "Last Feed Quantity (Volume)"
+      },
+      "next_feed_time": {
+        "name": "Next Feed Time"
+      },
+      "next_feed_quantity_weight": {
+        "name": "Next Feed Quantity (Weight)"
+      },
+      "next_feed_quantity_volume": {
+        "name": "Next Feed Quantity (Volume)"
+      },
+      "today_drinking_amount": {
+        "name": "Today's Water Consumption"
+      },
+      "weight": {
+        "name": "Current Weight"
+      },
+      "weight_percent": {
+        "name": "Remaining Water (%)"
+      },
+      "remaining_water": {
+        "name": "Remaining Water"
+      },
+      "use_water_interval": {
+        "name": "Water Interval"
+      },
+      "use_water_duration": {
+        "name": "Water Time Duration"
+      },
+      "remaining_filter_days": {
+        "name": "Remaining Filter Day"
+      },
+      "remaining_cleaning_days": {
+        "name": "Remaining Cleaning Days"
+      },
+      "resolution": {
+        "name": "Camera Resolution"
+      },
+      "night_vision": {
+        "name": "Night Vision Mode"
+      },
+      "enable_video_record": {
+        "name": "Video Recording Enabled"
+      },
+      "video_record_switch": {
+        "name": "Video Recording Switch"
+      },
+      "video_record_mode": {
+        "name": "Video Recording Mode"
+      },
+      "next_feeding_day": {
+        "name": "Feeding Schedule"
+      },
+      "next_feeding_time": {
+        "name": "Feeding Begins"
+      },
+      "next_feeding_end_time": {
+        "name": "Feeding Ends"
+      },
+      "temperature": {
+        "name": "Temperature"
+      },
+      "plate_position": {
+        "name": "Plate Position"
+      },
+      "display_selection": {
+        "name": "Display Value"
+      },
+      "vacuum_mode": {
+        "name": "Vacuum Mode"
+      },
+      "battery_charge_state": {
+        "name": "Battery Status"
+      },
+      "today_drinking_time": {
+        "name": "Today's Total Drinking Time"
+      },
+      "today_drinking_count": {
+        "name": "Today's Total Drinking Times"
+      },
+      "yesterday_drinking_count": {
+        "name": "Yesterday's Total Drinking Times"
+      },
+      "today_avg_time": {
+        "name": "Today's Average Drinking Time"
+      },
+      "yesterday_drinking_amount": {
+        "name": "Yesterday's Water Consumption"
+      },
+      "name": {
+        "name": "Name"
+      },
+      "type": {
+        "name": "Pet type"
+      },
+      "breed_name": {
+        "name": "Breed"
+      },
+      "age": {
+        "name": "Age",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          },
+          "months": {
+            "name": "Months"
+          },
+          "days": {
+            "name": "Days"
+          },
+          "days_until_birthday": {
+            "name": "Days until Birthday"
+          }
+        }
+      },
+      "bound_device_nums": {
+        "name": "Linked Devices"
+      },
+      "rfid": {
+        "name": "RFID Collar"
+      },
+      "remaining_replacement_days": {
+        "name": "Filter Replacement Days"
+      },
+      "remaining_mat_days": {
+        "name": "Mat Replacement Days"
+      },
+      "filter_state": {
+        "name": "Filter State"
+      },
+      "clean_state": {
+        "name": "Cleanliness State"
+      },
+      "mat_state": {
+        "name": "Mat State"
+      },
+      "door_state_sensor": {
+        "name": "Door State"
+      },
+      "throw_mode": {
+        "name": "Throw Mode"
+      },
+      "deodorization_mode": {
+        "name": "Deodorization Mode"
+      },
+      "garbage_warehouse_state": {
+        "name": "Waste Bin State"
+      },
+      "running_state": {
+        "name": "Running State"
+      },
+      "exception_message": {
+        "name": "Exception Message"
+      },
+      "clean_mode": {
+        "name": "Clean Mode"
+      },
+      "volume": {
+        "name": "Volume"
+      },
+      "today_potty_times": {
+        "name": "Today Potty Times"
+      },
+      "today_potty_duration": {
+        "name": "Today Potty Duration"
+      },
+      "deodorization_wind_speed": {
+        "name": "Deodorization Wind Speed"
+      }
+    },
+    "image": {
+      "avatar": {
+        "name": "Avatar"
+      }
+    },
+    "date": {
+      "birthday": {
+        "name": "Date of Birth"
+      }
+    },
+    "switch": {
+      "child_lock_switch": {
+        "name": "Buttons Lock"
+      },
+      "enable_light": {
+        "name": "Enable Display"
+      },
+      "enable_sound": {
+        "name": "Enable Sound"
+      },
+      "manual_feed_now": {
+        "name": "Manually Open/Close Lid"
+      },
+      "sterilization": {
+        "name": "Neutered/Spayed"
+      },
+      "sound_switch": {
+        "name": "Sound"
+      },
+      "light_switch": {
+        "name": "Light"
+      },
+      "deodorization_mode_switch": {
+        "name": "Deodorization"
+      },
+      "after_deodorization_switch": {
+        "name": "After-Use Deodorization"
+      },
+      "avoid_repeat_clean": {
+        "name": "Avoid Repeat Clean"
+      },
+      "enable_auto_clean_in_sleep_mode": {
+        "name": "Auto Clean in Sleep Mode"
+      },
+      "enable_deodorization_in_sleep_mode": {
+        "name": "Deodorize in Sleep Mode"
+      }
+    },
+    "button": {
+      "manual_feed": {
+        "name": "Manual Feed"
+      },
+      "manual_cleaning": {
+        "name": "Manual Cleaning"
+      },
+      "enable_feeding_plan": {
+        "name": "Enable Feeding Schedule"
+      },
+      "disable_feeding_plan": {
+        "name": "Disable Feeding Schedule"
+      },
+      "manual_lid_open": {
+        "name": "Manually Open Lid"
+      },
+      "display_on": {
+        "name": "Turn On Display"
+      },
+      "display_off": {
+        "name": "Turn Off Display"
+      },
+      "sound_on": {
+        "name": "Turn On Sound"
+      },
+      "sound_off": {
+        "name": "Turn Off Sound"
+      },
+      "sleep_on": {
+        "name": "Turn On Sleep Mode"
+      },
+      "sleep_off": {
+        "name": "Turn Off Sleep Mode"
+      },
+      "desiccant_reset": {
+        "name": "Desiccant Reset"
+      },
+      "ring_bell": {
+        "name": "Ring Bell"
+      },
+      "rotate_food_bowl": {
+        "name": "Rotate Food Bowl"
+      },
+      "reposition_schedule": {
+        "name": "Reposition Schedule"
+      },
+      "light_on": {
+        "name": "Turn On Indicator"
+      },
+      "light_off": {
+        "name": "Turn Off Indicator"
+      },
+      "cleaning_reset": {
+        "name": "Cleaning Reset"
+      },
+      "filter_reset": {
+        "name": "Filter Reset"
+      },
+      "feeding_plan_enable": {
+        "name": "Enable Selected Plan"
+      },
+      "feeding_plan_disable": {
+        "name": "Disable Selected Plan"
+      },
+      "feeding_plan_delete": {
+        "name": "Delete Selected Plan"
+      },
+      "feeding_plan_skip_today": {
+        "name": "Skip Selected Plan Today"
+      },
+      "feeding_plan_unskip_today": {
+        "name": "Un-skip Selected Plan Today"
+      },
+      "feeding_plan_today_enable_all": {
+        "name": "Enable Today's Feeding Schedule"
+      },
+      "feeding_plan_today_disable_all": {
+        "name": "Disable Today's Feeding Schedule"
+      },
+      "trigger_clean": {
+        "name": "Start Clean Cycle"
+      },
+      "trigger_empty_waste": {
+        "name": "Empty Waste Bin"
+      },
+      "trigger_level_litter": {
+        "name": "Level Litter"
+      },
+      "trigger_stop_action": {
+        "name": "Stop Current Action"
+      },
+      "trigger_open_door": {
+        "name": "Open Door"
+      },
+      "trigger_close_door": {
+        "name": "Close Door"
+      },
+      "trigger_vacuum": {
+        "name": "Run Air Purifier"
+      },
+      "reset_filter": {
+        "name": "Reset Filter Timer"
+      },
+      "reset_cleaning": {
+        "name": "Reset Cleaning Timer"
+      },
+      "reset_mat": {
+        "name": "Reset Mat Timer"
+      }
+    },
+    "binary_sensor": {
+      "door_state": {
+        "name": "Lid"
+      },
+      "food_dispenser_state": {
+        "name": "Food Dispenser"
+      },
+      "food_outlet_state": {
+        "name": "Food Outlet"
+      },
+      "vacuum_state": {
+        "name": "Vacuum State"
+      },
+      "door_blocked": {
+        "name": "Lid Status"
+      },
+      "food_low": {
+        "name": "Food Status"
+      },
+      "online": {
+        "name": "Wi-Fi"
+      },
+      "whether_in_sleep_mode": {
+        "name": "Sleep Mode"
+      },
+      "enable_low_battery_notice": {
+        "name": "Battery Status"
+      },
+      "child_lock_switch": {
+        "name": "Buttons Lock"
+      },
+      "sound_switch": {
+        "name": "Sound Status"
+      },
+      "display_switch": {
+        "name": "Display Status"
+      },
+      "light_switch": {
+        "name": "Indicator"
+      },
+      "power_state": {
+        "name": "Power State"
+      },
+      "water_state": {
+        "name": "Water Dispensing State"
+      },
+      "feeding_plan_state": {
+        "name": "Today's Feeding Schedule"
+      },
+      "feeding_schedule": {
+        "name": "Feeding Schedule"
+      },
+      "rubbish_full_state": {
+        "name": "Waste Bin Full"
+      },
+      "rubbish_inplace_state": {
+        "name": "Waste Bin Installed"
+      },
+      "deodorization_state_on": {
+        "name": "Deodorization Active"
+      },
+      "door_open": {
+        "name": "Door"
+      },
+      "device_stopped_working": {
+        "name": "Device Error"
+      },
+      "barn_door_error": {
+        "name": "Door Error"
+      },
+      "battery_supply_8_hours": {
+        "name": "Battery 8-Hour Supply"
+      }
+    },
+    "number": {
+      "sound_level": {
+        "name": "Volume Level"
+      },
+      "desiccant_cycle": {
+        "name": "Desiccant Cycle"
+      },
+      "lid_close_time": {
+        "name": "Lid Close Time"
+      },
+      "water_interval": {
+        "name": "Water Interval"
+      },
+      "water_low_threshold": {
+        "name": "Water Low Threshold"
+      },
+      "water_dispensing_duration": {
+        "name": "Water Dispensing Duration"
+      },
+      "cleaning_cycle": {
+        "name": "Cleaning Cycle"
+      },
+      "filter_cycle": {
+        "name": "Filter Cycle"
+      },
+      "manual_feed_quantity": {
+        "name": "Manual Feed Quantity"
+      },
+      "weight": {
+        "name": "Current Weight"
+      },
+      "drinking_goal": {
+        "name": "Drinking Goal"
+      },
+      "feeding_goal": {
+        "name": "Dry Food Goal"
+      },
+      "weight_goal": {
+        "name": "Weight Goal"
+      },
+      "training_goal": {
+        "name": "Training Goal"
+      },
+      "playing_goal": {
+        "name": "Playing Goal"
+      },
+      "walking_goal": {
+        "name": "Walking Goal"
+      },
+      "volume_control": {
+        "name": "Volume"
+      },
+      "auto_delay_sec": {
+        "name": "Auto Clean Delay"
+      },
+      "duration_after_deodorization": {
+        "name": "Post-Use Deodorization Duration"
+      }
+    },
+    "select": {
+      "lid_speed": {
+        "name": "Lid Speed"
+      },
+      "lid_mode": {
+        "name": "Lid Mode"
+      },
+      "display_icon": {
+        "name": "Icon on Display"
+      },
+      "water_dispensing_mode": {
+        "name": "Water Dispensing Mode"
+      },
+      "plate_position": {
+        "name": "Plate Position"
+      },
+      "manual_feed_quantity_cups": {
+        "name": "Manual Feed Quantity"
+      },
+      "feeding_plan_select": {
+        "name": "Feeding Schedule"
+      },
+      "feeding_plan_today_select": {
+        "name": "Today's Feeding Schedule"
+      },
+      "vacuum_mode": {
+        "name": "Vacuum Mode"
+      },
+      "pet_sex": {
+        "name": "Sex",
+        "state": {
+          "none": "None",
+          "male": "Male",
+          "female": "Female"
+        }
+      },
+      "clean_mode_select": {
+        "name": "Clean Mode"
+      },
+      "deodorization_wind_speed_select": {
+        "name": "Deodorization Wind Speed"
+      }
+    },
+    "text": {
+      "display_text": {
+        "name": "Text on Display"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Update"
+      }
+    }
+  },
+  "options": {
+    "abort": {
+      "no_member_data": "Member data not loaded, please check logs",
+      "account_settings_abort": "{account_settings_abort}",
+      "integration_settings_abort": "{integration_settings_abort}",
+      "error_check_logs": "Error, please check logs"
+    },
+    "error": {
+      "unknown": "Unexpected error"
+    },
+    "step": {
+      "init": {
+        "menu_options": {
+          "integration_settings": "Integration settings",
+          "account_settings": "Account settings"
+        }
+      },
+      "integration_settings": {
+        "title": "Integration Settings",
+        "data": {
+          "manual_feed_portions": "Set Manual Feed amount by Portions",
+          "pet_feed_quantity_no_rfid": "Include non-RFID Pet Consumption",
+          "enable_shared_pets": "Show Pets from Shared Devices"
+        },
+        "data_description": {
+          "manual_feed_portions": "Default: Set by your chosen unit for pet feed ({uom}).",
+          "pet_feed_quantity_no_rfid": "Pet consumption will include non-RFID devices when only one pet is assigned to them.",
+          "enable_shared_pets": "Access pets from other accounts that are linked to device(s) they share with you."
+        }
+      },
+      "account_settings": {
+        "title": "Account Settings",
+        "description": "For account: {email}",
+        "data": {
+          "nickname": "Nickname",
+          "gender": "Gender"
+        },
+        "sections": {
+          "measurement_unit": {
+            "name": "Measurement Units",
+            "data": {
+              "feedUnitType": "Feeder/Feeding",
+              "waterUnitType": "Fountain/Drinking",
+              "weightUnitType": "Weight",
+              "update_all_units": "Update measurement unit of all Petlibro unit sensors."
+            },
+            "data_description": {
+              "feedUnitType": "Please note that 'cups' are not supported for sensor entities.",
+              "update_all_units": "By default, changing a unit here only updates sensor entities of that type."
+            }
+          }
+        }
+      }
+    }
   }
 }

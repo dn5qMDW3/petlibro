@@ -99,6 +99,11 @@ class Device(Event):
         return cast(str, self._data.get("hardwareVersion"))
 
     @property
+    def icon_url(self) -> str | None:
+        """Product icon URL from the device list API response."""
+        return self._data.get("icon")
+
+    @property
     def boundPets(self) -> list[dict]:
         return self._data.get("boundPets") or []
 

@@ -2,7 +2,6 @@ import asyncio
 
 from logging import getLogger
 from collections.abc import Mapping
-import sys
 from typing import Any
 from datetime import datetime, timedelta
 from .const import UPDATE_INTERVAL_SECONDS
@@ -163,34 +162,33 @@ class PetLibroHub:
 
     async def load_pets(self) -> None:
         """Load pets from the API and initialize them."""
+        pet_list: list[dict] = []
+
+        # Fetch owned pets in their own try block so shared pet failures
+        # cannot prevent owned pets from loading.
         try:
             response = await self.api.pets.get_list()
-            pet_list: list[dict] = response.get("petList", [])
-
-            #TODO seperate shared pets into a different try so owned ones can still get loaded
-            if self.entry.options.get(IntegrationSetting.ENABLE_SHARED_PETS):
-                for pet_data in pet_list:
-                    self.pets_helper.shared_pet_ids.discard(pet_data.get("id"))
-            
-                for pet_id in self.pets_helper.shared_pet_ids:
-                    pet_list.append(await self.api.pets.get_details(pet_id))
-        
-            _LOGGER.debug("Fetched %s pets from the API.", len(pet_list))
+            pet_list = response.get("petList", [])
+            _LOGGER.debug("Fetched %s owned pets from the API.", len(pet_list))
         except Exception:
-            _LOGGER.exception("Error fetching pet info.")
-            return
+            _LOGGER.exception("Error fetching owned pet info.")
 
-        # Get shared pets if set to do so.
+        # Fetch shared pets only if enabled, in a separate try block.
         if self.entry.options.get(
             IntegrationSetting.ENABLE_SHARED_PETS,
             IntegrationSetting.ENABLE_SHARED_PETS.default,
         ):
+            # Avoid re-fetching pets already returned by get_list as owned.
+            owned_ids = {pet.get("id") for pet in pet_list}
+            shared_ids_to_fetch = self.pets_helper.shared_pet_ids - owned_ids
+
             try:
-                for pet_id in self.pets_helper.shared_pet_ids:
+                for pet_id in shared_ids_to_fetch:
                     if pet_data := await self.api.pets.get_details(pet_id):
                         pet_list.append(pet_data)
+                _LOGGER.debug("Fetched %s shared pets from the API.", len(shared_ids_to_fetch))
             except Exception:
-                _LOGGER.error("Error fetching shared pet info.")
+                _LOGGER.exception("Error fetching shared pet info.")
 
         if not pet_list:
             _LOGGER.warning("No pets found in the API response.")
@@ -225,12 +223,9 @@ class PetLibroHub:
 
     async def _initialize_helpers(self) -> None:
         """Initialise helper classes."""
-        if "Unit_Entities" not in sys.modules:
-            from .helpers.unit_entities import Unit_Entities
-        if "PetsHelper" not in sys.modules:
-            from .helpers.pets import PetsHelper
-        if "DevicesHelper" not in sys.modules:
-            from .helpers.devices import DevicesHelper
+        from .helpers.unit_entities import Unit_Entities
+        from .helpers.pets import PetsHelper
+        from .helpers.devices import DevicesHelper
 
         self.unit_entities = Unit_Entities(hass=self.hass, config_entry=self.entry, hub=self)
         self.pets_helper = PetsHelper(hass=self.hass, config_entry=self.entry, hub=self)

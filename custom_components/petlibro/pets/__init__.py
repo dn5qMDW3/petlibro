@@ -4,7 +4,6 @@ from __future__ import annotations
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from logging import getLogger
-import sys
 from typing import Any
 
 from ..api import PetLibroAPI
@@ -25,8 +24,7 @@ class Pet(Event):
     def __init__(self, data: dict[str, str | Any], hub) -> None:
         """Initialise the Pet object."""
         super().__init__()
-        if "PetLibroHub" not in sys.modules:
-            from ..hub import PetLibroHub
+        from ..hub import PetLibroHub
         self.hub: PetLibroHub = hub
         self.member: Member = self.hub.member
         self.api: PetLibroAPI = self.hub.api
@@ -36,8 +34,7 @@ class Pet(Event):
 
     def entities(self, pet_entity, hub) -> list:
         """Create entites from the entity map."""
-        if "PET_ENTITY_MAP" not in sys.modules:
-            from .entity import PET_ENTITY_MAP
+        from .entity import PET_ENTITY_MAP
         entities = []
         entities.extend(
             [

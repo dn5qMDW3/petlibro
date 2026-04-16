@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from collections.abc import Callable
 from functools import cached_property
-from typing import Optional
 import logging
 from .const import Unit, APIKey as API, VALID_UNIT_TYPES
 from homeassistant.components.binary_sensor import (
@@ -28,7 +27,6 @@ from .devices.fountains.dockstream_smart_rfid_fountain import DockstreamSmartRFI
 from .devices.fountains.dockstream_2_smart_cordless_fountain import Dockstream2SmartCordlessFountain
 from .devices.fountains.dockstream_2_smart_fountain import Dockstream2SmartFountain
 from .devices.litterboxes.luma_smart_litter_box import LumaSmartLitterBox
-from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription
 
 
 @dataclass(frozen=True)
@@ -37,7 +35,7 @@ class PetLibroBinarySensorEntityDescription(BinarySensorEntityDescription, PetLi
 
     device_class_fn: Callable[[_DeviceT], BinarySensorDeviceClass | None] = lambda _: None
     should_report: Callable[[_DeviceT], bool] = lambda _: True
-    device_class: Optional[BinarySensorDeviceClass] = None
+    device_class: BinarySensorDeviceClass | None = None
     # Optional override for is_on — use when the entity key differs from the device property
     value_fn: Callable | None = None
 

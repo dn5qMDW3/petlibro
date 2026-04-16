@@ -184,7 +184,10 @@ class PetlibroOptionsFlow(OptionsFlow):
         self.translations = await async_get_translations(
             self.hass, self.hass.config.language, "common")
         self.entry = self.config_entry
-        self.hub = self.hass.data[DOMAIN][self.handler]
+        self.hub = getattr(self.entry, "runtime_data", None)
+        if self.hub is None:
+            # Fall back to legacy storage if runtime_data not yet set
+            self.hub = self.hass.data[DOMAIN][self.handler]
         self.api = self.hub.api
         self.member = self.hub.member
         self._data.clear()

@@ -6,7 +6,6 @@ from datetime import date
 from functools import cached_property
 from logging import getLogger
 from pathlib import Path
-import sys
 from typing import Any
 
 from homeassistant.util.dt import utcnow
@@ -80,8 +79,7 @@ class PL_PetEntity(CoordinatorEntity[DataUpdateCoordinator[bool]]):
 
     def __init__(self, pet: Pet, hub, description) -> None:
         """Initialise the pet entity."""
-        if "PetLibroHub" not in sys.modules:
-            from ..hub import PetLibroHub
+        from ..hub import PetLibroHub
         self.pet = pet
         self.hub: PetLibroHub = hub
         self.helper = self.hub.pets_helper

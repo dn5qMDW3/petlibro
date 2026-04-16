@@ -1,7 +1,3 @@
-from typing import Dict, Type
-from .device import Device
-
-from . import Device
 from .device import Device
 from .feeders.feeder import Feeder
 from .feeders.air_smart_feeder import AirSmartFeeder
@@ -17,7 +13,7 @@ from .fountains.dockstream_2_smart_fountain import Dockstream2SmartFountain
 from .litterboxes.litter_box import LitterBox
 from .litterboxes.luma_smart_litter_box import LumaSmartLitterBox
 
-product_name_map : Dict[str, Type[Device]] = {
+product_name_map : dict[str, type[Device]] = {
     "Air Smart Feeder": AirSmartFeeder,
     "Granary Smart Feeder": GranarySmartFeeder,
     "Granary Smart Camera Feeder": GranarySmartCameraFeeder,

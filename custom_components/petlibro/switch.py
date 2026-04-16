@@ -115,7 +115,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up PETLIBRO switches using config entry."""
-    hub: PetLibroHub = hass.data[DOMAIN].get(entry.entry_id)
+    hub: PetLibroHub | None = getattr(entry, "runtime_data", None)
 
     if not hub:
         _LOGGER.error("Hub not found for entry: %s", entry.entry_id)

@@ -21,7 +21,7 @@ class OneRFIDSmartFeeder(Feeder):
             get_work_record = await self.api.get_device_work_record(self.serial)
             get_feeding_plan_today = await self.api.device_feeding_plan_today_new(self.serial)
             feeding_plan_list = (await self.api.device_feeding_plan_list(self.serial)
-                if self._data.get("enableFeedingPlan") else [])
+                if self._data.get("realInfo", {}).get("enableFeedingPlan") else [])
 
             self.update_data({
                 "grainStatus": grain_status or {},
@@ -113,7 +113,7 @@ class OneRFIDSmartFeeder(Feeder):
     # ------------------------------------------------------------------
 
     async def set_desiccant_cycle(self, value: float) -> None:
-        await self.api.set_desiccant_cycle(self.serial, value, "DESSICANT")
+        await self.api.set_maintenance_frequency(self.serial, "DESSICANT", value)
         await self.refresh()
 
     async def set_sound_level(self, value: float) -> None:

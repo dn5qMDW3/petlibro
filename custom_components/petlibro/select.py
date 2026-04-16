@@ -393,7 +393,7 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
                 else
                 _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_water_mode_radar_far(d.serial, interval, duration, currently_off=off)) if opt == "Sensor-Activated (Far)"
                 else
-                _apply_with_cached_schedule( d, lambda interval, duration, off: d.api.set_new_water_mode_constant(d.serial, interval, duration, currently_off=off))  # Flowing Water (Constant)
+                _apply_with_cached_schedule( d, lambda interval, duration, off: d.api.set_water_mode_constant(d.serial, interval, duration, currently_off=off))  # Flowing Water (Constant)
             ),
             options=['Flowing Water (Constant)','Sensor-Activated (Near)','Sensor-Activated (Far)','Off'],
             name="Water Dispensing Mode"
@@ -408,9 +408,9 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
             method=lambda d, opt: (
                 _apply_and_refresh(d, d.api.set_water_mode_off(d.serial)) if opt == "Off"
                 else
-                _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_new_water_mode_intermittent(d.serial, interval, duration, currently_off=off)) if opt == "Intermittent Water (Scheduled)"
+                _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_water_mode_intermittent(d.serial, interval, duration, currently_off=off)) if opt == "Intermittent Water (Scheduled)"
                 else
-                _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_new_water_mode_constant(d.serial, interval, duration, currently_off=off))
+                _apply_with_cached_schedule(d, lambda interval, duration, off: d.api.set_water_mode_constant(d.serial, interval, duration, currently_off=off))
             ),
             options=['Flowing Water (Constant)','Intermittent Water (Scheduled)','Off'],
             name="Water Dispensing Mode"
@@ -472,7 +472,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up PETLIBRO select using config entry."""
     # Retrieve the hub from hass.data that was set up in __init__.py
-    hub: PetLibroHub = hass.data[DOMAIN].get(entry.entry_id)
+    hub: PetLibroHub | None = getattr(entry, "runtime_data", None)
 
     if not hub:
         _LOGGER.error("Hub not found for entry: %s", entry.entry_id)

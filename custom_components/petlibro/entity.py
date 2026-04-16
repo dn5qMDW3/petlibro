@@ -60,6 +60,16 @@ class PetLibroEntity(
             serial_number=self.device.serial,
         )
 
+    @property
+    def entity_picture(self) -> str | None:
+        """Return the device product icon as entity picture.
+
+        Consumed by petlibro-cards (getDeviceImage in utils.ts) to render
+        the device image on the dashboard card. Do not remove without
+        updating the cards' image-resolution logic.
+        """
+        return getattr(self.device, "icon_url", None)
+
     async def async_added_to_hass(self) -> None:
         """Set up a listener for the entity."""
         await super().async_added_to_hass()

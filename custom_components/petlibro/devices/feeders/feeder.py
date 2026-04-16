@@ -1,7 +1,6 @@
 """Generic PETLIBRO feeder"""
 import ast
 from zoneinfo import ZoneInfo
-import aiohttp
 
 from typing import cast
 from logging import getLogger
@@ -205,11 +204,8 @@ class Feeder(Device):
 
     @property
     def feeding_plan_state(self) -> bool:
-        return bool(self._data.get("enableFeedingPlan", False))
-
-    @property
-    def feeding_plan(self) -> bool:
-        return self._data.get("enableFeedingPlan", False)
+        """Whether the feeding plan is enabled (read from realInfo namespace)."""
+        return bool(self._data.get("realInfo", {}).get("enableFeedingPlan", False))
 
     async def set_feeding_plan(self, value: bool) -> None:
         await self.api.set_feeding_plan(self.serial, value)
@@ -441,7 +437,7 @@ class Feeder(Device):
         await self.refresh()
 
     async def set_desiccant_cycle(self, value: float) -> None:
-        await self.api.set_desiccant_cycle(self.serial, value, "changeDesiccantFrequency")
+        await self.api.set_maintenance_frequency(self.serial, "changeDesiccantFrequency", value)
         await self.refresh()
 
     async def set_desiccant_reset(self) -> None:

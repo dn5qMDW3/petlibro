@@ -1,7 +1,6 @@
 # Error Mode - Used for pulling API for new devices. Enable Error Mode and Disable Debug Mode.
 
 from logging import getLogger
-import sys
 from typing import cast
 
 from .event import Event, EVENT_UPDATE
@@ -14,8 +13,7 @@ _LOGGER = getLogger(__name__)
 class Device(Event):
     def __init__(self, data: dict, hub):
         super().__init__()
-        if "PetLibroHub" not in sys.modules:
-            from ..hub import PetLibroHub
+        from ..hub import PetLibroHub
         self._data: dict = {}
         self.hub: PetLibroHub = hub
         self.api = self.hub.api

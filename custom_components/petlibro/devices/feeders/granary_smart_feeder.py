@@ -59,7 +59,7 @@ class GranarySmartFeeder(Feeder):
             get_default_matrix = await self.api.get_default_matrix(self.serial)
             get_feeding_plan_today = await self.api.device_feeding_plan_today_new(self.serial)
             feeding_plan_list = (await self.api.device_feeding_plan_list(self.serial)
-                if self._data.get("enableFeedingPlan") else [])
+                if self._data.get("realInfo", {}).get("enableFeedingPlan") else [])
 
             self.update_data({
                 "grainStatus": grain_status or {},

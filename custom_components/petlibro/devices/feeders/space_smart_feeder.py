@@ -21,7 +21,7 @@ class SpaceSmartFeeder(Feeder):
             get_work_record = await self.api.get_device_work_record(self.serial)
             get_device_events = await self.api.device_events(self.serial)
             feeding_plan_list = (await self.api.device_feeding_plan_list(self.serial)
-                if self._data.get("enableFeedingPlan") else [])
+                if self._data.get("realInfo", {}).get("enableFeedingPlan") else [])
 
             self.update_data({
                 "grainStatus": grain_status or {},

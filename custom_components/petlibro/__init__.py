@@ -3,6 +3,7 @@ import logging
 from homeassistant.core import HomeAssistant
 from homeassistant.const import Platform
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.device_registry import DeviceEntry
 from .devices import Device
 from .devices.feeders.feeder import Feeder
@@ -95,8 +96,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: PetLibroConfigEntry) -> 
         return True
 
     except Exception as err:
-        _LOGGER.error("Failed to set up PetLibro integration: %s", err, exc_info=True)
-        return False
+        _LOGGER.warning("PetLibro setup failed, will retry: %s", err)
+        raise ConfigEntryNotReady(f"PetLibro setup failed: {err}") from err
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: PetLibroConfigEntry) -> bool:

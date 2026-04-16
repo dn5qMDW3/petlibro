@@ -594,7 +594,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up PETLIBRO number using config entry."""
     # Retrieve the hub from hass.data that was set up in __init__.py
-    hub: PetLibroHub = hass.data[DOMAIN].get(entry.entry_id)
+    hub: PetLibroHub | None = getattr(entry, "runtime_data", None)
 
     if not hub:
         _LOGGER.error("Hub not found for entry: %s", entry.entry_id)

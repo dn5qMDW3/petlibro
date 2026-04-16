@@ -30,3 +30,6 @@ config/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# PETLIBRO APK (for reverse engineering research)
+Petlibro_*.xapk

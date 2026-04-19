@@ -108,8 +108,11 @@ class PetLibroHub:
 
                 # Get pet ids bound to this device if it's shared and shared pets are enabled
                 if (
-                    self.entry.options.get(IntegrationSetting.ENABLE_SHARED_PETS)
-                    and device_data.get("shareId") 
+                    self.entry.options.get(
+                        IntegrationSetting.ENABLE_SHARED_PETS,
+                        IntegrationSetting.ENABLE_SHARED_PETS.default,
+                    )
+                    and device_data.get("shareId")
                     and device_sn != "unknown"
                 ):
                     bound_pets = await self.api.device_get_bound_pets(device_sn)

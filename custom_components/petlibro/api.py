@@ -9,6 +9,7 @@ from .exceptions import PetLibroAPIError
 from aiohttp import ClientSession
 
 import aiohttp
+import asyncio
 import uuid  # To generate unique request IDs
 
 async def make_api_call(session, url, data):
@@ -32,7 +33,7 @@ class PetLibroSession:
             "source": "ANDROID",
             "language": "EN",
             "timezone": time_zone or "America/Chicago",
-            "version": "1.3.45",
+            "version": "1.8.10",
         }
 
     async def post(self, path: str, **kwargs: Any) -> JSON:
@@ -65,7 +66,7 @@ class PetLibroSession:
         kwargs["headers"] = headers
 
         # Set Content-Type to JSON explicitly
-        kwargs["headers"]["Content-Type"] = "application/json"
+        kwargs["headers"]["Content-Type"] = "application/json; charset=utf-8"
 
         if self.token is not None:
             kwargs["headers"]["token"] = self.token
@@ -1297,6 +1298,104 @@ class PetLibroAPI:
 
         _LOGGER.debug("Member info retrieved successfully")
         return data
+
+    async def unread_quantity(self) -> dict[str, int]:
+        """Fetch unread device-message and notification counts.
+
+        Returns: {"device": <int>, "notify": <int>}
+        """
+        try:
+            data = await self.session.get("/device/msg/unreadQuantity")
+        except Exception as exc:
+            raise PetLibroAPIError("Failed to fetch unread quantity") from exc
+        return data if isinstance(data, dict) else {}
+
+    async def share_pop_list(self) -> list[dict[str, Any]]:
+        """Fetch pending device-share invitations for the current account."""
+        try:
+            data = await self.session.post(
+                "/device/deviceShare/sharePopList", json={"shareId": None}
+            )
+        except Exception as exc:
+            raise PetLibroAPIError("Failed to fetch share invitations") from exc
+        return data if isinstance(data, list) else []
+
+    async def generate_mqtt_cert(self, member_id: int | str) -> dict[str, str | int]:
+        """Request a fresh client certificate for MQTT mutual-TLS.
+
+        Generates an RSA-2048 keypair locally, builds a CSR with subject
+        `CN=DesignLibro, serialNumber=<member_id>`, posts it to
+        ``/member/certificate/generate``, then acknowledges the cert via
+        ``/member/certificate/confirm``.
+
+        Returns a dict with ``key_pem``, ``cert_pem``, ``serial_number`` and
+        ``expire_time_ms`` (epoch milliseconds).
+        """
+        # Local imports keep cryptography off the hot path for users who never
+        # touch MQTT; HA core already ships with cryptography, no extra dep.
+        from cryptography import x509
+        from cryptography.hazmat.primitives import hashes, serialization
+        from cryptography.hazmat.primitives.asymmetric import rsa
+        from cryptography.x509.oid import NameOID
+
+        def _build() -> tuple[str, str]:
+            key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+            csr = (
+                x509.CertificateSigningRequestBuilder()
+                .subject_name(
+                    x509.Name(
+                        [
+                            x509.NameAttribute(NameOID.COMMON_NAME, "DesignLibro"),
+                            x509.NameAttribute(NameOID.SERIAL_NUMBER, str(member_id)),
+                        ]
+                    )
+                )
+                .sign(key, hashes.SHA256())
+            )
+            return (
+                key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.TraditionalOpenSSL,
+                    encryption_algorithm=serialization.NoEncryption(),
+                ).decode(),
+                csr.public_bytes(serialization.Encoding.PEM).decode(),
+            )
+
+        # CPU-bound RSA generation runs in executor to avoid blocking the loop
+        loop = asyncio.get_running_loop()
+        key_pem, csr_pem = await loop.run_in_executor(None, _build)
+
+        gen = await self.session.post(
+            "/member/certificate/generate", json={"csr": csr_pem}
+        )
+        if not isinstance(gen, dict) or "certificate" not in gen:
+            raise PetLibroAPIError(f"Unexpected /certificate/generate response: {gen}")
+
+        serial = gen["serialNumber"]
+        await self.session.post(
+            "/member/certificate/confirm", json={"serialNumber": serial}
+        )
+
+        return {
+            "key_pem": key_pem,
+            "cert_pem": gen["certificate"],
+            "serial_number": serial,
+            "expire_time_ms": gen.get("expireTime"),
+        }
+
+    async def get_mqtt_ca_cert(self) -> str:
+        """Fetch the PetlibroCA chain PEM used to verify the MQTT broker.
+
+        The endpoint returns ``{"pem": <download-url>, "caCertificate": <PEM string>,
+        "crt": <download-url>, "expireTime": <epoch_ms>}`` — we want the inline PEM.
+        """
+        try:
+            data = await self.session.get("/member/certificate/ca")
+        except Exception as exc:
+            raise PetLibroAPIError("Failed to fetch MQTT CA certificate") from exc
+        if isinstance(data, dict) and isinstance(data.get("caCertificate"), str):
+            return data["caCertificate"]
+        raise PetLibroAPIError(f"Unexpected /certificate/ca response: {data}")
 
     async def member_update_info(
         self, update_info: dict[str, Any], update_setting: dict[str, Any]

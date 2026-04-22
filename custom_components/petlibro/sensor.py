@@ -13,7 +13,7 @@ from homeassistant.util.unit_conversion import VolumeConverter
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.config_entries import ConfigEntry  # Added ConfigEntry import
 from .hub import PetLibroHub  # Adjust the import path as necessary
-from .member import MemberEntity
+from .member import MemberEntity, MemberUnreadDevicesSensor, MemberUnreadNotifySensor
 
 from .devices import Device
 from .devices.feeders.feeder import Feeder
@@ -1577,6 +1577,8 @@ async def async_setup_entry(
 
     if member:
         entities.append(MemberEntity(member))
+        entities.append(MemberUnreadDevicesSensor(member))
+        entities.append(MemberUnreadNotifySensor(member))
         _LOGGER.debug("Adding sensor entity for Petlibro member: %s", member.email)
 
     if pets:

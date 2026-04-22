@@ -233,6 +233,12 @@
       },
       "deodorization_wind_speed": {
         "name": "Deodorization Wind Speed"
+      },
+      "unread_devices": {
+        "name": "Unread device messages"
+      },
+      "unread_notify": {
+        "name": "Unread notifications"
       }
     },
     "image": {
@@ -465,6 +471,9 @@
       },
       "battery_supply_8_hours": {
         "name": "Battery 8-Hour Supply"
+      },
+      "pending_share_invitations": {
+        "name": "Pending share invitations"
       }
     },
     "number": {

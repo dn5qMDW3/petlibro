@@ -734,6 +734,40 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
 }
 
 
-async_setup_entry = create_platform_setup(
+_device_setup_entry = create_platform_setup(
     PetLibroBinarySensorEntity, DEVICE_BINARY_SENSOR_MAP, "binary_sensor"
 )
+
+
+class PendingShareInvitationsBinarySensor(BinarySensorEntity):
+    """On when there's at least one pending device-share invitation."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "pending_share_invitations"
+    _attr_icon = "mdi:account-multiple-plus"
+
+    def __init__(self, member) -> None:
+        from .devices.event import EVENT_UPDATE
+        self._event_update = EVENT_UPDATE
+        self.member = member
+        self._attr_unique_id = f"PL-{member.id or member.email}-share-invites"
+        self._attr_name = f"Petlibro ({member.email}) pending share invitations"
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self.member.pending_shares)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {"count": len(self.member.pending_shares), "invitations": self.member.pending_shares}
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self.async_on_remove(self.member.on(self._event_update, self.async_write_ha_state))
+
+
+async def async_setup_entry(hass, entry, async_add_entities):
+    await _device_setup_entry(hass, entry, async_add_entities)
+    hub = getattr(entry, "runtime_data", None)
+    if hub and hub.member:
+        async_add_entities([PendingShareInvitationsBinarySensor(hub.member)])

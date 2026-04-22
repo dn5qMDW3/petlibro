@@ -32,6 +32,9 @@ class Member(Event):
         self._data: dict[str, str | Any] = {}
         self.force_refresh: bool = False
         self.api = api
+        self.unread_devices: int = 0
+        self.unread_notify: int = 0
+        self.pending_shares: list[dict[str, Any]] = []
 
     def update_data(self, data: dict[str, Any]) -> None:
         """Save the member info from a data dictionary."""
@@ -47,6 +50,22 @@ class Member(Event):
         """Refresh the member info from the API."""
         new_data = await self.api.member_info()
         self.update_data(new_data)
+
+        # Account-level counters; fail soft so a transient error here does not
+        # break the member refresh flow.
+        try:
+            unread = await self.api.unread_quantity()
+            self.unread_devices = int(unread.get("device", 0) or 0)
+            self.unread_notify = int(unread.get("notify", 0) or 0)
+        except Exception:
+            _LOGGER.exception("Failed to fetch unread message counts")
+
+        try:
+            self.pending_shares = await self.api.share_pop_list()
+        except Exception:
+            _LOGGER.exception("Failed to fetch pending share invitations")
+
+        self.emit(EVENT_UPDATE)
 
     @property
     def entity_id(self) -> str:
@@ -138,5 +157,47 @@ class MemberEntity(SensorEntity):
 
     async def async_added_to_hass(self) -> None:
         """Set up a listener for the member entity."""
+        await super().async_added_to_hass()
+        self.async_on_remove(self.member.on(EVENT_UPDATE, self.async_write_ha_state))
+
+
+class MemberUnreadDevicesSensor(SensorEntity):
+    """Account-wide unread device-message count."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "unread_devices"
+    _attr_icon = "mdi:message-badge"
+
+    def __init__(self, member: Member) -> None:
+        self.member = member
+        self._attr_unique_id = f"PL-{member.id or member.email}-unread-devices"
+        self._attr_name = f"Petlibro ({member.email}) unread device messages"
+
+    @property
+    def native_value(self) -> int:
+        return self.member.unread_devices
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self.async_on_remove(self.member.on(EVENT_UPDATE, self.async_write_ha_state))
+
+
+class MemberUnreadNotifySensor(SensorEntity):
+    """Account-wide unread notification count."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "unread_notify"
+    _attr_icon = "mdi:bell-badge"
+
+    def __init__(self, member: Member) -> None:
+        self.member = member
+        self._attr_unique_id = f"PL-{member.id or member.email}-unread-notify"
+        self._attr_name = f"Petlibro ({member.email}) unread notifications"
+
+    @property
+    def native_value(self) -> int:
+        return self.member.unread_notify
+
+    async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         self.async_on_remove(self.member.on(EVENT_UPDATE, self.async_write_ha_state))

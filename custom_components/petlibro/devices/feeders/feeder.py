@@ -215,6 +215,11 @@ class Feeder(Device):
     def feeding_plan_today_all(self) -> bool:
         return not cast(bool, self._data.get("feedingPlanTodayNew", {}).get("allSkipped"))
 
+    @property
+    def today_feeding_plan_state(self) -> bool:
+        """Return True if all of today's plans are skipped."""
+        return bool(self.feeding_plan_today_data.get("allSkipped", False))
+
     async def set_feeding_plan_today_all(self, value: bool):
         await self.api.feeding_plan_today_all(self.serial, value)
         await self.refresh()

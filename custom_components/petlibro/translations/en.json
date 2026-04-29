@@ -626,6 +626,9 @@
       },
       "mqtt_push": {
         "name": "Real-time push"
+      },
+      "today_feeding_schedule": {
+        "name": "Today's Feeding Schedule"
       }
     },
     "number": {

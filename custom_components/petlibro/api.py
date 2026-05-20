@@ -469,6 +469,16 @@ class PetLibroAPI:
         _LOGGER.debug("Bound pets retrieved successfully")
         return data or []
 
+    async def device_wear_list(self, device_sn: str) -> list[dict]:
+        """Get wear/RFID data for pets bound to a device, with caching."""
+        response = await self._cached_request(
+            f"{device_sn}_wearListV2",
+            "POST",
+            "/device/device/wear/wearListV2",
+            json={"deviceSn": device_sn, "type": 1},
+        )
+        return response if isinstance(response, list) else []
+
     # Support for new switch functions
     async def set_feeding_plan(self, serial: str, enable: bool):
         """Set the feeding plan on/off."""

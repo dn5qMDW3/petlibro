@@ -26,7 +26,34 @@ class GranarySmartFeeder(Feeder):
         return self._data.get("realInfo", {}).get("bowlMode", "unknown")
 
     @property
+    def food_low(self) -> bool:
+        surplus = self._data.get("realInfo", {}).get("surplusGrain")
+        if surplus is not None:
+            return not bool(surplus)
+        # Dual-tray models (PLAF103-DT) report each warehouse separately.
+        left = self._data.get("realInfo", {}).get("leftWarehouseSurplusGrain")
+        right = self._data.get("realInfo", {}).get("rightWarehouseSurplusGrain")
+        if left is not None and right is not None:
+            return not bool(left) or not bool(right)
+        return True
+
+    @property
+    def left_food_low(self) -> bool | None:
+        value = self._data.get("realInfo", {}).get("leftWarehouseSurplusGrain")
+        if value is None:
+            return None
+        return not bool(value)
+
+    @property
+    def right_food_low(self) -> bool | None:
+        value = self._data.get("realInfo", {}).get("rightWarehouseSurplusGrain")
+        if value is None:
+            return None
+        return not bool(value)
+
+    @property
     def grain_outlet_state(self) -> bool:
+
         return bool(self._data.get("realInfo", {}).get("grainOutletState", True))
 
     @property

@@ -26,9 +26,11 @@ class AirSmartFeeder(Feeder):
             get_work_record = await self.api.get_device_work_record(self.serial)
             feeding_plan_list = (await self.api.device_feeding_plan_list(self.serial)
                 if self._data.get("realInfo", {}).get("enableFeedingPlan") else [])
+            data_real_info = await self.api.device_data_real_info(self.serial)
 
             self.update_data({
                 "grainStatus": grain_status or {},
+                "dataRealInfo": data_real_info or {},
                 "realInfo": real_info or {},
                 "getUpgrade": get_upgrade or {},
                 "getAttributeSetting": attribute_settings or {},
@@ -38,3 +40,11 @@ class AirSmartFeeder(Feeder):
             })
         except PetLibroAPIError as err:
             _LOGGER.error("Error refreshing data for AirSmartFeeder: %s", err)
+
+    @property
+    def power_connected(self) -> bool | None:
+        power_type = self._data.get("dataRealInfo", {}).get("powerType")
+        if power_type is None:
+            return None
+        return power_type == 3
+

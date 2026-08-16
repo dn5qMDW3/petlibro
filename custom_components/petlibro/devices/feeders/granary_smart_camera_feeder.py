@@ -21,8 +21,10 @@ class GranarySmartCameraFeeder(Feeder):
             get_work_record = await self.api.get_device_work_record(self.serial)
             feeding_plan_list = (await self.api.device_feeding_plan_list(self.serial)
                 if self._data.get("realInfo", {}).get("enableFeedingPlan") else [])
+            get_device_events = await self.api.device_events(self.serial)
 
             self.update_data({
+                "getDeviceEvents": get_device_events or {},
                 "grainStatus": grain_status or {},
                 "getUpgrade": get_upgrade or {},
                 "getfeedingplantoday": get_feeding_plan_today or {},
@@ -37,7 +39,18 @@ class GranarySmartCameraFeeder(Feeder):
     # ------------------------------------------------------------------
 
     @property
+    def motion_detected(self) -> bool:
+        events = self._data.get("getDeviceEvents", {}).get("data", {}).get("eventInfos", [])
+        return any(event.get("eventKey") == "MOTION_DETECTED" for event in events)
+
+    @property
+    def sound_detected(self) -> bool:
+        events = self._data.get("getDeviceEvents", {}).get("data", {}).get("eventInfos", [])
+        return any(event.get("eventKey") == "SOUND_DETECTED" for event in events)
+
+    @property
     def resolution(self) -> str:
+
         return self._data.get("realInfo", {}).get("resolution", "unknown")
 
     @property

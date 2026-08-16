@@ -22,9 +22,11 @@ class OneRFIDSmartFeeder(Feeder):
             get_feeding_plan_today = await self.api.device_feeding_plan_today_new(self.serial)
             feeding_plan_list = (await self.api.device_feeding_plan_list(self.serial)
                 if self._data.get("realInfo", {}).get("enableFeedingPlan") else [])
+            data_real_info = await self.api.device_data_real_info(self.serial)
 
             self.update_data({
                 "grainStatus": grain_status or {},
+                "dataRealInfo": data_real_info or {},
                 "getUpgrade": get_upgrade or {},
                 "getDefaultMatrix": get_default_matrix or {},
                 "getfeedingplantoday": get_feeding_plan_today or {},
@@ -51,7 +53,15 @@ class OneRFIDSmartFeeder(Feeder):
         return bool(self._data.get("realInfo", {}).get("barnDoorState", False))
 
     @property
+    def rotor_stuck(self) -> bool | None:
+        exception = self._data.get("dataRealInfo", {}).get("exceptionMessage")
+        if exception is None:
+            return None
+        return "rotor" in exception.lower() or "stuck" in exception.lower()
+
+    @property
     def door_blocked(self) -> bool:
+
         return bool(self._data.get("realInfo", {}).get("barnDoorError", False))
 
     @property

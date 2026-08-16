@@ -46,6 +46,11 @@ class Feeder(Device):
         super().__init__(*args, **kwargs)
         self._manual_feed_quantity = None
 
+    def update_data(self, data: dict) -> None:
+        # Any new data (poll or push) can change the plan, so drop the cached next feed.
+        self._cached_get_next_feed = None
+        super().update_data(data)
+
     async def refresh(self):
         await super().refresh()
         self.update_data({
@@ -306,6 +311,8 @@ class Feeder(Device):
 
     @property
     def get_next_feed(self) -> dict:
+        if getattr(self, "_cached_get_next_feed", None) is not None:
+            return self._cached_get_next_feed
         now_utc = dt_util.now(dt_util.UTC)
         next_feed = {}
 
@@ -340,7 +347,9 @@ class Feeder(Device):
                 candidate_dt_utc = candidate_dt_local.astimezone(dt_util.UTC)
                 if not next_feed or candidate_dt_utc < next_feed["utc_time"]:
                     next_feed = {"id": feed["id"], "utc_time": candidate_dt_utc}
+        self._cached_get_next_feed = next_feed
         return next_feed
+
 
     @property
     def next_feed_time(self) -> datetime | None:

@@ -13,10 +13,6 @@ import aiohttp
 import asyncio
 import uuid  # To generate unique request IDs
 
-async def make_api_call(session, url, data):
-    async with session.post(url, json=data) as response:
-        return await response.json()
-
 type JSON = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 _LOGGER = getLogger(__name__)
 
@@ -111,7 +107,7 @@ class PetLibroSession:
 
         if self.token is not None:
             kwargs["headers"]["token"] = self.token
-            _LOGGER.debug("Using token: %s...", self.token[:8] if self.token else "None")
+            _LOGGER.debug("Using token from config entry")
         else:
             _LOGGER.warning("No token available for request. Attempting to log in...")
 
@@ -133,7 +129,7 @@ class PetLibroSession:
                 # Trigger a re-login and get the new token
                 new_token = await self.re_login()
                 kwargs["headers"]["token"] = new_token
-                _LOGGER.debug("Retrying request with new token: %s...", new_token[:8] if new_token else "None")
+                _LOGGER.debug("Retrying request with new token")
 
                 # Retry the request with the new token
                 async with self.websession.request(method, joined_url, **kwargs) as retry_resp:
@@ -185,7 +181,7 @@ class PetLibroSession:
 
                 # Save the new token in the config entry
                 if hasattr(self, 'api') and self.api.hass and self.api.config_entry:
-                    _LOGGER.debug("Saving new token to config entry: %s...", self.token[:8] if self.token else "None")
+                    _LOGGER.debug("Saving new token to config entry")
                     self.api.hass.config_entries.async_update_entry(
                         self.api.config_entry,
                         data={**self.api.config_entry.data, "token": self.token}
@@ -233,7 +229,7 @@ class PetLibroAPI:
         # Load the saved token if available
         if config_entry and "token" in config_entry.data:
             self.token = config_entry.data["token"]
-            _LOGGER.debug("Loaded saved token: %s...", self.token[:8] if self.token else "None")
+            _LOGGER.debug("Loaded saved token from config entry")
 
         self._last_api_call_times = {}  # To store last call time per device
         self._cached_responses = {}  # To store cached responses for short periods
@@ -289,7 +285,7 @@ class PetLibroAPI:
 
             self.session.token = data["token"]
             self.session.capture_identity(data)
-            _LOGGER.debug("Login successful, token: %s...", self.session.token[:8] if self.session.token else "None")
+            _LOGGER.debug("Login successful")
             return self.session.token
 
         except Exception as e:

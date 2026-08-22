@@ -1,5 +1,7 @@
 """Support for PETLIBRO switches."""
 from __future__ import annotations
+
+import asyncio
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from typing import Any, Generic
@@ -180,12 +182,21 @@ async def async_setup_entry(
             for description in entity_descriptions
         )
 
-        # Notification toggles are table-driven and apply across product families.
-        entities.extend(
+        # Notification toggles are table-driven and apply across product
+        # families. Fetch the settings explicitly rather than assuming the
+        # coordinator refresh has already populated them — which toggles exist
+        # is decided here, once, so getting it wrong silently drops entities.
+        await asyncio.gather(
+            *(device.refresh_notice_setting() for device in devices.values()),
+            return_exceptions=True,
+        )
+        notice_entities = [
             PetLibroNoticeSwitchEntity(device, hub, toggle)
             for device in devices.values()
             for toggle in toggles_for(device)
-        )
+        ]
+        _LOGGER.debug("Adding %d notification switches", len(notice_entities))
+        entities.extend(notice_entities)
 
     if pets:
         for pet in pets.values():

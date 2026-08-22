@@ -68,6 +68,25 @@ class Device(Event):
         value = self._data.get("noticeSetting")
         return value if isinstance(value, dict) else {}
 
+    async def refresh_notice_setting(self) -> dict:
+        """Fetch the notification toggles on demand and cache them.
+
+        Entity setup needs these before the first coordinator refresh has
+        necessarily populated them, and several device classes override
+        ``refresh()`` without chaining to the base, so this must not rely on
+        the refresh cycle having run.
+        """
+        try:
+            notice = await self.api.get_notice_setting(self.serial)
+        except Exception:
+            _LOGGER.debug(
+                "Notification settings unavailable for %s", self.serial, exc_info=True
+            )
+            return self.notice_setting
+        if isinstance(notice, dict) and notice:
+            self._data["noticeSetting"] = notice
+        return self.notice_setting
+
     def notice_enabled(self, field: str) -> bool:
         """Current value of one notification flag."""
         return bool(self.notice_setting.get(field))

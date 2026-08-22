@@ -10,6 +10,8 @@ class DockstreamSmartFountain(Fountain):
     async def refresh(self):
         """Refresh the device data from the API."""
         try:
+            await super().refresh()
+
             real_info = await self.api.device_real_info(self.serial)
             data_real_info = await self.api.device_data_real_info(self.serial)
             attribute_settings = await self.api.device_attribute_settings(self.serial)

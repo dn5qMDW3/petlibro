@@ -15,6 +15,11 @@ _LOGGER = logging.getLogger(__name__)
 # Service names
 SERVICE_EDIT_FEEDING_PLAN = "edit_feeding_plan"
 SERVICE_ADD_FEEDING_PLAN  = "add_feeding_plan"
+SERVICE_ACCEPT_SHARE      = "accept_share"
+SERVICE_DECLINE_SHARE     = "decline_share"
+SERVICE_SHARE_DEVICE      = "share_device"
+SERVICE_ADD_CLEAN_PLAN    = "add_clean_plan"
+SERVICE_DELETE_CLEAN_PLAN = "delete_clean_plan"
 
 # Field keys
 _DEVICE_ID = "device_id"
@@ -24,6 +29,9 @@ _PORTIONS  = "portions"
 _LABEL     = "label"
 _DAYS      = "days"
 _SOUND     = "sound"
+_SHARE_ID  = "share_id"
+_ACCOUNT   = "account"
+_ENABLED   = "enabled"
 
 
 def _get_feeder(hass: HomeAssistant, device_id: str):
@@ -57,6 +65,36 @@ def _get_feeder(hass: HomeAssistant, device_id: str):
     raise ServiceValidationError(
         "Selected device is not a dry food feeder, or is not currently loaded."
     )
+
+
+def _get_hub(hass: HomeAssistant):
+    """Return the single loaded hub, or raise if there isn't exactly one."""
+    hubs = list(hass.data.get(DOMAIN, {}).values())
+    if not hubs:
+        raise ServiceValidationError("The PETLIBRO integration is not loaded.")
+    return hubs[0]
+
+
+def _get_device(hass: HomeAssistant, device_id: str):
+    """Resolve a HA device_id to any PetLibro device instance."""
+    dev_reg = dr.async_get(hass)
+    device_entry = dev_reg.async_get(device_id)
+    if not device_entry:
+        raise ServiceValidationError("Device not found. Please select a PETLIBRO device.")
+
+    serial = next(
+        (i[1] for i in device_entry.identifiers if i[0] == DOMAIN),
+        None,
+    )
+    if not serial:
+        raise ServiceValidationError("Selected device is not a PETLIBRO device.")
+
+    for hub in hass.data.get(DOMAIN, {}).values():
+        device = hub.devices.get(serial)
+        if device is not None:
+            return device
+
+    raise ServiceValidationError("Selected device is not currently loaded.")
 
 
 async def async_setup_services(hass: HomeAssistant) -> None:
@@ -127,7 +165,97 @@ async def async_setup_services(hass: HomeAssistant) -> None:
 
     hass.services.async_register(DOMAIN, SERVICE_ADD_FEEDING_PLAN, handle_add_feeding_plan)
 
-    _LOGGER.debug("PETLIBRO feeding plan services registered.")
+    # ------------------------------------------------------------------
+    # accept_share / decline_share
+    # ------------------------------------------------------------------
+    async def _respond_to_share(call: ServiceCall, accept: bool) -> None:
+        hub = _get_hub(hass)
+        share_id = call.data.get(_SHARE_ID)
+
+        pending = hub.member.pending_shares or []
+        if share_id is None:
+            if len(pending) != 1:
+                raise ServiceValidationError(
+                    f"{len(pending)} invitations are pending; pass share_id to choose one. "
+                    "The IDs are listed on the 'Pending share invitations' binary sensor."
+                )
+            share_id = pending[0].get("id")
+
+        known = {str(item.get("id")) for item in pending}
+        if known and str(share_id) not in known:
+            raise ServiceValidationError(
+                f"No pending invitation with ID {share_id}. Pending: {sorted(known) or 'none'}"
+            )
+
+        await hub.api.share_respond(share_id, accept)
+        _LOGGER.info(
+            "%s PETLIBRO share invitation %s", "Accepted" if accept else "Declined", share_id
+        )
+
+        # Accepting adds a device to the account, so reload the device list.
+        if accept:
+            await hub.load_devices()
+            if hub.mqtt is not None:
+                await hub.mqtt.async_sync_devices(hub._mqtt_device_pairs())
+        await hub.async_refresh(force_member=True)
+
+    async def handle_accept_share(call: ServiceCall) -> None:
+        await _respond_to_share(call, accept=True)
+
+    async def handle_decline_share(call: ServiceCall) -> None:
+        await _respond_to_share(call, accept=False)
+
+    hass.services.async_register(DOMAIN, SERVICE_ACCEPT_SHARE, handle_accept_share)
+    hass.services.async_register(DOMAIN, SERVICE_DECLINE_SHARE, handle_decline_share)
+
+    # ------------------------------------------------------------------
+    # share_device
+    # ------------------------------------------------------------------
+    async def handle_share_device(call: ServiceCall) -> None:
+        device = _get_device(hass, call.data[_DEVICE_ID])
+        account = call.data[_ACCOUNT]
+        await device.api.share_device_with(device.serial, account)
+        _LOGGER.info("Invited %s to PETLIBRO device %s", account, device.name)
+
+    hass.services.async_register(DOMAIN, SERVICE_SHARE_DEVICE, handle_share_device)
+
+    # ------------------------------------------------------------------
+    # add_clean_plan / delete_clean_plan  (litter boxes)
+    # ------------------------------------------------------------------
+    def _get_litter_box(device_id: str):
+        device = _get_device(hass, device_id)
+        if not hasattr(device, "add_clean_plan"):
+            raise ServiceValidationError(
+                f"{device.name} does not support cleaning schedules. "
+                "Please select a litter box."
+            )
+        return device
+
+    async def handle_add_clean_plan(call: ServiceCall) -> None:
+        device = _get_litter_box(call.data[_DEVICE_ID])
+        await device.add_clean_plan(
+            call.data[_TIME],
+            call.data.get(_DAYS, []),
+            call.data.get(_ENABLED, True),
+        )
+        _LOGGER.info("Added cleaning schedule on %s", device.name)
+
+    async def handle_delete_clean_plan(call: ServiceCall) -> None:
+        device = _get_litter_box(call.data[_DEVICE_ID])
+        plan_id = call.data[_PLAN_ID]
+        known = {str(p.get("planId")) for p in device.clean_plans}
+        if known and str(plan_id) not in known:
+            raise ServiceValidationError(
+                f"No cleaning schedule with ID {plan_id} on {device.name}. "
+                f"Existing: {sorted(known) or 'none'}"
+            )
+        await device.delete_clean_plan(plan_id)
+        _LOGGER.info("Deleted cleaning schedule %s on %s", plan_id, device.name)
+
+    hass.services.async_register(DOMAIN, SERVICE_ADD_CLEAN_PLAN, handle_add_clean_plan)
+    hass.services.async_register(DOMAIN, SERVICE_DELETE_CLEAN_PLAN, handle_delete_clean_plan)
+
+    _LOGGER.debug("PETLIBRO services registered.")
 
 
 async def async_unload_services(hass: HomeAssistant) -> None:
@@ -135,6 +263,11 @@ async def async_unload_services(hass: HomeAssistant) -> None:
     for service in (
         SERVICE_EDIT_FEEDING_PLAN,
         SERVICE_ADD_FEEDING_PLAN,
+        SERVICE_ACCEPT_SHARE,
+        SERVICE_DECLINE_SHARE,
+        SERVICE_SHARE_DEVICE,
+        SERVICE_ADD_CLEAN_PLAN,
+        SERVICE_DELETE_CLEAN_PLAN,
     ):
         hass.services.async_remove(DOMAIN, service)
     _LOGGER.debug("PETLIBRO feeding plan services removed.")

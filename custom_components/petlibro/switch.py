@@ -16,6 +16,7 @@ from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription
 from .devices import Device
 from .devices.feeders.polar_wet_food_feeder import PolarWetFoodFeeder
 from .devices.litterboxes.luma_smart_litter_box import LumaSmartLitterBox
+from .notifications import NoticeToggle, toggles_for
 from .pets.entity import PL_PetSwitchEntity
 
 
@@ -86,6 +87,47 @@ DEVICE_SWITCH_MAP: dict[type[Device], list[PetLibroSwitchEntityDescription]] = {
     ],
 }
 
+class PetLibroNoticeSwitchEntity(PetLibroEntity[_DeviceT], SwitchEntity):
+    """A single notification toggle from /device/setting/getNoticeSetting.
+
+    These are driven by the NOTICE_TOGGLES table rather than per-device
+    properties, because the flags are uniform across products even though the
+    write endpoints are not.
+    """
+
+    _attr_entity_category = EntityCategory.CONFIG
+
+    def __init__(self, device: Device, hub: PetLibroHub, toggle: NoticeToggle) -> None:
+        description = SwitchEntityDescription(
+            key=toggle.key,
+            translation_key=toggle.key,
+            name=toggle.name,
+            entity_category=EntityCategory.CONFIG,
+        )
+        super().__init__(device, hub, description)
+        self._toggle = toggle
+
+    @property
+    def is_on(self) -> bool | None:
+        return self.device.notice_enabled(self._toggle.field)
+
+    @property
+    def available(self) -> bool:
+        return getattr(self.device, "online", False)
+
+    async def _async_set(self, value: bool) -> None:
+        toggle = self._toggle
+        payload = toggle.payload(self.device.serial, value, self.device.notice_setting)
+        await self.device.set_notice(toggle.endpoint, payload, toggle.field, value)
+        self.async_write_ha_state()
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self._async_set(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self._async_set(False)
+
+
 class PetLibroSwitchEntity(PetLibroEntity[_DeviceT], SwitchEntity):
     """PETLIBRO switch entity."""
 
@@ -136,6 +178,13 @@ async def async_setup_entry(
             for device_type, entity_descriptions in DEVICE_SWITCH_MAP.items()
             if isinstance(device, device_type)
             for description in entity_descriptions
+        )
+
+        # Notification toggles are table-driven and apply across product families.
+        entities.extend(
+            PetLibroNoticeSwitchEntity(device, hub, toggle)
+            for device in devices.values()
+            for toggle in toggles_for(device)
         )
 
     if pets:

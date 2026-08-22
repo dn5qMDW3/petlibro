@@ -7,8 +7,13 @@
   "config_flow": true,
   "documentation": "https://github.com/dn5qMDW3/petlibro",
   "integration_type": "hub",
-  "iot_class": "cloud_polling",
+  "iot_class": "cloud_push",
   "issue_tracker": "https://github.com/dn5qMDW3/petlibro/issues",
-  "loggers": ["petlibro"],
-  "version": "2.4.0"
+  "loggers": [
+    "petlibro"
+  ],
+  "requirements": [
+    "paho-mqtt>=2.1.0"
+  ],
+  "version": "2.5.0"
 }

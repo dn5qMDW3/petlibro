@@ -4,7 +4,7 @@ from logging import getLogger
 from collections.abc import Mapping
 from typing import Any
 from datetime import datetime, timedelta
-from .const import UPDATE_INTERVAL_SECONDS
+from .const import UPDATE_INTERVAL_SECONDS, UPDATE_INTERVAL_SECONDS_PUSH
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_REGION, CONF_API_TOKEN
 from homeassistant.config_entries import ConfigEntry
@@ -16,6 +16,7 @@ from .api import PetLibroAPI  # Use a relative import if inside the same package
 from .const import CONF_EMAIL, CONF_PASSWORD, IntegrationSetting
 from .devices import Device, product_name_map
 from .member import Member
+from .mqtt import PetLibroMQTT
 from .pets import Pet
 from .helpers import set_missing_config_options
 
@@ -52,15 +53,24 @@ class PetLibroHub:
 
         _LOGGER.debug("Initializing PetLibroAPI with email: %s, region: %s", email, region)
 
-        # Initialize the PetLibro API instance
+        # Initialize the PetLibro API instance.
+        # hass/config_entry are required for token persistence on re-login and
+        # for caching the MQTT client certificate in the entry.
         self.api = PetLibroAPI(
             async_get_clientsession(hass),
             hass.config.time_zone,
             region,
             email,
             password,
-            self.entry.data.get(CONF_API_TOKEN)
+            self.entry.data.get(CONF_API_TOKEN),
+            config_entry=config_entry,
+            hass=hass,
         )
+
+        # Real-time push. Stays None when MQTT is unavailable; polling continues.
+        self.mqtt: PetLibroMQTT | None = None
+        self._mqtt_refresh_pending: set[str] = set()
+        self._mqtt_debounce_handle = None
 
         # Setup DataUpdateCoordinator to periodically refresh device data
         self.coordinator = DataUpdateCoordinator(
@@ -364,6 +374,103 @@ class PetLibroHub:
             _LOGGER.exception("Error refreshing %s: %s", obj_type_str, identifier)
             raise
 
+    # ------------------------------------------------------------------
+    # Real-time push
+    # ------------------------------------------------------------------
+
+    def _mqtt_device_pairs(self) -> list[tuple[str, str]]:
+        """(productIdentifier, deviceSn) for every loaded device.
+
+        ``Device.model`` is the productIdentifier (e.g. "PLWF116"); the broker
+        keys device topics on it.
+        """
+        return [
+            (str(device.model), str(serial))
+            for serial, device in self.devices.items()
+            if device.model and serial
+        ]
+
+    async def async_start_mqtt(self) -> bool:
+        """Open the push channel. Falls back silently to polling on failure."""
+        if self.mqtt is not None:
+            return self.mqtt.connected
+
+        mqtt = PetLibroMQTT(
+            self.hass,
+            self.api,
+            on_device_event=self._handle_mqtt_device_event,
+            on_member_event=self._handle_mqtt_member_event,
+        )
+        connected = await mqtt.async_start(self._mqtt_device_pairs())
+        self.mqtt = mqtt
+
+        if connected:
+            # Push covers the fast path; the poll becomes a slow safety net.
+            self.coordinator.update_interval = timedelta(
+                seconds=UPDATE_INTERVAL_SECONDS_PUSH
+            )
+            _LOGGER.info(
+                "PETLIBRO real-time push active; poll interval relaxed to %ss",
+                UPDATE_INTERVAL_SECONDS_PUSH,
+            )
+        else:
+            self.coordinator.update_interval = timedelta(seconds=UPDATE_INTERVAL_SECONDS)
+        return connected
+
+    def _handle_mqtt_device_event(self, serial: str, event_keys: list[str]) -> None:
+        """A device changed. Re-fetch just that device, debounced.
+
+        The push is only a signal — it carries no state — so the actual values
+        still come over HTTP. Several pushes usually land together (the broker
+        emits one per changed subsystem), hence the short debounce.
+        """
+        if serial not in self.devices:
+            _LOGGER.debug("MQTT event for unknown device %s; ignoring", serial)
+            return
+
+        _LOGGER.debug("MQTT refresh signal for %s: %s", serial, event_keys)
+        self._mqtt_refresh_pending.add(serial)
+
+        if self._mqtt_debounce_handle is not None:
+            self._mqtt_debounce_handle.cancel()
+        self._mqtt_debounce_handle = self.hass.loop.call_later(
+            1.0, lambda: self.hass.async_create_task(self._async_flush_mqtt_refresh())
+        )
+
+    async def _async_flush_mqtt_refresh(self) -> None:
+        """Refresh every device that a push flagged since the last flush."""
+        self._mqtt_debounce_handle = None
+        serials, self._mqtt_refresh_pending = self._mqtt_refresh_pending, set()
+        if not serials:
+            return
+
+        async def _refresh(serial: str) -> None:
+            device = self.devices.get(serial)
+            if device is None:
+                return
+            try:
+                await device.refresh()
+                # Bypass the throttle window: a push means the data really changed.
+                self.last_refresh_times[serial] = utcnow()
+            except Exception:
+                _LOGGER.exception("Push-triggered refresh failed for %s", serial)
+
+        await asyncio.gather(*(_refresh(s) for s in serials))
+        self.coordinator.async_update_listeners()
+
+    def _handle_mqtt_member_event(self, cmd: str, payload: dict[str, Any]) -> None:
+        """Account-scope push: share invitations, forced logout, and friends."""
+        _LOGGER.debug("MQTT account event %s: %s", cmd, payload)
+        if cmd in ("DEVICE_SHARE_INVITATION", "DEVICE_SHARE_CANCEL"):
+            # Pending-invitation list lives on Member; force it to re-read.
+            self.member.force_refresh = True
+            self.hass.async_create_task(self.async_refresh(force_member=True))
+        elif cmd in ("MEMBER_REJECT_LOGIN", "MEMBER_LOGIN"):
+            _LOGGER.warning(
+                "PETLIBRO account signed in elsewhere (%s); the session may be invalidated",
+                cmd,
+            )
+
     def get_device(self, serial: str) -> Device | None:
         """Return the device with the specified serial number."""
         device = self.devices.get(serial)
@@ -403,6 +510,14 @@ class PetLibroHub:
     async def async_unload(self) -> bool:
         """Unload the hub and its devices."""
         _LOGGER.debug("Unloading PetLibro Hub and clearing devices.")
+
+        if self._mqtt_debounce_handle is not None:
+            self._mqtt_debounce_handle.cancel()
+            self._mqtt_debounce_handle = None
+        if self.mqtt is not None:
+            await self.mqtt.async_stop()
+            self.mqtt = None
+
         self.devices.clear()  # Clears the device list
         self.pets.clear()  # Clears the pet list
         self.last_refresh_times.clear()  # Clears refresh times as well

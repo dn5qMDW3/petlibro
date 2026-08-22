@@ -11,7 +11,20 @@ from homeassistant.core import HomeAssistant
 
 from .hub import PetLibroHub
 
-TO_REDACT = {CONF_EMAIL, CONF_PASSWORD, "api_token", "token", "serial", "mac"}
+TO_REDACT = {
+    CONF_EMAIL,
+    CONF_PASSWORD,
+    "api_token",
+    "token",
+    "serial",
+    "mac",
+    # MQTT client credentials are per-account secrets.
+    "mqtt_cert_pem",
+    "mqtt_key_pem",
+    "mqtt_ca_pem",
+    "client_id",
+    "member_topic",
+}
 
 
 async def async_get_config_entry_diagnostics(
@@ -66,6 +79,12 @@ async def async_get_config_entry_diagnostics(
             "pets": pets_data,
             "device_count": len(hub.devices),
             "pet_count": len(hub.pets),
+            "mqtt": hub.mqtt.diagnostics if hub.mqtt else {"status": "not started"},
+            "poll_interval_seconds": (
+                hub.coordinator.update_interval.total_seconds()
+                if hub.coordinator.update_interval
+                else None
+            ),
         },
         TO_REDACT,
     )

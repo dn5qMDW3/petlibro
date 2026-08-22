@@ -23,6 +23,10 @@ PLATFORMS = ["sensor", "switch", "button", "binary_sensor", "number", "select", 
 # Update interval for device data in seconds
 UPDATE_INTERVAL_SECONDS = 60  # You can adjust this value based on your needs
 
+# When the MQTT push channel is live the poll is only a safety net, so it can be
+# much slower. Pushes arrive within ~200ms of a real change.
+UPDATE_INTERVAL_SECONDS_PUSH = 300
+
 
 class Gender(IntEnum):
     """Gender/sex options."""

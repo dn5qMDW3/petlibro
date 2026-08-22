@@ -5,11 +5,14 @@ from collections.abc import Callable
 from functools import cached_property
 import logging
 from .const import Unit, APIKey as API, VALID_UNIT_TYPES
+from datetime import datetime, timezone
+
 from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorEntityDescription,
     BinarySensorDeviceClass,
 )
+from homeassistant.const import EntityCategory
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -766,8 +769,49 @@ class PendingShareInvitationsBinarySensor(BinarySensorEntity):
         self.async_on_remove(self.member.on(self._event_update, self.async_write_ha_state))
 
 
+class MqttPushBinarySensor(BinarySensorEntity):
+    """On while the real-time push channel is connected.
+
+    Off is not a failure state on its own: the integration keeps polling, it
+    just does so at the slower fallback interval. The attributes carry enough
+    to tell a clean fallback from a broken one.
+    """
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "mqtt_push"
+    _attr_icon = "mdi:transit-connection-variant"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+    _attr_should_poll = True
+
+    def __init__(self, hub) -> None:
+        self.hub = hub
+        member = hub.member
+        self._attr_unique_id = f"PL-{member.id or member.email}-mqtt-push"
+        self._attr_name = f"Petlibro ({member.email}) real-time push"
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self.hub.mqtt and self.hub.mqtt.connected)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        if self.hub.mqtt is None:
+            return {"status": "not started"}
+        data = dict(self.hub.mqtt.diagnostics)
+        last = data.pop("last_event_at", None)
+        if last:
+            data["last_event"] = datetime.fromtimestamp(last, tz=timezone.utc).isoformat()
+        return data
+
+
 async def async_setup_entry(hass, entry, async_add_entities):
     await _device_setup_entry(hass, entry, async_add_entities)
     hub = getattr(entry, "runtime_data", None)
     if hub and hub.member:
-        async_add_entities([PendingShareInvitationsBinarySensor(hub.member)])
+        async_add_entities(
+            [
+                PendingShareInvitationsBinarySensor(hub.member),
+                MqttPushBinarySensor(hub),
+            ]
+        )

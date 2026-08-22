@@ -239,6 +239,9 @@
       },
       "unread_notify": {
         "name": "Unread notifications"
+      },
+      "clean_plan_count": {
+        "name": "Cleaning schedules"
       }
     },
     "image": {
@@ -287,6 +290,63 @@
       },
       "enable_deodorization_in_sleep_mode": {
         "name": "Deodorize in Sleep Mode"
+      },
+      "notice_offline": {
+        "name": "Offline alerts"
+      },
+      "notice_low_battery": {
+        "name": "Low battery alerts"
+      },
+      "notice_power_change": {
+        "name": "Power source change alerts"
+      },
+      "notice_feeding_plan": {
+        "name": "Feeding plan alerts"
+      },
+      "notice_surplus_grain": {
+        "name": "Low food alerts"
+      },
+      "notice_grain_outlet_blocked": {
+        "name": "Food outlet blocked alerts"
+      },
+      "notice_desiccant": {
+        "name": "Desiccant replacement alerts"
+      },
+      "notice_drinking_water": {
+        "name": "Drinking alerts"
+      },
+      "notice_low_water": {
+        "name": "Low water alerts"
+      },
+      "notice_filter_replacement": {
+        "name": "Filter replacement reminder"
+      },
+      "notice_machine_cleaning": {
+        "name": "Cleaning reminder"
+      },
+      "notice_tank_overturned": {
+        "name": "Tank overturned alerts"
+      },
+      "notice_drink_goal_reached": {
+        "name": "Drinking goal reached alerts"
+      },
+      "notice_drink_trend": {
+        "name": "Drinking trend alerts"
+      },
+      "notice_no_drink": {
+        "name": "Not drinking alerts"
+      },
+      "notice_vacuum_success": {
+        "name": "Cleaning completed alerts"
+      },
+      "notice_vacuum_failed": {
+        "name": "Cleaning failed alerts"
+      },
+      "notice_motion_detection": {
+        "name": "Motion detection alerts"
+      },
+      "notice_sound_detection": {
+        "name": "Sound detection alerts"
       }
     },
     "button": {
@@ -474,6 +534,9 @@
       },
       "pending_share_invitations": {
         "name": "Pending share invitations"
+      },
+      "mqtt_push": {
+        "name": "Real-time push"
       }
     },
     "number": {
@@ -640,6 +703,142 @@
               "update_all_units": "By default, changing a unit here only updates sensor entities of that type."
             }
           }
+        }
+      }
+    }
+  },
+  "services": {
+    "accept_share": {
+      "name": "Accept share invitation",
+      "description": "Accept a pending device-share invitation from another PETLIBRO account.",
+      "fields": {
+        "share_id": {
+          "name": "Invitation ID",
+          "description": "Which invitation to accept. Leave blank when only one is pending."
+        }
+      }
+    },
+    "add_clean_plan": {
+      "name": "Add cleaning schedule",
+      "description": "Add a scheduled cleaning cycle to a litter box.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The litter box to schedule."
+        },
+        "time": {
+          "name": "Time",
+          "description": "When to run the cleaning cycle (e.g. 03:00)."
+        },
+        "days": {
+          "name": "Repeat days",
+          "description": "Days of the week to repeat. Leave empty for a one-off run."
+        },
+        "enabled": {
+          "name": "Enabled",
+          "description": "Whether the schedule is active straight away."
+        }
+      }
+    },
+    "add_feeding_plan": {
+      "name": "Add Feeding Plan",
+      "description": "Add a new scheduled feeding plan to a dry food feeder.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The feeder to target."
+        },
+        "time": {
+          "name": "Time",
+          "description": "Feed time (e.g. 08:00)."
+        },
+        "portions": {
+          "name": "Portions",
+          "description": "Number of portions to dispense (1–48)."
+        },
+        "label": {
+          "name": "Label",
+          "description": "A name for this feeding plan. No spaces allowed (e.g. MorningFeed)."
+        },
+        "days": {
+          "name": "Repeat Days",
+          "description": "Days of the week to repeat. Leave empty for a one-time feed."
+        },
+        "sound": {
+          "name": "Meal Call Sound",
+          "description": "Play the meal call sound when dispensing."
+        }
+      }
+    },
+    "decline_share": {
+      "name": "Decline share invitation",
+      "description": "Decline a pending device-share invitation from another PETLIBRO account.",
+      "fields": {
+        "share_id": {
+          "name": "Invitation ID",
+          "description": "Which invitation to decline. Leave blank when only one is pending."
+        }
+      }
+    },
+    "delete_clean_plan": {
+      "name": "Delete cleaning schedule",
+      "description": "Remove a scheduled cleaning cycle from a litter box.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The litter box to change."
+        },
+        "plan_id": {
+          "name": "Schedule ID",
+          "description": "The planId of the schedule to remove. IDs are listed in the attributes of the \"Cleaning schedules\" sensor."
+        }
+      }
+    },
+    "edit_feeding_plan": {
+      "name": "Edit Feeding Plan",
+      "description": "Edit an existing scheduled feeding plan on a dry food feeder. Only the fields you provide will be changed — anything left blank keeps its current value. Find the Plan ID in the feeder's Feeding Schedule sensor attributes.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The feeder to target."
+        },
+        "plan_id": {
+          "name": "Plan ID",
+          "description": "The ID of the plan to edit. Find this in the feeder's Feeding Schedule sensor attributes (planID field)."
+        },
+        "time": {
+          "name": "Time",
+          "description": "New feed time (e.g. 08:00)."
+        },
+        "portions": {
+          "name": "Portions",
+          "description": "Number of portions to dispense (1–48)."
+        },
+        "label": {
+          "name": "Label",
+          "description": "A name for this feeding plan. No spaces allowed (e.g. MorningFeed)."
+        },
+        "days": {
+          "name": "Repeat Days",
+          "description": "Days of the week to repeat. Leave empty to keep existing days."
+        },
+        "sound": {
+          "name": "Meal Call Sound",
+          "description": "Play the meal call sound when dispensing."
+        }
+      }
+    },
+    "share_device": {
+      "name": "Share a device",
+      "description": "Invite another PETLIBRO account to a device this account owns.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The device to share."
+        },
+        "account": {
+          "name": "Account",
+          "description": "Email address of the PETLIBRO account to invite."
         }
       }
     }

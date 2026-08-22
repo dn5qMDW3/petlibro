@@ -29,12 +29,34 @@ class PetLibroSession:
         self.email = email
         self.password = password
         self.region = region
+        # Server-issued MQTT identity, returned in the login response as
+        # ``clientId`` (e.g. "APP_<memberId>"). The broker expects this exact
+        # value as the MQTT client identifier *and* the username *and* the
+        # password — see mqtt.py.
+        self.client_id: str | None = None
+        self.member_id: int | str | None = None
         self.headers = {
             "source": "ANDROID",
             "language": "EN",
             "timezone": time_zone or "America/Chicago",
             "version": "1.8.10",
         }
+
+    def capture_identity(self, data: dict[str, Any]) -> None:
+        """Remember the MQTT identity carried in a login response.
+
+        The login payload (``UserVO`` in the app) includes ``clientId`` and
+        ``memberId`` alongside the token. Older integration versions discarded
+        both, which is why MQTT CONNECT was rejected with rc=5.
+        """
+        if not isinstance(data, dict):
+            return
+        client_id = data.get("clientId")
+        if isinstance(client_id, str) and client_id:
+            self.client_id = client_id
+        member_id = data.get("memberId") or data.get("id")
+        if member_id:
+            self.member_id = member_id
 
     async def post(self, path: str, **kwargs: Any) -> JSON:
         """POST method for PetLibro API."""
@@ -140,6 +162,7 @@ class PetLibroSession:
                 # Get the new token from response data
                 new_token = response_data["data"]["token"]
                 self.token = new_token  # Update the session token
+                self.capture_identity(response_data["data"])
 
                 # Save the new token in the config entry
                 if hasattr(self, 'api') and self.api.hass and self.api.config_entry:
@@ -223,6 +246,7 @@ class PetLibroAPI:
                 raise PetLibroAPIError("No token found during login.")
 
             self.session.token = data["token"]
+            self.session.capture_identity(data)
             _LOGGER.debug("Login successful, token: %s...", self.session.token[:8] if self.session.token else "None")
             return self.session.token
 
@@ -1318,6 +1342,235 @@ class PetLibroAPI:
             )
         except Exception as exc:
             raise PetLibroAPIError("Failed to fetch share invitations") from exc
+        return data if isinstance(data, list) else []
+
+    # ------------------------------------------------------------------
+    # Device sharing
+    # ------------------------------------------------------------------
+
+    async def share_respond(self, share_id: int | str, accept: bool) -> bool:
+        """Accept (``accept=True``) or decline a pending share invitation.
+
+        ``share_id`` is the ``id`` of an item from :meth:`share_pop_list`. The
+        payload shape mirrors the app exactly: ``{"shareId": <int>, "rec": <bool>}``.
+        """
+        try:
+            share_id_int = int(share_id)
+        except (TypeError, ValueError) as exc:
+            raise PetLibroAPIError(f"Invalid share id: {share_id!r}") from exc
+
+        _LOGGER.debug("%s share invitation %s", "Accepting" if accept else "Declining", share_id_int)
+        try:
+            await self.session.post(
+                "/device/deviceShare/rec",
+                json={"shareId": share_id_int, "rec": bool(accept)},
+            )
+        except Exception as exc:
+            raise PetLibroAPIError(
+                f"Failed to {'accept' if accept else 'decline'} share {share_id_int}"
+            ) from exc
+        return True
+
+    async def share_verify(self, share_id: int | str) -> dict[str, Any]:
+        """Check that an invitation is still actionable before responding."""
+        data = await self.session.post(
+            "/device/deviceShare/verifyShare", json={"shareId": int(share_id)}
+        )
+        return data if isinstance(data, dict) else {}
+
+    async def shared_to_me_devices(self) -> list[dict[str, Any]]:
+        """Devices other accounts have shared with this one."""
+        data = await self.session.post("/device/deviceShare/deviceSharedList", json={})
+        return data if isinstance(data, list) else []
+
+    async def my_sharing_devices(self) -> dict[str, Any]:
+        """Devices this account is sharing out, plus the per-device share cap."""
+        data = await self.session.post("/device/deviceShare/mySharingDevices", json={})
+        return data if isinstance(data, dict) else {}
+
+    async def device_share_users(self, serial: str) -> list[dict[str, Any]]:
+        """Accounts that currently have access to one device."""
+        data = await self.session.post(
+            "/device/deviceShare/deviceSharingList", json={"deviceSn": serial}
+        )
+        if isinstance(data, dict):
+            return data.get("userList") or data.get("list") or []
+        return data if isinstance(data, list) else []
+
+    async def share_device_with(self, serial: str, to_account: str) -> bool:
+        """Invite another PETLIBRO account to a device this account owns."""
+        await self.session.post(
+            "/device/deviceShare/add", json={"deviceSn": serial, "toAccount": to_account}
+        )
+        return True
+
+    async def share_revoke(self, serial: str, share_id: int | str) -> bool:
+        """Revoke a share this account granted."""
+        await self.session.post(
+            "/device/deviceShare/remove",
+            json={"deviceSn": serial, "shareId": int(share_id)},
+        )
+        return True
+
+    async def share_quit(self, serial: str, share_id: int | str) -> bool:
+        """Leave a device that was shared with this account."""
+        await self.session.post(
+            "/device/deviceShare/quit",
+            json={"deviceSn": serial, "shareId": int(share_id)},
+        )
+        return True
+
+    async def set_device_share_enabled(self, serial: str, enable: bool) -> bool:
+        """Allow or block sharing for one device."""
+        await self.session.post(
+            "/device/setting/enableDeviceShare",
+            json={"deviceSn": serial, "enable": bool(enable)},
+        )
+        return True
+
+    # ------------------------------------------------------------------
+    # Notification settings
+    # ------------------------------------------------------------------
+
+    async def get_notice_setting(self, serial: str) -> dict[str, Any]:
+        """Fetch every notification toggle for a device.
+
+        The endpoint returns the union of all notification flags across product
+        families, so callers must pick the subset that applies to the device.
+        """
+        data = await self._cached_request(
+            f"notice_setting_{serial}",
+            "POST",
+            "/device/setting/getNoticeSetting",
+            json={"id": serial, "deviceSn": serial},
+            ttl_seconds=10,
+        )
+        return data if isinstance(data, dict) else {}
+
+    async def update_notice_setting(
+        self, endpoint: str, payload: dict[str, Any]
+    ) -> bool:
+        """POST one notification-setting update and invalidate the cached read."""
+        serial = payload.get("deviceSn")
+        _LOGGER.debug("Updating notice setting %s with %s", endpoint, payload)
+        await self.session.post(endpoint, json=payload)
+        if serial:
+            self._cached_responses.pop(f"notice_setting_{serial}", None)
+            self._last_api_call_times.pop(f"notice_setting_{serial}", None)
+        return True
+
+    # ------------------------------------------------------------------
+    # Litter box cleaning schedules
+    # ------------------------------------------------------------------
+
+    async def get_clean_plans(self, serial: str) -> list[dict[str, Any]]:
+        """List the litter box's scheduled cleaning runs."""
+        data = await self.session.post(
+            "/device/cleanPlan/getCleanPlan", json={"deviceSn": serial}
+        )
+        return data if isinstance(data, list) else []
+
+    async def add_clean_plan(
+        self, serial: str, execution_time: str, repeat_day: str, enable: bool = True
+    ) -> bool:
+        """Create a cleaning schedule. ``repeat_day`` is e.g. "1,2,3,4,5"."""
+        await self.session.post(
+            "/device/cleanPlan/addCleanPlan",
+            json={
+                "deviceSn": serial,
+                "executionTime": execution_time,
+                "repeatDay": repeat_day,
+                "enable": bool(enable),
+            },
+        )
+        return True
+
+    async def update_clean_plan(
+        self,
+        serial: str,
+        plan_id: int | str,
+        execution_time: str,
+        repeat_day: str,
+        enable: bool = True,
+    ) -> bool:
+        """Modify an existing cleaning schedule."""
+        await self.session.post(
+            "/device/cleanPlan/updateCleanPlan",
+            json={
+                "deviceSn": serial,
+                "planId": plan_id,
+                "executionTime": execution_time,
+                "repeatDay": repeat_day,
+                "enable": bool(enable),
+            },
+        )
+        return True
+
+    async def delete_clean_plan(self, serial: str, plan_id: int | str) -> bool:
+        """Remove a cleaning schedule."""
+        await self.session.post(
+            "/device/cleanPlan/delCleanPlan",
+            json={"deviceSn": serial, "planId": plan_id},
+        )
+        return True
+
+    # ------------------------------------------------------------------
+    # Device audio (meal-call clips)
+    # ------------------------------------------------------------------
+
+    async def list_device_audio(self, serial: str) -> dict[str, Any]:
+        """Return the stock and user-recorded audio clips available to a device."""
+        data = await self.session.post("/device/deviceAudio/all", json={"id": serial})
+        return data if isinstance(data, dict) else {}
+
+    async def use_device_audio(
+        self, serial: str, audio_id: int | str, used: bool = True
+    ) -> bool:
+        """Select (or deselect) an audio clip on a device."""
+        await self.session.post(
+            "/device/deviceAudio/use",
+            json={"audioId": audio_id, "deviceSn": serial, "used": bool(used)},
+        )
+        return True
+
+    # ------------------------------------------------------------------
+    # Rooms
+    # ------------------------------------------------------------------
+
+    async def list_rooms(self) -> list[dict[str, Any]]:
+        """Rooms defined on the account (PETLIBRO's equivalent of HA areas)."""
+        data = await self.session.post("/device/room/systemRooms", json={})
+        return data if isinstance(data, list) else []
+
+    async def set_device_room(self, serial: str, room_id: int | str) -> bool:
+        """Move a device into a room."""
+        await self.session.post(
+            "/device/device/updateRoom", json={"roomId": room_id, "deviceSn": serial}
+        )
+        return True
+
+    # ------------------------------------------------------------------
+    # Maintenance
+    # ------------------------------------------------------------------
+
+    async def device_maintain(self, serial: str, key: str) -> bool:
+        """Mark a maintenance task done (``key`` names the consumable)."""
+        await self.session.post(
+            "/device/device/maintain", json={"deviceSn": serial, "key": key}
+        )
+        return True
+
+    async def device_maintenance_record(
+        self, serial: str, key: str
+    ) -> list[dict[str, Any]]:
+        """History for one maintenance task.
+
+        Unlike most of the API this endpoint is a GET and takes query
+        parameters rather than a JSON body.
+        """
+        data = await self.session.get(
+            "/device/device/maintenanceRecord", params={"deviceSn": serial, "key": key}
+        )
         return data if isinstance(data, list) else []
 
     async def generate_mqtt_cert(self, member_id: int | str) -> dict[str, str | int]:

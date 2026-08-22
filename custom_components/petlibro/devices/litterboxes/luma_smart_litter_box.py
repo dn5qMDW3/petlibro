@@ -3,11 +3,12 @@ from logging import getLogger
 from typing import cast
 from ...exceptions import PetLibroAPIError
 from ..device import Device
+from .litter_box import LitterBox
 
 _LOGGER = getLogger(__name__)
 
 
-class LumaSmartLitterBox(Device):
+class LumaSmartLitterBox(LitterBox):
     """Represents the Luma Smart Litter Box device (PLLB001).
 
     Data sources (confirmed from live API):
@@ -31,6 +32,7 @@ class LumaSmartLitterBox(Device):
             attribute_settings = await self.api.device_attribute_settings(self.serial)
             get_upgrade = await self.api.get_device_upgrade(self.serial)
             potty_today = await self.api.device_potty_today(self.serial)
+            await self.refresh_clean_plans()
 
             self.update_data({
                 "realInfo": real_info or {},

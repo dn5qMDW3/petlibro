@@ -1,8 +1,11 @@
 # PETLIBRO MQTT / Real-Time Push — Research Notes
 
-> Status: **Cert generation UNBLOCKED** as of 2026-04-22.
-> One MQTT-level detail (CONNECT rc=5) still open — see "Remaining".
-> Source: APK v1.8.10 reverse engineering via MITM + Frida on an Android emulator.
+> Status: **SOLVED and live** as of 2026-08-22. MQTT push is implemented in
+> `custom_components/petlibro/mqtt.py` and verified end-to-end against a real
+> account (CONNACK rc=0, all topics granted, pushes received ~200ms after a
+> state change).
+> Sources: APK v1.8.10 via MITM + Frida (cert flow), and APK v1.8.95 via
+> `blutter` decompilation of the Flutter/Dart AOT snapshot (CONNECT identity).
 >
 > Supporting artifacts under `docs/research/`:
 > - `frida-scripts/` — the script bundle that captured Flutter HTTP traffic (config.js
@@ -151,22 +154,81 @@ body:     {"serialNumber":"<value from generate response>"}
 response: {"code":0,"msg":null,"data":null}
 ```
 
-## Remaining: MQTT CONNECT rc=5
+## SOLVED: the CONNECT rc=5 blocker
 
-With a freshly generated cert, TLS mutual auth to `mqtt.us.petlibro.com:8883` **succeeds** —
-the broker accepts our client cert at the TLS layer. The subsequent MQTT CONNECT packet is
-rejected with rc=5 ("Not authorized"), regardless of:
-- clientId format (`APP_<memberId>`, `<memberId>`, `app_<memberId>`, etc.)
-- username/password permutations (email, memberId, clientId, token, stored password)
-- whether the intermediate `PetlibroCA` is included in the client's presented chain
-- whether the emulator app is still holding a session
+**The login response contains a `clientId` field that we were discarding.** The broker
+wants that exact string as the MQTT client identifier *and* the username *and* the
+password — all three the same value.
 
-This is a CONNECT-packet-content issue, not a cert issue. Two approaches to unblock:
-1. Capture the exact CONNECT bytes from the live app via Frida (hook `SSL_write` inside
-   `libflutter.so` — requires pattern-matching because symbols are stripped).
-2. Write a tiny MQTT passthrough proxy on the host that TLS-terminates with mitmproxy CA,
-   logs MQTT control packets in plaintext, then re-connects to the real broker with a
-   *different* cert of our own.
+```
+clientIdentifier = username = password = <login response>.clientId    # e.g. "APP_<memberId>"
+```
+
+The old guess `APP_<memberId>` happens to *look* right for this account (the server
+derives it from the member id), but it was never sent in all three slots at once, and it
+must be taken from the response rather than constructed — nothing guarantees the format.
+
+### How it was found
+
+`blutter` was run against `libapp.so` from the 1.8.95 arm64 split, recovering the Dart
+class tree with original file paths. The chain:
+
+1. `MqttCertificateHelper::connectMqtt` calls `HiMQTT::connect` passing the *same*
+   register (`fp-0x18`) three times, in the argument slots that the connect body's own
+   log line labels `clientIdentifier:`, `username:` and (via
+   `MqttConnectMessage::authenticateAs`) the password.
+2. That value is `MqttController::_subscribeMqtt`'s read of `field_1f` off the global
+   session object.
+3. The session object is `UserVO` (`dl_common/persistence/model/user.dart`); its
+   `toJson` maps `field_1f` → `clientId` and `field_2b` → `memberId`.
+
+### Verified connection parameters
+
+| Parameter | Value |
+|---|---|
+| Broker | `mqtt.us.petlibro.com:8883` (from `/member/app/config` → `appMqttsHosts`) |
+| TLS | Mutual; server verified against the CA chain from `/member/certificate/ca` |
+| Protocol | MQTT 3.1.1, `clean_session=true`, keepalive 60 |
+| clientId / username / password | `<login>.clientId` |
+
+### Topics (all granted)
+
+```
+dl/member/<memberId>/sub                      # account scope
+dl/<productIdentifier>/<deviceSn>/app/+/sub   # per device
+```
+
+The broker's ACL rejects wildcards in the first two levels — `dl/+/+/app/+/sub` gets
+SUBACK 128. Each device must be subscribed explicitly. The `+` in the fifth level is
+fine and matches `event` in practice.
+
+### Payload
+
+```json
+{
+  "cmd": "APP_REFRESH_EVENT",
+  "ts": 1787405687642,
+  "msgId": "ee313a7ee1eb43f0bd1a00e6d55069d2",
+  "eventKeys": ["DEVICE_ATTR_CHANGE", "DEVICE_WATER_CHANGE", "DEVICE_STATUS_CHANGE",
+                "DEVICE_WORK_RECORD_CHANGE", "DEVICE_GRAIN_STATUS_CHANGE"]
+}
+```
+
+This is a **signal to re-fetch, not a state delta** — there are no values in it. The app
+reloads over HTTP when it arrives, and the integration does the same, refreshing only the
+device named in the topic. Several pushes usually arrive together (one per changed
+subsystem), so the refresh is debounced by ~1s.
+
+### Gotchas found while implementing
+
+- **The account is single-session.** A login elsewhere (the phone app) invalidates the
+  HTTP token and calls start returning `1009 NOT_YET_LOGIN`. The session layer already
+  re-logins on 1009; anything talking to the API directly needs the same.
+- **`/member/certificate/confirm` returns `{"code":0,"data":null}`** on success. Treating
+  a null `data` as failure gives a false negative.
+- **`getNoticeSetting` lags its own writes** by a few seconds, so a read-back immediately
+  after a write can still show the old value. Switches write optimistically to local
+  state for this reason.
 
 ## Topic structure (from APK strings)
 

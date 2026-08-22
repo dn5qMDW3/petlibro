@@ -206,6 +206,10 @@ class PetLibroSensorEntity(PetLibroEntity[_DeviceT], SensorEntity):
     def extra_state_attributes(self):
         """Return entity specific state attributes."""        
         match self.key:
+            case "clean_plan_count":
+                # Surface the schedules themselves so automations can read
+                # times and repeat days without another API round-trip.
+                return {"plans": self.device.clean_plans}
             case "next_feed_time":
                 next_feed = self.device.get_next_feed
                 next_feed_data = self.device.feeding_plan_data.get(str(next_feed.get("id")), {})
@@ -1352,6 +1356,13 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
         ),
     ],
     LumaSmartLitterBox: [
+        PetLibroSensorEntityDescription[LumaSmartLitterBox](
+            key="clean_plan_count",
+            translation_key="clean_plan_count",
+            icon="mdi:calendar-clock",
+            name="Cleaning schedules",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
         PetLibroSensorEntityDescription[LumaSmartLitterBox](
             key="wifi_ssid",
             translation_key="wifi_ssid",

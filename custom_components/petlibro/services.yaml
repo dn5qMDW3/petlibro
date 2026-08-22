@@ -135,3 +135,133 @@ add_feeding_plan:
       required: false
       selector:
         boolean:
+accept_share:
+  name: Accept share invitation
+  description: >
+    Accept a pending device-share invitation from another PETLIBRO account.
+    The device is added to this account and appears in Home Assistant after
+    the device list reloads.
+  fields:
+    share_id:
+      name: Invitation ID
+      description: >
+        Which invitation to accept. Leave blank when only one is pending.
+        IDs are listed in the attributes of the "Pending share invitations"
+        binary sensor.
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 999999999999
+          mode: box
+
+decline_share:
+  name: Decline share invitation
+  description: >
+    Decline a pending device-share invitation from another PETLIBRO account.
+  fields:
+    share_id:
+      name: Invitation ID
+      description: >
+        Which invitation to decline. Leave blank when only one is pending.
+        IDs are listed in the attributes of the "Pending share invitations"
+        binary sensor.
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 999999999999
+          mode: box
+
+share_device:
+  name: Share a device
+  description: >
+    Invite another PETLIBRO account to a device this account owns. The other
+    account has to accept the invitation in their app before they get access.
+  fields:
+    device_id:
+      name: Device
+      description: The device to share.
+      required: true
+      selector:
+        device:
+          integration: petlibro
+    account:
+      name: Account
+      description: The email address of the PETLIBRO account to invite.
+      required: true
+      example: "someone@example.com"
+      selector:
+        text:
+
+add_clean_plan:
+  name: Add cleaning schedule
+  description: >
+    Add a scheduled cleaning cycle to a litter box.
+  fields:
+    device_id:
+      name: Device
+      description: The litter box to schedule.
+      required: true
+      selector:
+        device:
+          integration: petlibro
+    time:
+      name: Time
+      description: "When to run the cleaning cycle (e.g. 03:00)."
+      required: true
+      selector:
+        time:
+    days:
+      name: Repeat days
+      description: Days of the week to repeat. Leave empty for a one-off run.
+      required: false
+      selector:
+        select:
+          multiple: true
+          options:
+            - label: Monday
+              value: "1"
+            - label: Tuesday
+              value: "2"
+            - label: Wednesday
+              value: "3"
+            - label: Thursday
+              value: "4"
+            - label: Friday
+              value: "5"
+            - label: Saturday
+              value: "6"
+            - label: Sunday
+              value: "7"
+    enabled:
+      name: Enabled
+      description: Whether the schedule is active straight away.
+      required: false
+      default: true
+      selector:
+        boolean:
+
+delete_clean_plan:
+  name: Delete cleaning schedule
+  description: >
+    Remove a scheduled cleaning cycle from a litter box.
+  fields:
+    device_id:
+      name: Device
+      description: The litter box to change.
+      required: true
+      selector:
+        device:
+          integration: petlibro
+    plan_id:
+      name: Schedule ID
+      description: >
+        The planId of the schedule to remove. IDs are listed in the attributes
+        of the "Cleaning schedules" sensor.
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 999999999
+          mode: box

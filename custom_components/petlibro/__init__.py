@@ -89,6 +89,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: PetLibroConfigEntry) -> 
         await hub.load_devices()
         await hub.load_pets()
         await hub.coordinator.async_config_entry_first_refresh()
+        # Real-time push; degrades to polling on its own if unavailable.
+        await hub.async_start_mqtt()
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
         await async_setup_services(hass)
 

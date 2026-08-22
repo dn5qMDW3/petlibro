@@ -45,10 +45,48 @@ class Device(Event):
             data.update(await self.api.device_real_info(self.serial))
             data.update(await self.api.device_attribute_settings(self.serial))
             data.update({"boundPets": await self.api.device_get_bound_pets(self.serial)})
+            # Notification toggles live behind their own endpoint and are
+            # namespaced so they cannot collide with attribute-setting keys.
+            try:
+                data["noticeSetting"] = await self.api.get_notice_setting(self.serial)
+            except Exception:
+                _LOGGER.debug(
+                    "Notification settings unavailable for %s", self.serial, exc_info=True
+                )
             self.update_data(data)
         except Exception as e:
             _LOGGER.error("Failed to refresh device data: %s", e)
 
+
+    # ------------------------------------------------------------------
+    # Notification settings
+    # ------------------------------------------------------------------
+
+    @property
+    def notice_setting(self) -> dict:
+        """The device's notification toggles, or an empty dict if unavailable."""
+        value = self._data.get("noticeSetting")
+        return value if isinstance(value, dict) else {}
+
+    def notice_enabled(self, field: str) -> bool:
+        """Current value of one notification flag."""
+        return bool(self.notice_setting.get(field))
+
+    async def set_notice(
+        self, endpoint: str, payload: dict, field: str, value: bool
+    ) -> None:
+        """Push one notification-setting change, then reflect it locally.
+
+        The write payload uses generic keys (``enableNotice``) while the read
+        response uses specific ones (``enableOfflineNotice``), so the field to
+        update optimistically is passed in rather than inferred. The optimistic
+        write stops the switch flicking back before the next refresh; the MQTT
+        push (or the poll) corrects it if the server disagreed.
+        """
+        await self.api.update_notice_setting(endpoint, payload)
+        notice = dict(self.notice_setting)
+        notice[field] = value
+        self._data["noticeSetting"] = notice
 
     @property
     def device_id(self) -> str:

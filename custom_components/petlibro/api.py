@@ -5,6 +5,7 @@ from typing import Any
 from datetime import timedelta
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util.dt import utcnow
+from .const import CONF_MEMBER_ID, CONF_MQTT_CLIENT_ID
 from .exceptions import PetLibroAPIError
 from aiohttp import ClientSession
 
@@ -57,6 +58,24 @@ class PetLibroSession:
         member_id = data.get("memberId") or data.get("id")
         if member_id:
             self.member_id = member_id
+
+        # Persist it: `clientId` comes back only from the login response, and a
+        # normal restart reuses the stored token without logging in again.
+        api = getattr(self, "api", None)
+        entry = getattr(api, "config_entry", None)
+        hass = getattr(api, "hass", None)
+        if entry is None or hass is None or not self.client_id:
+            return
+        if entry.data.get(CONF_MQTT_CLIENT_ID) == self.client_id:
+            return
+        hass.config_entries.async_update_entry(
+            entry,
+            data={
+                **entry.data,
+                CONF_MQTT_CLIENT_ID: self.client_id,
+                CONF_MEMBER_ID: self.member_id,
+            },
+        )
 
     async def post(self, path: str, **kwargs: Any) -> JSON:
         """POST method for PetLibro API."""
@@ -206,6 +225,11 @@ class PetLibroAPI:
         # Inject the API reference into the session for token saving
         self.session.api = self
 
+        # Restore the MQTT identity saved by a previous login.
+        if config_entry:
+            self.session.client_id = config_entry.data.get(CONF_MQTT_CLIENT_ID)
+            self.session.member_id = config_entry.data.get(CONF_MEMBER_ID)
+
         # Load the saved token if available
         if config_entry and "token" in config_entry.data:
             self.token = config_entry.data["token"]
@@ -221,6 +245,24 @@ class PetLibroAPI:
     def hash_password(password: str) -> str:
         """Generate the password hash for the API"""
         return md5(password.encode("UTF-8")).hexdigest()
+
+    async def async_ensure_identity(self) -> tuple[str | None, str | int | None]:
+        """Return (clientId, memberId), logging in once if clientId is unknown.
+
+        Only ``/member/auth/login`` returns ``clientId``, so an entry created
+        before it was persisted has to log in again to learn it. That costs one
+        login (which the account treats as a new session), hence doing it only
+        when the value is genuinely missing rather than on every startup.
+        """
+        if self.session.client_id:
+            if not self.session.member_id:
+                info = await self.member_info()
+                self.session.capture_identity(info or {})
+            return self.session.client_id, self.session.member_id
+
+        _LOGGER.debug("No stored MQTT clientId; logging in to obtain one")
+        await self.login(self.email, self.password)
+        return self.session.client_id, self.session.member_id
 
     async def login(self, email: str, password: str) -> str:
         """Login to the API and retrieve the token"""

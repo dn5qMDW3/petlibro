@@ -124,11 +124,13 @@ class PetLibroMQTT:
     async def _async_start(self, devices: Iterable[tuple[str, str]]) -> None:
         import paho.mqtt.client as mqtt  # deferred: declared in manifest requirements
 
-        client_id = getattr(self.api.session, "client_id", None)
-        member_id = getattr(self.api.session, "member_id", None)
+        # `clientId` is only ever returned by the login endpoint, and a normal
+        # restart reuses the stored token without logging in — so ask the API
+        # for it, which falls back to a single login when it isn't cached yet.
+        client_id, member_id = await self.api.async_ensure_identity()
         if not client_id:
             raise RuntimeError(
-                "login response carried no clientId; cannot authenticate to the broker"
+                "could not obtain clientId from the API; cannot authenticate to the broker"
             )
         self._client_id = str(client_id)
         self._member_id = str(member_id) if member_id else None

@@ -16,6 +16,11 @@ CONF_EMAIL = "email"
 CONF_PASSWORD = "password"
 CONF_API_TOKEN = "api_token"
 CONF_REGION = "region"
+# MQTT identity from the login response. Persisted because `clientId` is
+# returned *only* by /member/auth/login — no other endpoint exposes it — and a
+# normal restart reuses the stored token without logging in again.
+CONF_MQTT_CLIENT_ID = "mqtt_client_id"
+CONF_MEMBER_ID = "member_id"
 
 # Supported platforms
 PLATFORMS = ["sensor", "switch", "button", "binary_sensor", "number", "select", "text", "date", "image", "update"]  # Add any other platforms as needed

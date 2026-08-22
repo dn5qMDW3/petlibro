@@ -12,6 +12,7 @@ from homeassistant.helpers import entity_registry as er
 
 _LOGGER = getLogger(__name__)
 
+from .const import DOMAIN
 from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription, create_platform_setup
 from .devices import Device
 from .devices.feeders.feeder import Feeder

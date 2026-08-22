@@ -29,6 +29,36 @@ jobs:
       - name: Run Hassfest validation
         uses: home-assistant/actions/hassfest@master
 
+  lint:
+    name: Undefined names (pyflakes)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install pyflakes
+        run: pip install pyflakes
+
+      # hassfest and py_compile both miss NameErrors at import time, which take
+      # the whole integration down with "Exception importing ...". pyflakes
+      # catches them without needing Home Assistant installed.
+      - name: Check for undefined names
+        run: |
+          pyflakes custom_components/petlibro/ \
+            | grep -v "imported but unused" \
+            | grep -v "unable to detect undefined names" \
+            | grep -v "redefinition of unused" \
+            | tee /tmp/pyflakes.txt
+          if grep -q "undefined name" /tmp/pyflakes.txt; then
+            echo "::error::undefined name(s) found - these crash at import time"
+            exit 1
+          fi
+
   validate-hacs:
     name: HACS Validation
     runs-on: ubuntu-latest

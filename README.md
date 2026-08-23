@@ -2,7 +2,7 @@
 
 [![hacs_badge][hacsbadge]][hacs] [![version][versionbadge]][versionlink]
 
-Custom Home Assistant integration for PETLIBRO pet devices (feeders, fountains, litter boxes). Cloud-polling hub-based integration using the PETLIBRO API.
+Custom Home Assistant integration for PETLIBRO pet devices (feeders, fountains, litter boxes). Hub-based integration using the PETLIBRO cloud API, with **real-time push** over the vendor's MQTT broker and polling as a fallback.
 
 > **Based on** [jjjonesjr33/petlibro](https://github.com/jjjonesjr33/petlibro) — this is a maintained fork with additional features, bug fixes, and audit improvements. Original credit goes to [@jjjonesjr33](https://github.com/jjjonesjr33), [@C4-Dimitri](https://github.com/C4-Dimitri), and [@FeliGoblin](https://github.com/FeliGoblin) for the foundational work.
 
@@ -58,30 +58,48 @@ When adding the integration, enter:
 - **Email** — your PETLIBRO account email
 - **Password** — your PETLIBRO account password
 
-> **Note:** PETLIBRO only allows one active session per account. If you keep the mobile app logged in, create a separate account for Home Assistant and share your devices to it.
+> **Note:** PETLIBRO only allows one active session per account, and signing in elsewhere invalidates the others. If you keep the mobile app logged in, create a separate account for Home Assistant and share your devices to it — you can accept the invitation with the `petlibro.accept_share` service.
 
 ---
 
 ## Features
 
-- Real-time device data (60-second polling interval)
+- **Real-time push** — state changes arrive within about a second over PETLIBRO's MQTT broker, instead of waiting for the next poll. Polling continues in the background as a safety net (every 5 minutes while push is healthy, 60 seconds if it drops). No setup: no broker to configure and nothing to do with Home Assistant's own MQTT integration.
 - Sensor entities for battery, water level, food level, weights, drinking statistics, etc.
 - Switches for sound, light, child lock, deodorization, and other device toggles
+- **Notification switches** — per-device alert toggles (offline, low battery, low water, filter and cleaning reminders, drinking trends, cleaning success/failure, motion and sound detection, and more), mirroring the mobile app's notification settings
 - Buttons for manual feed, manual clean, lid open, timer resets, etc.
 - Number inputs for volume, schedules, thresholds
 - Selects for modes (clean mode, water dispensing mode, etc.)
+- **Device sharing** — see pending invitations, and accept or decline them from Home Assistant
+- **Litter box cleaning schedules** — view them, and add or remove them via services
 - Firmware update notifications
 - Multi-language support (13 languages)
 - Account-level unit preferences (feed, water, weight)
 
-See [docs/API_REFERENCE.md](docs/API_REFERENCE.md) for the full PETLIBRO Cloud API reference.
+See [docs/API_REFERENCE.md](docs/API_REFERENCE.md) for the full PETLIBRO Cloud API reference, and [docs/MQTT_RESEARCH.md](docs/MQTT_RESEARCH.md) for how the push channel works (broker, certificates, topics and payloads).
+
+---
+
+## Services
+
+| Service | What it does |
+|---|---|
+| `petlibro.add_feeding_plan` | Add a scheduled feed to a dry food feeder |
+| `petlibro.edit_feeding_plan` | Change an existing feeding plan |
+| `petlibro.accept_share` | Accept a pending device-share invitation |
+| `petlibro.decline_share` | Decline a pending device-share invitation |
+| `petlibro.share_device` | Invite another PETLIBRO account to a device you own |
+| `petlibro.add_clean_plan` | Add a cleaning schedule to a litter box |
+| `petlibro.delete_clean_plan` | Remove a cleaning schedule from a litter box |
+
+Pending share invitations appear on the *Pending share invitations* binary sensor, with the invitation IDs in its attributes. When only one invitation is waiting, `accept_share` and `decline_share` can be called without arguments.
 
 ---
 
 ## Pending / Experimental
 
 - **Live camera feed** — Granary Smart Camera Feeder (PLAF203) and Luma Smart Litter Box (PLLB001) use TUTK/Kalay P2P video which isn't currently feasible to integrate directly into HA. Help welcome.
-- **Real-time MQTT push** — PETLIBRO devices support MQTT for instant state updates. Currently blocked on certificate generation. See [docs/MQTT_RESEARCH.md](docs/MQTT_RESEARCH.md).
 
 ---
 
@@ -107,6 +125,7 @@ After adding the integration, allow 1–5 minutes for all entities to populate. 
 - **Login fails** — Verify credentials and region. Code `1009` means the token expired (auto-handled). Code `1025` means a force logout (someone else logged in to the same account).
 - **Devices missing** — Check your account on the PETLIBRO mobile app to confirm devices are bound. Shared devices appear with limited control.
 - **Empty values** — Some devices return empty strings/null for unused fields. The integration filters these where possible.
+- **Real-time push not connecting** — Check the *Real-time push* diagnostic sensor. Its attributes show the broker, the subscribed devices, the time of the last event, and the last error. Push is an optimisation: when it is unavailable the integration keeps polling, so devices still work, just less promptly.
 
 ---
 

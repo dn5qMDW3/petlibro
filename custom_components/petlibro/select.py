@@ -222,7 +222,10 @@ class FeedingPlanSelectEntity(PetLibroEntity[_DeviceT], SelectEntity):
     _attr_should_poll = False
 
     def __init__(self, device, hub, key: str, name: str) -> None:
-        desc = PetLibroEntityDescription(key=key, name=name)
+        # translation_key mirrors the key so the card (and anything else
+        # reading the registry) can find these the same way as every other
+        # entity, rather than guessing from the generated entity_id.
+        desc = PetLibroEntityDescription(key=key, name=name, translation_key=key)
         super().__init__(device, hub, desc)
         self._attr_unique_id = f"{device.serial}-{key}"
         self._current: str | None = None

@@ -1,3 +1,4 @@
+import asyncio
 import aiohttp
 from ...exceptions import PetLibroAPIError
 from .fountain import Fountain
@@ -8,27 +9,41 @@ _LOGGER = getLogger(__name__)
 class DockstreamSmartFountain(Fountain):
     """Represents the Dockstream Smart Fountain device."""
 
+    async def _safe_fetch(self, coro):
+        """Await one endpoint, returning None on failure.
+
+        Catches both API errors and network-level errors so one failing
+        endpoint never takes down the whole refresh or loses other data.
+        """
+        try:
+            return await coro
+        except (PetLibroAPIError, aiohttp.ClientError, asyncio.TimeoutError) as err:
+            _LOGGER.warning("Error fetching data for DockstreamSmartFountain %s: %s", self.serial, err)
+            return None
+
     async def refresh(self):
         """Refresh the device data from the API."""
         try:
             await super().refresh()
 
-            real_info = await self.api.device_real_info(self.serial)
-            data_real_info = await self.api.device_data_real_info(self.serial)
-            attribute_settings = await self.api.device_attribute_settings(self.serial)
-            get_upgrade = await self.api.get_device_upgrade(self.serial)
-            get_work_record = await self.api.get_device_work_record(self.serial, record_types=["DRINK"])
-            get_feeding_plan_today = await self.api.device_feeding_plan_today_new(self.serial)
-            get_drink_water = await self.api.get_device_drink_water(self.serial)
+            keys = (
+                "realInfo", "dataRealInfo", "getAttributeSetting", "getUpgrade",
+                "workRecord", "getfeedingplantoday", "getDrinkWater",
+            )
+            results = await asyncio.gather(
+                self._safe_fetch(self.api.device_real_info(self.serial)),
+                self._safe_fetch(self.api.device_data_real_info(self.serial)),
+                self._safe_fetch(self.api.device_attribute_settings(self.serial)),
+                self._safe_fetch(self.api.get_device_upgrade(self.serial)),
+                self._safe_fetch(self.api.get_device_work_record(self.serial, record_types=["DRINK"])),
+                self._safe_fetch(self.api.device_feeding_plan_today_new(self.serial)),
+                self._safe_fetch(self.api.get_device_drink_water(self.serial)),
+            )
 
+            # Only update keys that were fetched successfully so a transient
+            # failure doesn't overwrite previously-good data with empty values.
             self.update_data({
-                "realInfo": real_info or {},
-                "dataRealInfo": data_real_info or {},
-                "getDrinkWater": get_drink_water or {},
-                "getAttributeSetting": attribute_settings or {},
-                "getUpgrade": get_upgrade or {},
-                "getfeedingplantoday": get_feeding_plan_today or {},
-                "workRecord": get_work_record if get_work_record is not None else []
+                key: value for key, value in zip(keys, results) if value is not None
             })
         except PetLibroAPIError as err:
             _LOGGER.error("Error refreshing data for DockstreamSmartFountain: %s", err)

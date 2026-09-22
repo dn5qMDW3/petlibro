@@ -14,6 +14,7 @@ class PolarWetFoodFeeder(Feeder):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._manual_feed_active = False
+        self._rotating = False
 
     async def refresh(self):
         """Refresh the device data from the API."""
@@ -137,30 +138,47 @@ class PolarWetFoodFeeder(Feeder):
         if target not in (1, 2, 3):
             raise PetLibroAPIError(f"Plate must be 1, 2, or 3, got {target}")
 
-        if not self.plate_position:
+        if self._rotating:
+            _LOGGER.warning("Rotation already in progress for %s", self.serial)
+            return
+
+        # Acquire the lock before the first await so concurrent calls can't
+        # both pass the guard above (TOCTOU).
+        self._rotating = True
+        try:
+            if not self.plate_position:
+                await self.refresh()
+            curr = self.plate_position or 1
+
+            steps = (target - curr) % 3
+            _LOGGER.debug("Rotate-to-plate: curr=%s target=%s steps=%s for %s", curr, target, steps, self.serial)
+
+            ROTATE_COOLDOWN = 2.0
+            for _ in range(steps):
+                await self.api.set_rotate_food_bowl(self.serial)
+                await asyncio.sleep(ROTATE_COOLDOWN)
+                await self.refresh()
+
             await self.refresh()
-        curr = self.plate_position or 1
-
-        steps = (target - curr) % 3
-        _LOGGER.debug("Rotate-to-plate: curr=%s target=%s steps=%s for %s", curr, target, steps, self.serial)
-
-        ROTATE_COOLDOWN = 0.6
-        for _ in range(steps):
-            await self.api.set_rotate_food_bowl(self.serial)
-            await asyncio.sleep(ROTATE_COOLDOWN)
-            await self.refresh()
-
-        await self.refresh()
+        finally:
+            self._rotating = False
 
     async def rotate_food_bowl(self) -> None:
+        if self._rotating:
+            _LOGGER.warning("Rotation already in progress for %s", self.serial)
+            return
         _LOGGER.debug("Triggering rotate food bowl for %s", self.serial)
 
+        self._rotating = True
         try:
             await self.api.set_rotate_food_bowl(self.serial)
             await self.refresh()
         except aiohttp.ClientError as err:
             _LOGGER.error("Failed to trigger rotate food bowl for %s: %s", self.serial, err)
             raise PetLibroAPIError(f"Error triggering rotate food bowl: {err}")
+        finally:
+            self._rotating = False
+
 
     async def feed_audio(self) -> None:
         _LOGGER.debug("Triggering feed audio for %s", self.serial)

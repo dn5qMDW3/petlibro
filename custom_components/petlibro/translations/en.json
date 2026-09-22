@@ -361,6 +361,12 @@
       },
       "today_fountain_drinking_time": {
         "name": "Today's Fountain Drinking Time"
+      },
+      "last_clean_date": {
+        "name": "Last Clean Date"
+      },
+      "next_clean_date": {
+        "name": "Next Clean Date"
       }
     },
     "image": {

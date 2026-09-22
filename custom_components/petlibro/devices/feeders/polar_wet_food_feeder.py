@@ -4,6 +4,8 @@ import aiohttp
 from datetime import datetime
 from logging import getLogger
 
+from homeassistant.util import dt as dt_util
+
 from ...exceptions import PetLibroAPIError
 from .feeder import Feeder
 
@@ -110,7 +112,48 @@ class PolarWetFoodFeeder(Feeder):
         fahrenheit = celsius * 9 / 5 + 32
         return round(fahrenheit, 1)
 
+    @property
+    def remaining_cleaning_days(self) -> float | None:
+        """Get the remaining cleaning days."""
+        value = self._data.get("realInfo", {}).get("remainingCleaningDays")
+        try:
+            return float(value) if value is not None else None
+        except (TypeError, ValueError):
+            return None
+
+    @property
+    def last_clean_date(self) -> datetime | None:
+        """Return the timestamp of the last machine cleaning as a datetime object (UTC)."""
+        timestamp_ms = self._data.get("realInfo", {}).get("machineCleaningTime")
+        if not timestamp_ms:
+            return None
+        try:
+            return dt_util.utc_from_timestamp(timestamp_ms / 1000)
+        except (TypeError, ValueError, OverflowError, OSError):
+            return None
+
+    @property
+    def next_clean_date(self) -> datetime | None:
+        """Return the timestamp of the next machine cleaning as a datetime object (UTC)."""
+        timestamp_ms = self._data.get("realInfo", {}).get("machineNextCleaningTime")
+        if not timestamp_ms:
+            return None
+        try:
+            return dt_util.utc_from_timestamp(timestamp_ms / 1000)
+        except (TypeError, ValueError, OverflowError, OSError):
+            return None
+
+    async def set_cleaning_reset(self) -> None:
+        _LOGGER.debug("Triggering machine cleaning reset for %s", self.serial)
+        try:
+            await self.api.set_cleaning_reset(self.serial)
+            await self.refresh()
+        except aiohttp.ClientError as err:
+            _LOGGER.error("Failed to trigger machine cleaning reset for %s: %s", self.serial, err)
+            raise PetLibroAPIError(f"Error triggering machine cleaning reset: {err}") from err
+
     async def set_manual_feed_now(self, start: bool, plate: int) -> None:
+
         plate = plate if plate is not None else self.plate_position
         try:
             if start:

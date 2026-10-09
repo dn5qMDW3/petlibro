@@ -130,9 +130,14 @@ class LumaSmartLitterBox(LitterBox):
         return self._data.get("realInfo", {}).get("garbageWarehouseLeaveState", "NORMAL")
 
     @property
-    def warehouse_surplus_grain(self) -> str:
-        """Overall litter warehouse supply (GOOD, LOW, etc.)."""
-        return self._data.get("realInfo", {}).get("warehouseSurplusGrain", "GOOD")
+    def warehouse_surplus_grain(self) -> str | None:
+        """Overall litter warehouse supply (GOOD, LOW, etc.).
+
+        None until the device has reported it, so the sensor reads unknown
+        rather than a reassuring GOOD when there is no data.
+        """
+        return self._data.get("realInfo", {}).get("warehouseSurplusGrain")
+
 
     @property
     def left_warehouse_surplus_grain(self) -> bool:

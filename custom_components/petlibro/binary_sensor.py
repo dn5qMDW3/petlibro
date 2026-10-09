@@ -208,7 +208,7 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             name="Indicator"
         ),
         PetLibroBinarySensorEntityDescription[AirSmartFeeder](
-            key="feeding_plan_state",
+            key="today_feeding_schedule",
             translation_key="today_feeding_schedule",
             icon="mdi:calendar-check",
             should_report=lambda device: device.feeding_plan_today_data is not None,
@@ -280,7 +280,7 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             name="Indicator"
         ),
         PetLibroBinarySensorEntityDescription[GranarySmartFeeder](
-            key="feeding_plan_state",
+            key="today_feeding_schedule",
             translation_key="today_feeding_schedule",
             icon="mdi:calendar-check",
             should_report=lambda device: device.feeding_plan_today_data is not None,
@@ -360,7 +360,7 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             name="Indicator"
         ),
         PetLibroBinarySensorEntityDescription[GranarySmartCameraFeeder](
-            key="feeding_plan_state",
+            key="today_feeding_schedule",
             translation_key="today_feeding_schedule",
             icon="mdi:calendar-check",
             should_report=lambda device: device.feeding_plan_today_data is not None,
@@ -471,7 +471,7 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             name="Display Status"
         ),
         PetLibroBinarySensorEntityDescription[OneRFIDSmartFeeder](
-            key="feeding_plan_state",
+            key="today_feeding_schedule",
             translation_key="today_feeding_schedule",
             icon="mdi:calendar-check",
             should_report=lambda device: device.feeding_plan_today_data is not None,
@@ -622,7 +622,7 @@ DEVICE_BINARY_SENSOR_MAP: dict[type[Device], list[PetLibroBinarySensorEntityDesc
             name="Indicator"
         ),
         PetLibroBinarySensorEntityDescription[SpaceSmartFeeder](
-            key="feeding_plan_state",
+            key="today_feeding_schedule",
             translation_key="today_feeding_schedule",
             icon="mdi:calendar-check",
             should_report=lambda device: device.feeding_plan_today_data is not None,

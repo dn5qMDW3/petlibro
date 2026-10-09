@@ -4,14 +4,14 @@
 
 Custom Home Assistant integration for PETLIBRO pet devices (feeders, fountains, litter boxes). Hub-based integration using the PETLIBRO cloud API, with **real-time push** over the vendor's MQTT broker and polling as a fallback.
 
-> **Based on** [jjjonesjr33/petlibro](https://github.com/jjjonesjr33/petlibro) — this is a maintained fork with additional features, bug fixes, and audit improvements. Original credit goes to [@jjjonesjr33](https://github.com/jjjonesjr33), [@C4-Dimitri](https://github.com/C4-Dimitri), and [@FeliGoblin](https://github.com/FeliGoblin) for the foundational work.
+> **Based on** [jjjonesjr33/petlibro](https://github.com/jjjonesjr33/petlibro) — this is a maintained fork with additional features, bug fixes, and audit improvements. It is kept in sync with upstream (currently through upstream v1.3, September 2026). Original credit goes to [@jjjonesjr33](https://github.com/jjjonesjr33), [@C4-Dimitri](https://github.com/C4-Dimitri), and [@FeliGoblin](https://github.com/FeliGoblin) for the foundational work.
 
 ---
 
 ## Supported Devices
 
 ### Feeders
-- Granary Smart Feeder (PLAF103) — V1 & V2
+- Granary Smart Feeder (PLAF103) — V1 & V2, including the dual-tray model's left/right food level
 - Space Smart Feeder (PLAF107)
 - Air Smart Feeder (PLAF108)
 - Polar Wet Food Feeder (PLAF109)
@@ -58,6 +58,8 @@ When adding the integration, enter:
 - **Email** — your PETLIBRO account email
 - **Password** — your PETLIBRO account password
 
+To change the email or password later, use **Reconfigure** in the integration's three-dot menu, or **Configure → Change login credentials**. There is no need to remove and re-add the integration.
+
 > **Note:** PETLIBRO only allows one active session per account, and signing in elsewhere invalidates the others. If you keep the mobile app logged in, create a separate account for Home Assistant and share your devices to it — you can accept the invitation with the `petlibro.accept_share` service.
 
 ---
@@ -73,9 +75,15 @@ When adding the integration, enter:
 - Selects for modes (clean mode, water dispensing mode, etc.)
 - **Device sharing** — see pending invitations, and accept or decline them from Home Assistant
 - **Litter box cleaning schedules** — view them, and add or remove them via services
+- **Litter box use per pet** — today's visits, pee count and poop count on each pet, alongside the box-wide totals, plus the Luma's litter level
+- **Feeding schedule control** — enable, disable, skip or delete individual feeding plans, and switch the whole schedule on or off, via services
 - Firmware update notifications
-- Multi-language support (13 languages)
+- Multi-language support (14 languages)
 - Account-level unit preferences (feed, water, weight)
+
+Each entity uses a standard Home Assistant icon; the device's product picture appears on its firmware update entity.
+
+<img src="docs/media/entities-litter-box.png" alt="Luma Smart Litter Box controls and sensors in Home Assistant" width="360">
 
 See [docs/API_REFERENCE.md](docs/API_REFERENCE.md) for the full PETLIBRO Cloud API reference, and [docs/MQTT_RESEARCH.md](docs/MQTT_RESEARCH.md) for how the push channel works (broker, certificates, topics and payloads).
 
@@ -87,6 +95,11 @@ See [docs/API_REFERENCE.md](docs/API_REFERENCE.md) for the full PETLIBRO Cloud A
 |---|---|
 | `petlibro.add_feeding_plan` | Add a scheduled feed to a dry food feeder |
 | `petlibro.edit_feeding_plan` | Change an existing feeding plan |
+| `petlibro.toggle_feeding_plan` | Enable or disable one feeding plan |
+| `petlibro.skip_feeding_plan` | Skip, or un-skip, one feeding plan for today |
+| `petlibro.delete_feeding_plan` | Permanently remove a feeding plan |
+| `petlibro.toggle_feeding_schedule` | Enable or disable a feeder's whole schedule |
+| `petlibro.toggle_today_feeding_schedule` | Enable or disable all of today's feeds |
 | `petlibro.accept_share` | Accept a pending device-share invitation |
 | `petlibro.decline_share` | Decline a pending device-share invitation |
 | `petlibro.share_device` | Invite another PETLIBRO account to a device you own |
@@ -115,6 +128,10 @@ logger:
   logs:
     custom_components.petlibro: debug
 ```
+
+### Download diagnostics
+
+**Settings → Devices & Services → PETLIBRO → ⋮ → Download diagnostics** produces a file with the raw data PETLIBRO returns for each device and pet. Serial numbers, MAC addresses, Wi-Fi names, account details, tokens and image URLs are redacted, so it is suitable for attaching to an issue — and it is the quickest way to get a missing field or a new device supported.
 
 ### First-time setup
 

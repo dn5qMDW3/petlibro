@@ -257,6 +257,15 @@
       },
       "door_state": {
         "name": "Door State"
+      },
+      "pet_today_potty_times": {
+        "name": "Today's litter box visits"
+      },
+      "pet_today_pee_times": {
+        "name": "Today's pee count"
+      },
+      "pet_today_poop_times": {
+        "name": "Today's poop count"
       }
     },
     "image": {

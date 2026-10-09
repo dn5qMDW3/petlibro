@@ -347,3 +347,39 @@ class Pet(Event):
     def today_fountain_drinking_time(self) -> int:
         """Total seconds spent drinking at RFID fountains today."""
         return self._data.get("todayFountainDrinkingTime") or 0
+
+    # --- Litter box use (from the litter boxes' pottyToday data)
+
+    def _potty_today(self, field: str) -> int | None:
+        """Sum one of this pet's potty counters across all litter boxes.
+
+        Returns None when no litter box reports this pet, so the sensors stay
+        unknown rather than showing a misleading zero.
+        """
+        total: int | None = None
+        for device in (self.hub.devices or {}).values():
+            potty = getattr(device, "_data", {}).get("pottyToday")
+            if not isinstance(potty, dict):
+                continue
+            for entry in potty.get("petList") or []:
+                if not isinstance(entry, dict) or str(entry.get("id")) != str(self.id):
+                    continue
+                value = entry.get(field)
+                if isinstance(value, int) and not isinstance(value, bool):
+                    total = (total or 0) + value
+        return total
+
+    @property
+    def today_potty_times(self) -> int | None:
+        """Number of litter box visits by this pet today."""
+        return self._potty_today("times")
+
+    @property
+    def today_pee_times(self) -> int | None:
+        """Number of times this pet peed in a litter box today."""
+        return self._potty_today("peeTimes")
+
+    @property
+    def today_poop_times(self) -> int | None:
+        """Number of times this pet pooped in a litter box today."""
+        return self._potty_today("poopTimes")

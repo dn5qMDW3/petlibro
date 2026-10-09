@@ -367,6 +367,15 @@
       },
       "next_clean_date": {
         "name": "Next Clean Date"
+      },
+      "child_lock_switch": {
+        "name": "Buttons Lock"
+      },
+      "pump_air_state": {
+        "name": "Pump Air State"
+      },
+      "door_state": {
+        "name": "Door State"
       }
     },
     "image": {
@@ -582,6 +591,9 @@
       },
       "reset_mat": {
         "name": "Reset Mat Timer"
+      },
+      "calibrate_weight": {
+        "name": "Calibrate Weight Sensor"
       }
     },
     "binary_sensor": {
@@ -665,6 +677,27 @@
       },
       "today_feeding_schedule": {
         "name": "Today's Feeding Schedule"
+      },
+      "power_connected": {
+        "name": "Power Connected"
+      },
+      "left_food_low": {
+        "name": "Left Food Status"
+      },
+      "right_food_low": {
+        "name": "Right Food Status"
+      },
+      "motion_detected": {
+        "name": "Motion Detected"
+      },
+      "sound_detected": {
+        "name": "Sound Detected"
+      },
+      "rotor_stuck": {
+        "name": "Rotor Status"
+      },
+      "weight_calibration_error": {
+        "name": "Weight Calibration Error"
       }
     },
     "number": {
@@ -724,6 +757,12 @@
       },
       "duration_after_deodorization": {
         "name": "Post-Use Deodorization Duration"
+      },
+      "desiccant_frequency": {
+        "name": "Desiccant Frequency"
+      },
+      "water_sensing_delay": {
+        "name": "Water Sensing Delay"
       }
     },
     "select": {

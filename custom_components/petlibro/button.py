@@ -692,18 +692,6 @@ DEVICE_BUTTON_MAP: dict[type[Device], list[PetLibroButtonEntityDescription]] = {
     ],
     Dockstream2SmartCordlessFountain: [
         PetLibroButtonEntityDescription[Dockstream2SmartCordlessFountain](
-            key="light_on",
-            translation_key="light_on",
-            set_fn=lambda device: device.set_light_on(),
-            name="Turn On Indicator"
-        ),
-        PetLibroButtonEntityDescription[Dockstream2SmartCordlessFountain](
-            key="light_off",
-            translation_key="light_off",
-            set_fn=lambda device: device.set_light_off(),
-            name="Turn Off Indicator"
-        ),
-        PetLibroButtonEntityDescription[Dockstream2SmartCordlessFountain](
             key="cleaning_reset",
             translation_key="cleaning_reset",
             set_fn=lambda device: device.set_cleaning_reset(),
@@ -717,18 +705,6 @@ DEVICE_BUTTON_MAP: dict[type[Device], list[PetLibroButtonEntityDescription]] = {
         )
     ],
     Dockstream2SmartFountain: [
-        PetLibroButtonEntityDescription[Dockstream2SmartFountain](
-            key="light_on",
-            translation_key="light_on",
-            set_fn=lambda device: device.set_light_on(),
-            name="Turn On Indicator"
-        ),
-        PetLibroButtonEntityDescription[Dockstream2SmartFountain](
-            key="light_off",
-            translation_key="light_off",
-            set_fn=lambda device: device.set_light_off(),
-            name="Turn Off Indicator"
-        ),
         PetLibroButtonEntityDescription[Dockstream2SmartFountain](
             key="cleaning_reset",
             translation_key="cleaning_reset",

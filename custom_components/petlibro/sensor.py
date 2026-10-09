@@ -1484,6 +1484,12 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
             name="Deodorization Mode"
         ),
         PetLibroSensorEntityDescription[LumaSmartLitterBox](
+            key="warehouse_surplus_grain",
+            translation_key="litter_level",
+            icon="mdi:grain",
+            name="Litter Level"
+        ),
+        PetLibroSensorEntityDescription[LumaSmartLitterBox](
             key="garbage_warehouse_state",
             translation_key="garbage_warehouse_state",
             icon="mdi:delete-variant",

@@ -39,6 +39,7 @@ class PetLibroUpdateEntity(PetLibroEntity[_DeviceT], UpdateEntity):
             self._attr_unique_id = f"{device.serial}-{description.key}"
 
         self._attr_device_class = UpdateDeviceClass.FIRMWARE
+
         self._attr_supported_features = (
             UpdateEntityFeature.INSTALL | UpdateEntityFeature.RELEASE_NOTES
         )
@@ -51,6 +52,17 @@ class PetLibroUpdateEntity(PetLibroEntity[_DeviceT], UpdateEntity):
         self._attr_in_progress = False
         self._attr_update_percentage = None
         self._attr_available = True
+
+    @property
+    def entity_picture(self) -> str | None:
+        """Return the device product image.
+
+        Only the firmware update entity carries it, so every other entity keeps
+        its own icon. petlibro-cards (getDeviceImage in utils.ts) scans the
+        device's entities for this attribute to render the device image; do not
+        remove it without updating the cards.
+        """
+        return getattr(self.device, "icon_url", None)
 
     @property
     def installed_version(self) -> str:

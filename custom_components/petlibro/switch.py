@@ -17,6 +17,8 @@ from .hub import PetLibroHub
 from .entity import PetLibroEntity, _DeviceT, PetLibroEntityDescription
 from .devices import Device
 from .devices.feeders.polar_wet_food_feeder import PolarWetFoodFeeder
+from .devices.fountains.dockstream_2_smart_cordless_fountain import Dockstream2SmartCordlessFountain
+from .devices.fountains.dockstream_2_smart_fountain import Dockstream2SmartFountain
 from .devices.litterboxes.luma_smart_litter_box import LumaSmartLitterBox
 from .notifications import NoticeToggle, toggles_for
 from .pets.entity import PL_PetSwitchEntity
@@ -41,6 +43,24 @@ DEVICE_SWITCH_MAP: dict[type[Device], list[PetLibroSwitchEntityDescription]] = {
             translation_key="manual_feed_now",
             set_fn=lambda device, value: device.set_manual_feed_now(value, device.plate_position),
             name="Manually Open/Close Lid"
+        ),
+    ],
+    Dockstream2SmartCordlessFountain: [
+        PetLibroSwitchEntityDescription[Dockstream2SmartCordlessFountain](
+            key="light_switch",
+            translation_key="indicator",
+            icon="mdi:led-on",
+            set_fn=lambda device, value: device.set_light_on() if value else device.set_light_off(),
+            name="Indicator",
+        ),
+    ],
+    Dockstream2SmartFountain: [
+        PetLibroSwitchEntityDescription[Dockstream2SmartFountain](
+            key="light_switch",
+            translation_key="indicator",
+            icon="mdi:led-on",
+            set_fn=lambda device, value: device.set_light_on() if value else device.set_light_off(),
+            name="Indicator",
         ),
     ],
     LumaSmartLitterBox: [

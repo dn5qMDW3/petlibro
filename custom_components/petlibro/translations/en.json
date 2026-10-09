@@ -385,6 +385,9 @@
       },
       "pet_today_poop_times": {
         "name": "Today's poop count"
+      },
+      "litter_level": {
+        "name": "Litter level"
       }
     },
     "image": {
@@ -490,6 +493,9 @@
       },
       "notice_sound_detection": {
         "name": "Sound detection alerts"
+      },
+      "indicator": {
+        "name": "Indicator"
       }
     },
     "button": {

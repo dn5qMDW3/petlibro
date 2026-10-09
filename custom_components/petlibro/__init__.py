@@ -4,6 +4,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import Platform
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntry
 from .devices import Device
 from .devices.feeders.feeder import Feeder
@@ -68,6 +69,25 @@ def get_platforms_for_devices(devices: list[Device]) -> set[Platform]:
     }
 
 
+def _remove_replaced_entities(hass: HomeAssistant, hub: PetLibroHub) -> None:
+    """Remove registry entries for entities that a newer entity replaced.
+
+    The Dockstream 2 fountains' "Turn On/Off Indicator" buttons became a single
+    indicator switch; without this the old buttons linger as unavailable.
+    """
+    registry = er.async_get(hass)
+    for device in hub.devices.values():
+        if not isinstance(device, (Dockstream2SmartCordlessFountain, Dockstream2SmartFountain)):
+            continue
+        for key in ("light_on", "light_off"):
+            entity_id = registry.async_get_entity_id(
+                Platform.BUTTON, DOMAIN, f"{device.serial}-{key}"
+            )
+            if entity_id:
+                _LOGGER.debug("Removing replaced entity %s", entity_id)
+                registry.async_remove(entity_id)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: PetLibroConfigEntry) -> bool:
     """Set up platform from a ConfigEntry."""
     email = entry.data.get(CONF_EMAIL)
@@ -91,7 +111,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: PetLibroConfigEntry) -> 
         await hub.coordinator.async_config_entry_first_refresh()
         # Real-time push; degrades to polling on its own if unavailable.
         await hub.async_start_mqtt()
+        _remove_replaced_entities(hass, hub)
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
         await async_setup_services(hass)
 
         _LOGGER.info("Successfully set up PetLibro integration for %s", email)

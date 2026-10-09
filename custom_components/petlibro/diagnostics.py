@@ -26,12 +26,78 @@ TO_REDACT = {
     "member_topic",
 }
 
+# Field names in raw PETLIBRO payloads that identify the account, the device or
+# the home network, or that carry credentials. Field *names* are kept so the
+# dump can still be used to map new fields; only the values are redacted.
+RAW_TO_REDACT = TO_REDACT | {
+    "deviceSn",
+    "sn",
+    "id",
+    "deviceId",
+    "memberId",
+    "ownerId",
+    "shareId",
+    "petId",
+    "account",
+    "phone",
+    "nickname",
+    "cameraId",
+    "cameraAuthInfo",
+    "userToken",
+    "appTutkUrl",
+    "wifiSsid",
+    "ssid",
+    "bssid",
+    "ip",
+    "avatar",
+    "icon",
+    "url",
+    "imageUrl",
+    "videoUrl",
+    "thumbnailUrl",
+    "rfid",
+    "rfidCode",
+}
+
+# Record lists grow without bound and repeat the same shape; a few entries are
+# enough to see the fields.
+_MAX_LIST_ITEMS = 3
+
+
+def _scrub(value: Any, secrets: set[str]) -> Any:
+    """Truncate long lists and blank out any string containing a known identifier."""
+    if isinstance(value, dict):
+        return {key: _scrub(item, secrets) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_scrub(item, secrets) for item in value[:_MAX_LIST_ITEMS]]
+    if isinstance(value, str) and any(secret in value for secret in secrets):
+        return "**REDACTED**"
+    return value
+
+
+def _raw_payload(data: Any, secrets: set[str]) -> Any:
+    """Return a raw API payload that is safe to attach to an issue."""
+    if not isinstance(data, dict):
+        return None
+    return async_redact_data(_scrub(data, secrets), RAW_TO_REDACT)
+
 
 async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, entry: ConfigEntry
 ) -> dict[str, Any]:
     """Return diagnostics for a config entry."""
     hub: PetLibroHub = entry.runtime_data
+
+    # Values that must never leave the instance, wherever they appear in a payload.
+    secrets = {
+        str(value)
+        for device in hub.devices.values()
+        for value in (device.serial, device.mac)
+        if value and len(str(value)) >= 6
+    }
+    for candidate in (entry.data.get(CONF_EMAIL), getattr(hub.member, "email", None)):
+        if candidate:
+            secrets.add(str(candidate))
 
     devices_data = []
     for device in hub.devices.values():
@@ -45,6 +111,7 @@ async def async_get_config_entry_diagnostics(
                 "hardware_version": getattr(device, "hardware_version", None),
                 "online": getattr(device, "online", None),
                 "type": type(device).__name__,
+                "raw": _raw_payload(getattr(device, "_data", None), secrets),
             }
         )
 
@@ -65,7 +132,9 @@ async def async_get_config_entry_diagnostics(
                 "name": getattr(pet, "name", None),
                 "id": getattr(pet, "id", None),
                 "type": type(pet).__name__,
+                "raw": _raw_payload(getattr(pet, "_data", None), secrets),
             }
+
         )
 
     return async_redact_data(

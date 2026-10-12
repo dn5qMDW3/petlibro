@@ -210,6 +210,8 @@ class PetLibroSensorEntity(PetLibroEntity[_DeviceT], SensorEntity):
                 # Surface the schedules themselves so automations can read
                 # times and repeat days without another API round-trip.
                 return {"plans": self.device.clean_plans}
+            case "operation_status":
+                return self.device.operation_attributes
             case "next_feed_time":
                 next_feed = self.device.get_next_feed
                 next_feed_data = self.device.feeding_plan_data.get(str(next_feed.get("id")), {})
@@ -1500,6 +1502,14 @@ DEVICE_SENSOR_MAP: dict[type[Device], list[PetLibroSensorEntityDescription]] = {
             translation_key="running_state",
             icon="mdi:state-machine",
             name="Running State"
+        ),
+        PetLibroSensorEntityDescription[LumaSmartLitterBox](
+            key="operation_status",
+            translation_key="operation_status",
+            icon="mdi:progress-clock",
+            device_class=SensorDeviceClass.ENUM,
+            options=["idle", "cleaning", "leveling", "emptying", "running", "paused", "ending"],
+            name="Operation"
         ),
         PetLibroSensorEntityDescription[LumaSmartLitterBox](
             key="exception_message",

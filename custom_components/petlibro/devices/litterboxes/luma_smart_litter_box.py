@@ -7,6 +7,20 @@ from .litter_box import LitterBox
 
 _LOGGER = getLogger(__name__)
 
+# What the app shows for an action that is running (execState == "EXEC").
+_OPERATION_BY_ACTION = {
+    "CLEAN": "cleaning",
+    "LEVELING": "leveling",
+    "EMPTY": "emptying",
+}
+
+# Identifying fields left out of the deviceStoppedWorking debug log.
+_LOG_REDACT = ("deviceSn", "mac", "wifiSsid", "cameraAuthInfo")
+
+
+def _loggable(payload: dict) -> dict:
+    return {key: value for key, value in payload.items() if key not in _LOG_REDACT}
+
 
 class LumaSmartLitterBox(LitterBox):
     """Represents the Luma Smart Litter Box device (PLLB001).
@@ -20,6 +34,7 @@ class LumaSmartLitterBox(LitterBox):
       - getAttributeSetting:  sleep mode, clean mode, deodorization config, camera config,
                               night vision, pet detection, hardware button lock
       - getUpgrade:           OTA firmware info (null when up-to-date)
+      - getSuspendInfo:       the running action, its state and progress
     """
 
     async def refresh(self):
@@ -32,7 +47,10 @@ class LumaSmartLitterBox(LitterBox):
             attribute_settings = await self.api.device_attribute_settings(self.serial)
             get_upgrade = await self.api.get_device_upgrade(self.serial)
             potty_today = await self.api.device_potty_today(self.serial)
+            suspend_info = await self._fetch_suspend_info()
             await self.refresh_clean_plans()
+
+            self._log_stopped_working_change(real_info or {}, data_real_info or {}, suspend_info)
 
             self.update_data({
                 "realInfo": real_info or {},
@@ -40,9 +58,39 @@ class LumaSmartLitterBox(LitterBox):
                 "getAttributeSetting": attribute_settings or {},
                 "getUpgrade": get_upgrade or {},
                 "pottyToday": potty_today or {},
+                "suspendInfo": suspend_info,
             })
         except PetLibroAPIError as err:
             _LOGGER.error("Error refreshing data for LumaSmartLitterBox: %s", err)
+
+    async def _fetch_suspend_info(self) -> dict:
+        """Fetch the operation info, keeping the last one if the call fails.
+
+        It only feeds the operation sensor, so a failure here must not cost
+        the rest of the refresh.
+        """
+        try:
+            return await self.api.device_suspend_info(self.serial) or {}
+        except Exception as err:  # noqa: BLE001
+            _LOGGER.debug("Could not fetch operation info for %s: %s", self.serial, err)
+            return self._data.get("suspendInfo", {})
+
+    def _log_stopped_working_change(self, real_info: dict, data_real_info: dict, suspend_info: dict) -> None:
+        """Log the raw payloads whenever deviceStoppedWorking flips.
+
+        The flag blips on while the box is idle and nobody knows why yet; the
+        payloads around a change are the evidence needed to find out.
+        """
+        if not _LOGGER.isEnabledFor(10) or "realInfo" not in self._data:
+            return
+        previous = bool(self._data["realInfo"].get("deviceStoppedWorking", False))
+        current = bool(real_info.get("deviceStoppedWorking", False))
+        if previous == current:
+            return
+        _LOGGER.debug(
+            "deviceStoppedWorking changed %s -> %s: realInfo=%s dataRealInfo=%s suspendInfo=%s",
+            previous, current, _loggable(real_info), _loggable(data_real_info), _loggable(suspend_info),
+        )
 
     @property
     def available(self) -> bool:
@@ -330,6 +378,41 @@ class LumaSmartLitterBox(LitterBox):
         return self._data.get("realInfo", {}).get("runningState", "IDLE")
 
     @property
+    def operation_status(self) -> str | None:
+        """What the box is doing, as the app's status line shows it.
+
+        None until getSuspendInfo has answered, so the sensor reads unknown
+        rather than a made-up idle.
+        """
+        exec_state = self._data.get("suspendInfo", {}).get("execState")
+        if exec_state == "NORMAL":
+            return "idle"
+        if exec_state == "PAUSED":
+            return "paused"
+        if exec_state == "ENDING":
+            return "ending"
+        if exec_state == "EXEC":
+            return _OPERATION_BY_ACTION.get(self._data["suspendInfo"].get("action"), "running")
+        return None
+
+    @property
+    def operation_attributes(self) -> dict:
+        """The raw operation fields behind operation_status.
+
+        While the box is idle, ``action`` and ``started_at`` still describe
+        the last action it ran.
+        """
+        info = self._data.get("suspendInfo", {})
+        return {
+            "action": info.get("action"),
+            "exec_state": info.get("execState"),
+            "progress": info.get("progress"),
+            "started_at": info.get("exeCmdStartTime"),
+            "expected_duration": info.get("expectExeTime"),
+            "last_pause_at": info.get("lastPauseTime"),
+        }
+
+    @property
     def device_stopped_working(self) -> bool:
         return bool(self._data.get("realInfo", {}).get("deviceStoppedWorking", False))
 
@@ -404,7 +487,28 @@ class LumaSmartLitterBox(LitterBox):
         """Whether deodorization runs during sleep mode."""
         return bool(self._data.get("getAttributeSetting", {}).get("enableDeodorizationInSleepMode", True))
 
+    @property
+    def manual_deodorization_wind_speed(self) -> str | None:
+        """Fan speed of a manually started air purifier run (LOW/HIGH)."""
+        return self._data.get("getAttributeSetting", {}).get("manualDeodorizationWindSpeed")
+
+    @property
+    def deodorization_timer_off(self) -> bool:
+        """Whether a manual air purifier run turns itself off."""
+        return bool(self._data.get("getAttributeSetting", {}).get("deodorizationTimerOffSwitch", False))
+
+    @property
+    def deodorization_timer_off_interval(self) -> int | None:
+        """Minutes after which a manual air purifier run turns itself off."""
+        val = self._data.get("getAttributeSetting", {}).get("deodorizationTimerOffInterval")
+        return val if isinstance(val, int) else None
+
     # ── Cleaning Extras ───────────────────────────────────────
+
+    @property
+    def enable_adsorption(self) -> bool:
+        """Coverage assist."""
+        return bool(self._data.get("getAttributeSetting", {}).get("enableAdsorption", False))
 
     @property
     def avoid_repeat_clean(self) -> bool:
@@ -593,6 +697,48 @@ class LumaSmartLitterBox(LitterBox):
             await self.refresh()
         except Exception as err:
             _LOGGER.error("Failed to set avoid repeat clean for %s: %s", self.serial, err)
+
+    async def set_enable_adsorption(self, value: bool) -> None:
+        """Enable/disable coverage assist."""
+        _LOGGER.debug("Setting coverage assist to %s for %s", value, self.serial)
+        try:
+            await self.api.set_coverage_assist(
+                self.serial, self.clean_mode, self.auto_delay_sec, self.avoid_repeat_clean, value
+            )
+            await self.refresh()
+        except Exception as err:
+            _LOGGER.error("Failed to set coverage assist for %s: %s", self.serial, err)
+
+    async def set_manual_deodorization_wind_speed(self, value: str) -> None:
+        """Set the manual air purifier fan speed (LOW/HIGH)."""
+        _LOGGER.debug("Setting manual wind speed to %s for %s", value, self.serial)
+        try:
+            await self.api.set_manual_deodorization_wind_speed(self.serial, value)
+            await self.refresh()
+        except Exception as err:
+            _LOGGER.error("Failed to set manual wind speed for %s: %s", self.serial, err)
+
+    async def set_deodorization_timer_off(self, value: bool) -> None:
+        """Enable/disable the manual air purifier's auto-off."""
+        _LOGGER.debug("Setting purifier auto-off to %s for %s", value, self.serial)
+        try:
+            await self.api.set_deodorization_timer_off(
+                self.serial, value, self.deodorization_timer_off_interval or 5
+            )
+            await self.refresh()
+        except Exception as err:
+            _LOGGER.error("Failed to set purifier auto-off for %s: %s", self.serial, err)
+
+    async def set_deodorization_timer_off_interval(self, value: int) -> None:
+        """Set the minutes after which a manual air purifier run turns itself off."""
+        _LOGGER.debug("Setting purifier auto-off interval to %sm for %s", value, self.serial)
+        try:
+            await self.api.set_deodorization_timer_off(
+                self.serial, self.deodorization_timer_off, value
+            )
+            await self.refresh()
+        except Exception as err:
+            _LOGGER.error("Failed to set purifier auto-off interval for %s: %s", self.serial, err)
 
     async def set_enable_auto_clean_in_sleep_mode(self, value: bool) -> None:
         """Enable/disable auto-clean during sleep mode."""

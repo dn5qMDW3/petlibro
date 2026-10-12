@@ -768,6 +768,55 @@ class PetLibroAPI:
             _LOGGER.error("Failed to set clean mode for device %s: %s", serial, e)
             raise
 
+    async def set_coverage_assist(self, serial: str, clean_mode: str, auto_delay_sec: int, avoid_repeat: bool, enable: bool):
+        """Set the litter box's coverage assist (``enableAdsorption``).
+
+        Sent with the rest of the clean-mode settings, as the app does.
+        """
+        _LOGGER.debug("Setting coverage assist: serial=%s, enable=%s", serial, enable)
+        try:
+            response = await self.session.post("/device/setting/updateCleanModeSetting", json={
+                "deviceSn": serial,
+                "cleanMode": clean_mode,
+                "autoDelaySec": auto_delay_sec,
+                "avoidRepeatClean": avoid_repeat,
+                "enableAdsorption": enable,
+            })
+            _LOGGER.debug("Coverage assist setting returned: %s", response)
+            return response
+        except Exception as e:
+            _LOGGER.error("Failed to set coverage assist for device %s: %s", serial, e)
+            raise
+
+    async def set_manual_deodorization_wind_speed(self, serial: str, wind_speed: str):
+        """Set the fan speed of a manually started air purifier run (LOW/HIGH)."""
+        _LOGGER.debug("Setting manual deodorization wind speed: serial=%s, speed=%s", serial, wind_speed)
+        try:
+            response = await self.session.post("/device/setting/updateDeodorizationSetting", json={
+                "deviceSn": serial,
+                "manualDeodorizationWindSpeed": wind_speed,
+            })
+            _LOGGER.debug("Manual deodorization wind speed returned: %s", response)
+            return response
+        except Exception as e:
+            _LOGGER.error("Failed to set manual deodorization wind speed for device %s: %s", serial, e)
+            raise
+
+    async def set_deodorization_timer_off(self, serial: str, switch: bool, interval: int):
+        """Set whether a manual air purifier run turns itself off, and after how many minutes."""
+        _LOGGER.debug("Setting deodorization timer off: serial=%s, switch=%s, interval=%s", serial, switch, interval)
+        try:
+            response = await self.session.post("/device/setting/updateDeodorizationSetting", json={
+                "deviceSn": serial,
+                "deodorizationTimerOffSwitch": switch,
+                "deodorizationTimerOffInterval": interval,
+            })
+            _LOGGER.debug("Deodorization timer off returned: %s", response)
+            return response
+        except Exception as e:
+            _LOGGER.error("Failed to set deodorization timer off for device %s: %s", serial, e)
+            raise
+
     async def set_sleep_mode_setting(self, serial: str, enable: bool, auto_clean: bool, deodorization: bool):
         """Set sleep mode sub-settings."""
         _LOGGER.debug("Setting sleep mode: serial=%s, enable=%s, auto_clean=%s, deodorization=%s", serial, enable, auto_clean, deodorization)
@@ -822,6 +871,10 @@ class PetLibroAPI:
         except Exception as e:
             _LOGGER.error("Failed to reset mat for device %s: %s", serial, e)
             raise
+
+    async def device_suspend_info(self, serial: str) -> dict[str, Any]:
+        """Fetch what the device is currently doing (action, state, progress)."""
+        return await self.session.post("/device/device/getSuspendInfo", json={"deviceSn": serial})
 
     async def device_potty_today(self, serial: str) -> dict:
         """Fetch today's potty statistics for a device."""

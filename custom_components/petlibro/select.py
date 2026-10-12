@@ -464,6 +464,27 @@ DEVICE_SELECT_MAP: dict[type[Device], list[PetLibroSelectEntityDescription]] = {
             options=["LOW", "MEDIUM", "HIGH"],
             name="Deodorization Wind Speed"
         ),
+        PetLibroSelectEntityDescription[LumaSmartLitterBox](
+            key="manual_deodorization_wind_speed",
+            translation_key="manual_deodorization_wind_speed",
+            icon="mdi:fan",
+            current_selection=lambda device: device.manual_deodorization_wind_speed,
+            method=lambda device, opt: device.set_manual_deodorization_wind_speed(opt),
+            options=["LOW", "HIGH"],
+            name="Manual Air Purifier Fan Speed"
+        ),
+        PetLibroSelectEntityDescription[LumaSmartLitterBox](
+            key="deodorization_timer_off_interval",
+            translation_key="deodorization_timer_off_interval",
+            icon="mdi:timer-off-outline",
+            current_selection=lambda device: (
+                str(device.deodorization_timer_off_interval)
+                if device.deodorization_timer_off_interval is not None else None
+            ),
+            method=lambda device, opt: device.set_deodorization_timer_off_interval(int(opt)),
+            options=["5", "10", "15", "30", "60", "120"],
+            name="Air Purifier Auto-Off After"
+        ),
     ],
 }
 

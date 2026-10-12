@@ -75,6 +75,8 @@ To change the email or password later, use **Reconfigure** in the integration's 
 - Selects for modes (clean mode, water dispensing mode, etc.)
 - **Device sharing** — see pending invitations, and accept or decline them from Home Assistant
 - **Litter box cleaning schedules** — view them, and add or remove them via services
+- **Litter box operation** — an *Operation* sensor that says what the Luma is doing right now (idle, cleaning, leveling, emptying, paused, ending), with the raw action, state and progress as attributes
+- **Litter box air purifier and coverage settings** — coverage assist, the fan speed of a manual purifier run, and whether and when a manual run turns itself off
 - **Litter box use per pet** — today's visits, pee count and poop count on each pet, alongside the box-wide totals, plus the Luma's litter level
 - **Feeding schedule control** — enable, disable, skip or delete individual feeding plans, and switch the whole schedule on or off, via services
 - Firmware update notifications
@@ -85,7 +87,7 @@ Each entity uses a standard Home Assistant icon; the device's product picture ap
 
 <img src="docs/media/entities-litter-box.png" alt="Luma Smart Litter Box controls and sensors in Home Assistant" width="360">
 
-See [docs/API_REFERENCE.md](docs/API_REFERENCE.md) for the full PETLIBRO Cloud API reference, and [docs/MQTT_RESEARCH.md](docs/MQTT_RESEARCH.md) for how the push channel works (broker, certificates, topics and payloads).
+See [docs/API_REFERENCE.md](docs/API_REFERENCE.md) for the full PETLIBRO Cloud API reference, and [docs/MQTT_RESEARCH.md](docs/MQTT_RESEARCH.md) for how the push channel works (broker, certificates, topics and payloads). Both were last checked against PETLIBRO app 1.9.40 (October 2026); the reference lists what the app offers that the integration does not use yet.
 
 ---
 
@@ -142,6 +144,7 @@ After adding the integration, allow 1–5 minutes for all entities to populate. 
 - **Login fails** — Verify credentials and region. Code `1009` means the token expired (auto-handled). Code `1025` means a force logout (someone else logged in to the same account).
 - **Devices missing** — Check your account on the PETLIBRO mobile app to confirm devices are bound. Shared devices appear with limited control.
 - **Empty values** — Some devices return empty strings/null for unused fields. The integration filters these where possible.
+- **Luma "Device Error" turns on for a few seconds** — The sensor mirrors PETLIBRO's `deviceStoppedWorking` flag, which the cloud sets briefly while the box is idle. The PETLIBRO app only uses it to grey out its Clean / Empty / Level buttons and shows no error, so a short blip is not a hardware fault. Until the cause is known ([#1](https://github.com/dn5qMDW3/petlibro/issues/1)), have automations wait for the sensor to stay on — 15 minutes has been enough to avoid false alarms — instead of triggering on the first change. With debug logging enabled, the integration logs the raw device payloads each time the flag changes — those log lines are what the issue needs.
 - **Real-time push not connecting** — Check the *Real-time push* diagnostic sensor. Its attributes show the broker, the subscribed devices, the time of the last event, and the last error. Push is an optimisation: when it is unavailable the integration keeps polling, so devices still work, just less promptly.
 
 ---

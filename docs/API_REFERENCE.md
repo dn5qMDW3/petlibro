@@ -1,8 +1,13 @@
 # PETLIBRO Cloud API Reference
 
 > Extracted from PETLIBRO Android app v1.7.90 (Flutter/Dart) and verified against live API.
+> Re-checked against app v1.9.40 on 2026-10-12 by static analysis only (`blutter` on
+> `libapp.so`, Dart 3.11.5) — see [App 1.9.40 Notes](#app-1940-notes). Rows whose method
+> is `?` come from that pass: the path and request keys are read from the app's code, but
+> the HTTP method and the response have not been seen on the wire. A few of them were then
+> read live on 2026-10-12 and carry their real method.
 > Base URL: `https://api.us.petlibro.com` (US region)
-> Last updated: 2026-04-15
+> Last updated: 2026-10-12
 
 ## Table of Contents
 
@@ -34,6 +39,7 @@
   - [Rooms](#rooms)
   - [App & System](#app--system)
 - [Live API Response Examples](#live-api-response-examples)
+- [App 1.9.40 Notes](#app-1940-notes)
 - [Integration Coverage](#integration-coverage)
 
 ---
@@ -186,12 +192,12 @@ All responses follow:
 | `/device/device/boundMessage` | POST | Get device binding messages | |
 | `/device/device/unbind` | POST | Unbind/remove device | |
 | `/device/device/updateName` | POST | Rename device | |
-| `/device/device/updateRoom` | POST | Assign device to room | |
+| `/device/device/updateRoom` | POST | Assign device to room | ✅ |
 | `/device/device/updateDeviceImage` | POST | Change device image | |
 | `/device/device/wifiInfo` | POST | Get WiFi connection info | |
 | `/device/device/wifiChangeService` | POST | Initiate WiFi change | |
 | `/device/device/wifiReconnect` | POST | Reconnect WiFi | |
-| `/device/device/getSuspendInfo` | POST | Get device suspension info | |
+| `/device/device/getSuspendInfo` | POST | Current operation of a litter box: action, state and progress (see [App 1.9.40 Notes](#app-1940-notes)) | ✅ |
 | `/device/device/resume` | POST | Resume suspended device | |
 | `/device/device/reset` | POST | Factory reset device | |
 | `/device/device/hardVersionCompatible` | POST | Check hardware version compatibility | |
@@ -215,7 +221,7 @@ All responses follow:
 | `/device/data/petGrainStatus` | POST | Per-pet feeding statistics | |
 | `/device/data/petPeriodGrain` | POST | Per-pet periodic feeding data | |
 | `/device/setting/getAttributeSetting` | POST | Device configuration settings | ✅ |
-| `/device/setting/getNoticeSetting` | POST | Notification settings | |
+| `/device/setting/getNoticeSetting` | POST | Notification settings | ✅ |
 
 ---
 
@@ -241,35 +247,37 @@ All responses follow:
 | `/device/setting/updateBowlModeSetting` | POST | Single/dual bowl mode | |
 | `/device/setting/updateDisplayMatrixSetting` | POST | LED display matrix config | ✅ |
 | `/device/setting/updateAutoUpgradeSwitch` | POST | Auto firmware upgrade toggle | |
+| `/device/setting/otaSetting` | ? | Firmware settings. Body `deviceSn`, `upgradeNoticeSwitch`, `autoUpgradeSwitch` | |
+| `/device/setting/updateMealCallSetting` | ? | Meal call. Body `deviceSn`, `mealCallSwitch`, `mealCallTimes`, `mealCallApply` | |
 | `/device/setting/updateFeedingPlanSwitch` | POST | Enable/disable feeding plans | ✅ |
 | `/device/setting/updateRingerMode` | POST | Bell/ringer mode | |
 | `/device/setting/updateRadarSetting` | POST | Radar sensing level | ✅ |
 | `/device/setting/updateLowWaterSetting` | POST | Low water threshold | ✅ |
 | `/device/setting/updateChildLockSwitch` | POST | Child lock toggle | ✅ |
 | `/device/setting/updateNoticeSetting` | POST | General notification settings | |
-| `/device/setting/updateFeedingNoticeSetting` | POST | Feeding notifications | |
-| `/device/setting/updateOfflineNoticeSetting` | POST | Offline notifications | |
-| `/device/setting/updateLowBatteryNoticeSetting` | POST | Low battery notifications | |
-| `/device/setting/updatePowerChangeNoticeSetting` | POST | Power change notifications | |
-| `/device/setting/updateVacuumSuccessNoticeSetting` | POST | Vacuum success notifications | |
-| `/device/setting/updateVacuumFailedNoticeSetting` | POST | Vacuum fail notifications | |
-| `/device/setting/updateSurplusGrainNoticeSetting` | POST | Food level notifications | |
-| `/device/setting/updateGrainOutletBlockedNoticeSetting` | POST | Food outlet blocked notifications | |
-| `/device/setting/updateMotionDetectionNoticeSetting` | POST | Motion detection notifications | |
-| `/device/setting/updateSoundDetectionNoticeSetting` | POST | Sound detection notifications | |
-| `/device/setting/updateDrinkTrendNoticeSetting` | POST | Drinking trend notifications | |
-| `/device/setting/updateNoDrinkNoticeSetting` | POST | No-drink alert notifications | |
+| `/device/setting/updateFeedingNoticeSetting` | POST | Feeding notifications | ✅ |
+| `/device/setting/updateOfflineNoticeSetting` | POST | Offline notifications | ✅ |
+| `/device/setting/updateLowBatteryNoticeSetting` | POST | Low battery notifications | ✅ |
+| `/device/setting/updatePowerChangeNoticeSetting` | POST | Power change notifications | ✅ |
+| `/device/setting/updateVacuumSuccessNoticeSetting` | POST | Vacuum success notifications | ✅ |
+| `/device/setting/updateVacuumFailedNoticeSetting` | POST | Vacuum fail notifications | ✅ |
+| `/device/setting/updateSurplusGrainNoticeSetting` | POST | Food level notifications | ✅ |
+| `/device/setting/updateGrainOutletBlockedNoticeSetting` | POST | Food outlet blocked notifications | ✅ |
+| `/device/setting/updateMotionDetectionNoticeSetting` | POST | Motion detection notifications | ✅ |
+| `/device/setting/updateSoundDetectionNoticeSetting` | POST | Sound detection notifications | ✅ |
+| `/device/setting/updateDrinkTrendNoticeSetting` | POST | Drinking trend notifications | ✅ |
+| `/device/setting/updateNoDrinkNoticeSetting` | POST | No-drink alert notifications | ✅ |
 | `/device/setting/updateLocationReminderSetting` | POST | Location-based reminders | |
-| `/device/setting/updateDesiccantNoticeSetting` | POST | Desiccant replacement notifications | |
+| `/device/setting/updateDesiccantNoticeSetting` | POST | Desiccant replacement notifications | ✅ |
 | `/device/setting/dailyDrinkGoalSetting` | POST | Set daily drinking goal | |
-| `/device/setting/enableDeviceShare` | POST | Enable device sharing | |
+| `/device/setting/enableDeviceShare` | POST | Enable device sharing | ✅ |
 | `/device/setting/enableDeviceAiAssistance` | POST | Enable AI assistant | |
-| `/device/setting/enableDrinkingWaterNotice` | POST | Drinking water notifications | |
-| `/device/setting/enableFilterReplacementReminder` | POST | Filter replacement reminder | |
-| `/device/setting/enableMachineCleaningReminder` | POST | Machine cleaning reminder | |
-| `/device/setting/enableLowWaterNotice` | POST | Low water notification | |
-| `/device/setting/enableReachDrinkingWaterAlertNotice` | POST | Drinking goal alert | |
-| `/device/setting/enableTankOverturnedNotice` | POST | Tank overturned notification | |
+| `/device/setting/enableDrinkingWaterNotice` | POST | Drinking water notifications | ✅ |
+| `/device/setting/enableFilterReplacementReminder` | POST | Filter replacement reminder | ✅ |
+| `/device/setting/enableMachineCleaningReminder` | POST | Machine cleaning reminder | ✅ |
+| `/device/setting/enableLowWaterNotice` | POST | Low water notification | ✅ |
+| `/device/setting/enableReachDrinkingWaterAlertNotice` | POST | Drinking goal alert | ✅ |
+| `/device/setting/enableTankOverturnedNotice` | POST | Tank overturned notification | ✅ |
 
 ---
 
@@ -286,6 +294,15 @@ All responses follow:
 | `/device/device/wetFoodFeedNow` | POST | Trigger wet food feed | |
 | `/device/device/weighingCalibration` | POST | Calibrate weight sensor | |
 | `/device/device/weighingPeeling` | POST | Tare/zero the scale | |
+| `/device/device/releaseMotorStuck` | ? | Litter box: release a stuck motor. Body `deviceSn` | |
+| `/device/device/releaseAntiPinch` | ? | Release the anti-pinch stop. Body `deviceSn`, `type` | |
+| `/device/lockedRotor/diagnostics` | ? | Litter box: start stuck-drum diagnostics. Body `deviceSn` | |
+| `/device/lockedRotor/diagnosticsResult` | ? | Litter box: poll diagnostics. Body `deviceSn`, `diagId` | |
+| `/device/device/pauseFreeFeed` | ? | Pause free feeding. Body `deviceSn`, `step` | |
+| `/device/device/stopFeeding` | ? | Stop a feed in progress | |
+| `/device/device/playVoice` | ? | Play a sound on the device. Body `deviceSn`, `type` | |
+| `/device/device/wakeUpCamera` | ? | Wake a sleeping camera. Body `deviceSn` | |
+| `/device/device/bowlWeightClear` | ? | Zero the bowl scale | |
 
 #### `execCmdService` Actions (Litter Box)
 
@@ -367,10 +384,10 @@ All responses follow:
 
 | Endpoint | Method | Purpose | Used by Integration |
 |----------|--------|---------|:---:|
-| `/device/cleanPlan/getCleanPlan` | POST | Get scheduled clean plans | |
-| `/device/cleanPlan/addCleanPlan` | POST | Add scheduled clean | |
-| `/device/cleanPlan/updateCleanPlan` | POST | Update scheduled clean | |
-| `/device/cleanPlan/delCleanPlan` | POST | Delete scheduled clean | |
+| `/device/cleanPlan/getCleanPlan` | POST | Get scheduled clean plans | ✅ |
+| `/device/cleanPlan/addCleanPlan` | POST | Add scheduled clean | ✅ |
+| `/device/cleanPlan/updateCleanPlan` | POST | Update scheduled clean | ✅ |
+| `/device/cleanPlan/delCleanPlan` | POST | Delete scheduled clean | ✅ |
 
 ---
 
@@ -383,8 +400,8 @@ All responses follow:
 | `/device/device/matReset` | POST | Reset mat replacement timer | ✅ |
 | `/device/device/desiccantReset` | POST | Reset desiccant timer | ✅ |
 | `/device/device/maintenanceFrequencySetting` | POST | Set maintenance frequency | ✅ |
-| `/device/device/maintenanceRecord` | GET | Get maintenance history | |
-| `/device/device/maintain` | GET | Get maintenance info | |
+| `/device/device/maintenanceRecord` | GET | Get maintenance history | ✅ |
+| `/device/device/maintain` | GET | Get maintenance info | ✅ |
 
 ---
 
@@ -475,10 +492,10 @@ Record type filters:
 
 | Endpoint | Method | Purpose | Used by Integration |
 |----------|--------|---------|:---:|
-| `/member/pet/list` | POST | List all pets | |
+| `/member/pet/list` | POST | List all pets | ✅ |
 | `/member/pet/petBaseInfoList` | POST | Basic pet info list | |
-| `/member/pet/detailV2` | POST | Pet details (v2) | |
-| `/member/pet/saveOrUpdate` | POST | Create/update pet | |
+| `/member/pet/detailV2` | POST | Pet details (v2) | ✅ |
+| `/member/pet/saveOrUpdate` | POST | Create/update pet | ✅ |
 | `/member/pet/delete` | POST | Delete pet | |
 | `/member/pet/getLabels` | POST | Get pet labels | |
 | `/member/pet/getCommonLabels` | POST | Get common labels | |
@@ -486,7 +503,7 @@ Record type filters:
 | `/device/devicePetRelation/getBoundPets` | POST | Get pets bound to device | ✅ |
 | `/device/devicePetRelation/bindPets` | POST | Bind pets to device | |
 | `/device/devicePetRelation/removePets` | POST | Remove pets from device | |
-| `/device/devicePetRelation/getBoundDevices` | POST | Get devices bound to pet | |
+| `/device/devicePetRelation/getBoundDevices` | POST | Get devices bound to pet | ✅ |
 | `/device/devicePetRelation/getBindableDevices` | POST | Get bindable devices | |
 
 #### Pet AI (Embedding/Recognition)
@@ -505,32 +522,85 @@ Record type filters:
 
 ### Pet Health Care
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/member/healthCare/dashboardList` | POST | Health dashboard list |
-| `/member/healthCare/dashboardDetail` | POST | Health dashboard detail |
-| `/member/healthCare/getDashboardLayout` | POST | Dashboard layout |
-| `/member/healthCare/updateDashboardLayout` | POST | Update dashboard layout |
-| `/member/healthCare/getFirstClassification` | POST | Health categories |
-| `/member/healthCare/getPetGoal` | POST | Pet health goals |
-| `/member/healthCare/goalSetting` | POST | Set health goals |
-| `/member/healthCare/goalDistCal` | POST | Goal distance calculation |
-| `/member/healthCare/goalRecommendInfo` | POST | Goal recommendations |
-| `/member/healthCare/goalApplyToDevice` | POST | Apply goal to device |
-| `/member/healthCare/planInfo` | POST | Health plan info |
-| `/member/healthCare/addTraceV2` | POST | Add health trace |
-| `/member/healthCare/updateTraceV2` | POST | Update health trace |
-| `/member/healthCare/deleteTrace` | POST | Delete health trace |
-| `/member/healthCare/traceHistory` | POST | Trace history |
-| `/member/healthCare/traceQuantity` | POST | Trace quantities |
-| `/member/healthCare/traceAndCalenderV2` | POST | Traces with calendar |
-| `/member/healthCare/traceCalendarList` | POST | Trace calendar |
-| `/member/healthCare/updateTraceCompletedState` | POST | Mark trace complete |
-| `/member/healthCare/repeatTraceListV2` | POST | Repeating traces |
-| `/member/healthCare/updateRepeatTraceV2` | POST | Update repeating trace |
-| `/member/healthCare/enableRepeatTrace` | POST | Enable repeating trace |
-| `/member/healthCare/deleteRepeatTrace` | POST | Delete repeating trace |
-| `/member/healthCare/petBindDeviceList` | POST | Pet's bound device list |
+| Endpoint | Method | Purpose | Used by Integration |
+|----------|--------|---------|:---:|
+| `/member/healthCare/dashboardList` | POST | Health dashboard list | |
+| `/member/healthCare/dashboardDetail` | POST | Health dashboard detail | |
+| `/member/healthCare/getDashboardLayout` | POST | Dashboard layout | |
+| `/member/healthCare/updateDashboardLayout` | POST | Update dashboard layout | |
+| `/member/healthCare/getFirstClassification` | POST | Health categories | |
+| `/member/healthCare/getPetGoal` | POST | Pet health goals | |
+| `/member/healthCare/goalSetting` | POST | Set health goals | ✅ |
+| `/member/healthCare/goalDistCal` | POST | Goal distance calculation | |
+| `/member/healthCare/goalRecommendInfo` | POST | Goal recommendations | |
+| `/member/healthCare/goalApplyToDevice` | POST | Apply goal to device | |
+| `/member/healthCare/planInfo` | POST | Health plan info | |
+| `/member/healthCare/addTraceV2` | POST | Add health trace | |
+| `/member/healthCare/updateTraceV2` | POST | Update health trace | |
+| `/member/healthCare/deleteTrace` | POST | Delete health trace | |
+| `/member/healthCare/traceHistory` | POST | Trace history | |
+| `/member/healthCare/traceQuantity` | POST | Trace quantities | |
+| `/member/healthCare/traceAndCalenderV2` | POST | Traces with calendar | |
+| `/member/healthCare/traceCalendarList` | POST | Trace calendar | |
+| `/member/healthCare/updateTraceCompletedState` | POST | Mark trace complete | |
+| `/member/healthCare/repeatTraceListV2` | POST | Repeating traces | |
+| `/member/healthCare/updateRepeatTraceV2` | POST | Update repeating trace | |
+| `/member/healthCare/enableRepeatTrace` | POST | Enable repeating trace | |
+| `/member/healthCare/deleteRepeatTrace` | POST | Delete repeating trace | |
+| `/member/healthCare/petBindDeviceList` | POST | Pet's bound device list | |
+
+#### Pet Care data (per pet)
+
+The app's pet dashboard. In 1.9.40 the per-metric history calls were replaced by one set
+of `V2` calls that take a `type` — `WEIGHT`, `FOOD`, `WATER`, `FOOD_DISPENSED`,
+`BATHROOM` or `ACTIVITY` (`FOOD_DISPENSED` is new in 1.9.40). The integration uses none
+of these yet.
+
+| Endpoint | Method | Purpose | Used by Integration |
+|----------|--------|---------|:---:|
+| `/data/petCare/overviewV2` | POST | Overview for one metric. Body `petId`, `type` | |
+| `/data/petCare/historyV2` | POST | History for one metric. Body `petId`, `type`, `dimension`, `startTime`, `endTime` | |
+| `/data/petCare/highlightsV2` | POST | Highlights for one metric. Body `petId`, `type` | |
+| `/data/petCare/abnormal/card` | POST | Abnormal-behaviour card. Body `petId`, `type` | |
+| `/data/petCare/overview/activity` | POST | Activity overview. Body `petId` | |
+| `/data/petCare/overview/bathroom` | POST | Bathroom overview. Body `petId` | |
+| `/data/petCare/overview/water` | POST | Water overview. Body `petId` | |
+| `/data/petCare/overview/weight` | POST | Weight overview. Body `petId` | |
+| `/data/petCare/getInsight` | POST | Insight text. Body `petId` | |
+| `/data/petCare/getShowModules` | GET | Which dashboard modules are shown. Returns `moduleOrders`, `hiddenModules`, `customSortMode`. POST is rejected with code 1006 | |
+| `/data/petCare/manualSave` | ? | Save a manual entry | |
+
+Read live on 2026-10-12 for one pet that has no device linked to it (`hasDevice: false`),
+so every count was zero — the shapes are real, the units are not established:
+
+- `overviewV2` returned data only for `type: "FOOD"`, and answered with
+  `"type": "FOOD_DISPENSED"`: `times`, `total`, `trendData` (24 hourly slots, `null` for
+  hours still to come), `hasDevice`, `hasG2Device`. Every other type returned `null`.
+- `overview/water`: `times`, `total`, `changePercent`, `trendData`, `hasDevice`.
+  `overview/bathroom`: `times`, `average`, `changePercent`, `trendDataWithFree`,
+  `trendDataWithPay`, `hasDevice`. `overview/activity`: `times`, `trendData`,
+  `hasDevice`. `overview/weight`: `weight`, `changePercent`, `trendData`, `hasDevice`.
+- `historyV2` (`dimension` `DAY` and `WEEK` both accepted): `averageTimes`,
+  `averageIntake`, `averageWeight`, `latestWeight`, `averageDuration`, and the series
+  either as `data` (`xValue` / `yValue` pairs) or as `xdate` + `ydata`. For `BATHROOM`,
+  `ydata` items are `{poopTimes, peeTimes, times}`.
+- `highlightsV2`: `type`, `habit`, `communityRanking`. Rejects `FOOD_DISPENSED` with
+  code 1002.
+- `abnormal/card`: `hasBaseline`, `hasAbnormal`, `message`. Only `type: "WATER"` was
+  accepted; the other types returned code 1002.
+- `getInsight` returns a plain string — for this account an upsell for the paid Care
+  plan, which the `…WithFree` / `…WithPay` split in the bathroom overview also points to.
+
+These are keyed by the pet profiles in `/member/pet/list`. On the test account that list
+held one pet, while the integration shows litter box visits for a second one, so not
+every pet the integration knows about has a profile to query here. Where that second pet
+comes from was not traced.
+
+Removed from the app in 1.9.40 (present in 1.9.30): `/data/petCare/activity/history`,
+`/data/petCare/bathroom/history`, `/data/petCare/food/intake/history`,
+`/data/petCare/water/intake/history`, `/data/petCare/weight/history` and
+`/data/petCare/overview/food`. Whether the server still answers them is untested.
+(`/data/petCare/manualSave` is still method `?` — it is a write and was not called.)
 
 ---
 
@@ -544,7 +614,7 @@ Record type filters:
 | `/device/device/getDefaultMatrix` | GET | Get RFID matrix data | ✅ |
 | `/device/device/getMatrixConfig` | POST | Get matrix configuration | |
 | `/device/device/getMatrixDictionary` | POST | Get matrix dictionary | |
-| `/device/device/wear/wearListV2` | POST | List wearables | |
+| `/device/device/wear/wearListV2` | POST | List wearables | ✅ |
 | `/device/device/wear/bindWearV2` | POST | Bind wearable | |
 | `/device/device/wear/unbindWearV2` | POST | Unbind wearable | |
 | `/device/device/wear/discoveryListV2` | POST | Discover wearables | |
@@ -561,34 +631,34 @@ Record type filters:
 
 ### Device Sharing
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/device/deviceShare/add` | POST | Share device |
-| `/device/deviceShare/remove` | POST | Remove share |
-| `/device/deviceShare/batchRemove` | POST | Batch remove shares |
-| `/device/deviceShare/cancel` | POST | Cancel pending share |
-| `/device/deviceShare/quit` | POST | Leave shared device |
-| `/device/deviceShare/retry` | POST | Retry failed share |
-| `/device/deviceShare/rec` | POST | Accept share invite |
-| `/device/deviceShare/verifyShare` | POST | Verify share code |
-| `/device/deviceShare/deviceShareList` | POST | Shared device list |
-| `/device/deviceShare/deviceSharedList` | POST | Devices shared with me |
-| `/device/deviceShare/deviceSharingList` | POST | Pending shares |
-| `/device/deviceShare/myShareList` | POST | My shares list |
-| `/device/deviceShare/mySharingDevices` | POST | Devices I'm sharing |
-| `/device/deviceShare/sharePopList` | POST | Share popup list |
-| `/device/deviceShare/deviceSelector` | POST | Device selector for sharing |
+| Endpoint | Method | Purpose | Used by Integration |
+|----------|--------|---------|:---:|
+| `/device/deviceShare/add` | POST | Share device | ✅ |
+| `/device/deviceShare/remove` | POST | Remove share | ✅ |
+| `/device/deviceShare/batchRemove` | POST | Batch remove shares | |
+| `/device/deviceShare/cancel` | POST | Cancel pending share | |
+| `/device/deviceShare/quit` | POST | Leave shared device | ✅ |
+| `/device/deviceShare/retry` | POST | Retry failed share | |
+| `/device/deviceShare/rec` | POST | Accept share invite | ✅ |
+| `/device/deviceShare/verifyShare` | POST | Verify share code | ✅ |
+| `/device/deviceShare/deviceShareList` | POST | Shared device list | |
+| `/device/deviceShare/deviceSharedList` | POST | Devices shared with me | ✅ |
+| `/device/deviceShare/deviceSharingList` | POST | Pending shares | ✅ |
+| `/device/deviceShare/myShareList` | POST | My shares list | |
+| `/device/deviceShare/mySharingDevices` | POST | Devices I'm sharing | ✅ |
+| `/device/deviceShare/sharePopList` | POST | Share popup list | ✅ |
+| `/device/deviceShare/deviceSelector` | POST | Device selector for sharing | |
 
 ---
 
 ### Device Audio
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/device/deviceAudio/all` | POST | List all audio files |
-| `/device/deviceAudio/add` | POST | Upload audio file |
-| `/device/deviceAudio/remove` | POST | Remove audio file |
-| `/device/deviceAudio/use` | POST | Set active audio |
+| Endpoint | Method | Purpose | Used by Integration |
+|----------|--------|---------|:---:|
+| `/device/deviceAudio/all` | POST | List all audio files | ✅ |
+| `/device/deviceAudio/add` | POST | Upload audio file | |
+| `/device/deviceAudio/remove` | POST | Remove audio file | |
+| `/device/deviceAudio/use` | POST | Set active audio | ✅ |
 
 ---
 
@@ -626,13 +696,13 @@ Record type filters:
 
 The camera uses **TUTK/Kalay P2P SDK** — this is a peer-to-peer video protocol, not HTTP streaming. Not feasible for HA integration without native TUTK library.
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/member/third/tutk/info` | POST | Get TUTK credentials |
-| `/member/certificate/ca` | POST | Get CA certificate |
-| `/member/certificate/generate` | POST | Generate certificate |
-| `/member/certificate/confirm` | POST | Confirm certificate |
-| `/member/certificate/error` | POST | Report certificate error |
+| Endpoint | Method | Purpose | Used by Integration |
+|----------|--------|---------|:---:|
+| `/member/third/tutk/info` | POST | Get TUTK credentials | |
+| `/member/certificate/ca` | POST | Get CA certificate | ✅ |
+| `/member/certificate/generate` | POST | Generate certificate | ✅ |
+| `/member/certificate/confirm` | POST | Confirm certificate | ✅ |
+| `/member/certificate/error` | POST | Report certificate error | |
 
 **TUTK info response:**
 ```json
@@ -655,52 +725,54 @@ The camera uses **TUTK/Kalay P2P SDK** — this is a peer-to-peer video protocol
 
 ### Notifications & Messages
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/device/msg/page` | POST | Message list (paginated) |
-| `/device/msg/detail` | POST | Message detail |
-| `/device/msg/detailWithDel` | POST | Detail and delete |
-| `/device/msg/read` | POST | Mark message read |
-| `/device/msg/readAll` | POST | Mark all read |
-| `/device/msg/readBatch` | POST | Batch mark read |
-| `/device/msg/delBatch` | POST | Batch delete |
-| `/device/msg/unreadQuantity` | POST | Unread count |
-| `/device/deviceTips/getTips` | POST | Get device tips |
-| `/device/deviceTips/disableTips` | POST | Disable a tip |
-| `/member/popup/create` | POST | Create popup |
-| `/member/findPet/detail` | POST | Lost pet detail |
-| `/member/findPet/publish` | POST | Publish lost pet |
-| `/member/findPet/upsertFindPet` | POST | Create/update lost pet |
+| Endpoint | Method | Purpose | Used by Integration |
+|----------|--------|---------|:---:|
+| `/device/msg/page` | POST | Message list (paginated) | |
+| `/device/msg/detail` | POST | Message detail | |
+| `/device/msg/detailWithDel` | POST | Detail and delete | |
+| `/device/msg/read` | POST | Mark message read | |
+| `/device/msg/readAll` | POST | Mark all read | |
+| `/device/msg/readBatch` | POST | Batch mark read | |
+| `/device/msg/delBatch` | POST | Batch delete | |
+| `/device/msg/unreadQuantity` | POST | Unread count | ✅ |
+| `/device/msg/v2/dnd` | GET | Read the do-not-disturb window for push notifications. Returns `enable`, `startTime`, `endTime` (`"HH:MM"`), `repeatDays` (a JSON list in a string), `timezone`, `serverTime`. POST is rejected with code 1006 | |
+| `/device/msg/v2/dnd/save` | ? | Set it. Body `enable`, `startTime`, `endTime` | |
+| `/device/deviceTips/getTips` | POST | Get device tips | |
+| `/device/deviceTips/disableTips` | POST | Disable a tip | |
+| `/member/popup/create` | POST | Create popup | |
+| `/member/findPet/detail` | POST | Lost pet detail | |
+| `/member/findPet/publish` | POST | Publish lost pet | |
+| `/member/findPet/upsertFindPet` | POST | Create/update lost pet | |
 
 ---
 
 ### Rooms
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/device/room/systemRooms` | POST | List system rooms |
-| `/device/room/addRoom` | POST | Add custom room |
-| `/device/room/upRoom` | POST | Update room |
-| `/device/room/delRoom` | POST | Delete room |
-| `/device/room/delRoomV2` | POST | Delete room (v2) |
+| Endpoint | Method | Purpose | Used by Integration |
+|----------|--------|---------|:---:|
+| `/device/room/systemRooms` | POST | List system rooms | ✅ |
+| `/device/room/addRoom` | POST | Add custom room | |
+| `/device/room/upRoom` | POST | Update room | |
+| `/device/room/delRoom` | POST | Delete room | |
+| `/device/room/delRoomV2` | POST | Delete room (v2) | |
 
 ---
 
 ### App & System
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/member/app/config` | POST | App configuration |
-| `/member/app/commonConfig` | POST | Common config (authenticated) |
-| `/member/app/commonConfigWithoutLogin` | POST | Common config (unauthenticated) |
-| `/member/app/faq` | POST | FAQ list |
-| `/member/app/faqByType` | POST | FAQ by type |
-| `/member/app/delayUpgrade` | POST | Delay upgrade prompt |
-| `/member/channel/click` | POST | Analytics channel click |
-| `/member/feedback/save` | POST | Submit feedback |
-| `/member/feedback/tag` | POST | Feedback tags |
-| `/member/feedback/addLog` | POST | Add feedback log |
-| `/member/feedback/addDeviceFeedback` | POST | Device-specific feedback |
+| Endpoint | Method | Purpose | Used by Integration |
+|----------|--------|---------|:---:|
+| `/member/app/config` | POST | App configuration | ✅ |
+| `/member/app/commonConfig` | POST | Common config (authenticated) | |
+| `/member/app/commonConfigWithoutLogin` | POST | Common config (unauthenticated) | |
+| `/member/app/faq` | POST | FAQ list | |
+| `/member/app/faqByType` | POST | FAQ by type | |
+| `/member/app/delayUpgrade` | POST | Delay upgrade prompt | |
+| `/member/channel/click` | POST | Analytics channel click | |
+| `/member/feedback/save` | POST | Submit feedback | |
+| `/member/feedback/tag` | POST | Feedback tags | |
+| `/member/feedback/addLog` | POST | Add feedback log | |
+| `/member/feedback/addDeviceFeedback` | POST | Device-specific feedback | |
 
 ---
 
@@ -908,27 +980,149 @@ Note: This endpoint returns many fields that overlap with realInfo. The unique f
 
 ---
 
+## App 1.9.40 Notes
+
+From a static pass over app v1.9.40 (2026-10-12): `blutter` against `libapp.so`, plus a
+string diff against v1.9.30. Unless a paragraph says it was read live, nothing here was
+captured from the network or tried against the API: it shows what the app sends and how
+it reads responses — not what a given device or firmware actually returns.
+
+### What changed between 1.9.30 and 1.9.40
+
+Little, and nothing that affects a device the integration supports:
+
+- The pet-care dashboard moved to the `V2` calls listed under
+  [Pet Care data](#pet-care-data-per-pet), with a new `FOOD_DISPENSED` metric.
+- No new product identifiers, no new MQTT handlers, and no new keys in the device
+  `realInfo` model.
+
+The rest of this section is not new in 1.9.40. It is what the app has that this
+reference and the integration did not yet cover.
+
+### Litter box operation info (`/device/device/getSuspendInfo`)
+
+The app's litter box screen calls this with `{"deviceSn": "<sn>"}` and reads:
+
+| Field | Values seen in the app's code |
+|-------|-------------------------------|
+| `action` | `CLEAN`, `LEVELING`, `EMPTY` — the same names as the `execCmdService` actions |
+| `execState` | `NORMAL` (nothing running), `EXEC`, `PAUSED`, `ENDING` |
+| `progress` | Drives the progress bar; unit and range not confirmed |
+| `exeCmdStartTime` | Start of the current action |
+| `expectExeTime` | Expected duration |
+
+The app shows "Cleaning", "Leveling", "Emptying", "Paused" or "Ending" from these.
+
+Read live from an idle Luma (firmware 1.0.19, 2026-10-12):
+
+```json
+{
+  "deviceSn": "<sn>",
+  "action": "CLEAN",
+  "exeCmdStartTime": 1791805702966,
+  "expectExeTime": null,
+  "execState": "NORMAL",
+  "lastPauseTime": 1791805703409,
+  "progress": 0
+}
+```
+
+- While the box is idle (`execState: "NORMAL"`), `action` and `exeCmdStartTime` still
+  describe the **last** action, so `action` alone does not mean something is running.
+- `lastPauseTime` is returned but not read by the app.
+- A Dockstream fountain answers the same call with every field `null`.
+- No response has been captured while an action runs, so the scale of `progress`
+  (0–1 or 0–100) is still unknown.
+
+The integration's Luma **Operation** sensor is built on this call. It follows the app's
+status line: `idle` for `NORMAL`; `cleaning` / `leveling` / `emptying` for `EXEC` with
+that action (`running` for any other action); `paused`; `ending`. The raw fields are on
+the sensor's attributes, `progress` included, unscaled.
+
+### What `deviceStoppedWorking` means to the app
+
+The app's Luma screen (`LB001/lb001_main.dart`) uses the flag for one thing: while it is
+`true`, the Clean / Empty / Level buttons are drawn greyed out (`LbOperateStatus.gray`
+instead of `wait`). No banner, dialog or error text is tied to it there, which matches
+the app showing nothing during the blips reported in issue #1.
+
+So the app treats it as "the box is not accepting a command right now", not as a fault.
+That reading comes from the app's code, not from the device: what makes the firmware set
+the flag is still unknown, and a payload captured during a blip is what would settle it.
+
+Checked against a live Luma (firmware 1.0.19, integration diagnostics, 2026-10-12, box
+idle and flag `false`):
+
+- The flag is not specific to the litter box. `realInfo` carries `deviceStoppedWorking`
+  for the Dockstream fountains (`PLWF105`, `PLWF106`, `PLWF116`) as well.
+- The app's `realInfo` model also has `antiPinchState`, `errorState`, `execState`,
+  `deviceState`, `zeroState` and `litterState`. The Luma sends **none** of them, so
+  there is no companion field in `realInfo` that would explain a blip. (`errorState`
+  does arrive for the fountains.)
+- Next to the flag the Luma sends only `runningState`, `doorErrorState`, `barnDoorError`
+  and, from `dataRealInfo`, `exceptionMessage`. That leaves `getSuspendInfo` above as
+  the one untried source for what the box was doing at that moment.
+
+### Litter box faults
+
+`/device/device/releaseMotorStuck`, `/device/device/releaseAntiPinch` and the
+`/device/lockedRotor/diagnostics` pair back the app's "stuck" flow. A diagnostics result
+carries `state` (`PROCESSING`, `FINISH`, `ERROR`, `RECOVERY`), `percent`, `errorCode`
+and `logs`. These act on hardware and have not been tried.
+
+### Litter box settings from the app's pages
+
+The keys are in the `getAttributeSetting` sample below; the current values were read live
+on 2026-10-12. The **writes** follow the app's request keys and have not been exercised
+against a device yet.
+
+| Key | App label | Integration | Notes |
+|-----|-----------|-------------|-------|
+| `enableAdsorption` | Coverage assist | Switch *Coverage Assist* | Sent to `updateCleanModeSetting` together with `cleanMode`, `autoDelaySec` and `avoidRepeatClean`, as the app does (the app also sends `cleanModeEnable`) |
+| `manualDeodorizationWindSpeed` | Fan speed (manual purify) | Select *Manual Air Purifier Fan Speed* | `LOW` / `HIGH`, to `updateDeodorizationSetting` |
+| `deodorizationTimerOffSwitch` | Turn off after | Switch *Air Purifier Auto-Off* | To `updateDeodorizationSetting`, with the interval |
+| `deodorizationTimerOffInterval` | Turn off after | Select *Air Purifier Auto-Off After* | Minutes; the app offers 5, 10, 15, 30, 60, 120 |
+| `cleanMode` | Clean mode | Select *Clean Mode* (`AUTO` / `MANUAL`) | The app's page only ever sends `AUTO` or `PLAN` (scheduled) plus the separate `cleanModeEnable` flag. Whether the server accepts `MANUAL` is unconfirmed — not changed until a write has been observed |
+| `deodorizationMode` | Operation mode | Read-only sensor | The app uses `SMART`, `PERIOD` and `MANUAL` |
+
+### Push event keys
+
+`eventKeys` values known to app 1.9.40 — see [MQTT_RESEARCH.md](MQTT_RESEARCH.md#payload).
+
+---
+
 ## Integration Coverage
 
 ### Supported Product Identifiers
 
 | Identifier | Product Name | Type |
 |------------|-------------|------|
-| `PLAF007` | Air Smart Feeder | Feeder |
 | `PLAF103` | Granary Smart Feeder | Feeder |
-| `PLAF107` | Granary Smart Camera Feeder | Feeder |
-| `PLAF015` | One RFID Smart Feeder | Feeder |
+| `PLAF107` | Space Smart Feeder | Feeder |
+| `PLAF108` | Air Smart Feeder | Feeder |
 | `PLAF109` | Polar Wet Food Feeder | Feeder |
-| `PLAF203` | Space Smart Feeder | Feeder |
+| `PLAF203` | Granary Smart Camera Feeder | Feeder |
+| `PLAF301` | One RFID Smart Feeder | Feeder |
 | `PLWF105` | Dockstream Smart Fountain | Fountain |
-| `PLWF005` | Dockstream Smart RFID Fountain | Fountain |
+| `PLWF305` | Dockstream Smart RFID Fountain | Fountain |
 | `PLWF106` | Dockstream 2 Smart Fountain | Fountain |
-| `PLWF115` | Dockstream 2 Smart Cordless Fountain | Fountain |
+| `PLWF116` | Dockstream 2 Smart Cordless Fountain | Fountain |
 | `PLLB001` | Luma Smart Litter Box | Litter Box |
+
+The integration picks a device class by product *name*, not by identifier, so this table
+is for reference. The identifiers are the ones in the README and all of them occur in
+app 1.9.40; the earlier version of this table listed `PLAF007`, `PLAF015`, `PLWF005` and
+`PLWF115`, none of which occur in the app. The name-to-identifier pairing is confirmed
+from a live device list for `PLLB001`, `PLWF105`, `PLWF106` and `PLWF116`; for the
+feeders and `PLWF305` it follows the README and has not been checked against hardware.
+
+App 1.9.40 also knows `PLAF105`, `PLAF204`, `PLAF205`, `PLAF305`, `PLWF107` and
+`PLPC001`. The integration has no device class for them, and which products they are has
+not been established.
 
 ### Endpoints Used by Integration
 
-Total: **61 endpoints** used out of **220+ discovered** in the app.
+Total: **112 endpoints** used out of **260+ discovered** in the app (counted from the code on 2026-10-12).
 
 ### Known API Quirks
 
@@ -940,3 +1134,4 @@ Total: **61 endpoints** used out of **220+ discovered** in the app.
 6. **`deodorizationModeSwitch`** has different values in `realInfo` (runtime state) vs `getAttributeSetting` (configured value)
 7. **`maintenanceRecord`** requires `key` query parameter (e.g., `?key=filter`)
 8. **`maintain`** endpoint is GET, not POST
+9. **`deviceStoppedWorking`** (Luma `realInfo`) flips to `true` for seconds at a time while the box is idle — see [App 1.9.40 Notes](#app-1940-notes) and issue #1

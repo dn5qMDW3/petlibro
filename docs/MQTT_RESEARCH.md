@@ -6,6 +6,8 @@
 > state change).
 > Sources: APK v1.8.10 via MITM + Frida (cert flow), and APK v1.8.95 via
 > `blutter` decompilation of the Flutter/Dart AOT snapshot (CONNECT identity).
+> Re-checked against APK v1.9.40 on 2026-10-12 (static only): handlers and topic
+> structure unchanged.
 >
 > Supporting artifacts under `docs/research/`:
 > - `frida-scripts/` — the script bundle that captured Flutter HTTP traffic (config.js
@@ -214,6 +216,17 @@ fine and matches `event` in practice.
 }
 ```
 
+`eventKeys` names known to app 1.9.40 (from its string pool, 2026-10-12; only the five in
+the sample above have been seen on the wire): `DEVICE_ATTR_CHANGE`,
+`DEVICE_STATUS_CHANGE`, `DEVICE_WATER_CHANGE`, `DEVICE_WORK_RECORD_CHANGE`,
+`DEVICE_GRAIN_STATUS_CHANGE`, `DEVICE_LINK_PETS_CHANGE`, `FEED_PROCESS_CHANGE`,
+`PET_LIST_CHANGE`, `PET_POTTY_CHANGE`, `POWER_CHANGE`, `SERVICE_STATE_CHANGE`. The app
+also carries `LOW_LITTER_EVENT`, `DEVICE_CANNOT_ROTATE_EVENT`, `PET_APPEAR_EVENT`,
+`PET_EATING_RECORD_EVENT`, `PLATE_ABNORMAL_EVENT`, `SNOWFLAKE_ERROR_EVENT` and
+`WEIGHING_PEELING_ERROR_EVENT`; whether those travel over MQTT or are message types in
+the HTTP notification list is not established. The integration refreshes on any push and
+does not look at the keys, so none of this needs handling.
+
 This is a **signal to re-fetch, not a state delta** — there are no values in it. The app
 reloads over HTTP when it arrives, and the integration does the same, refreshing only the
 device named in the topic. Several pushes usually arrive together (one per changed
@@ -239,6 +252,9 @@ dl/{productId}/{deviceSn}/app/+/sub
 Example: `dl/PLLB001/LB0102030312CEF4AE4D/app/+/sub`
 
 ### Event strategy handlers (`package:petlibro/app/component/dl_mqtt/mqtt_strategy/`)
+
+The same ten handlers are present in app 1.9.40 (checked 2026-10-12) — nothing added or
+removed since 1.8.95.
 
 | Handler | Purpose |
 |---------|---------|

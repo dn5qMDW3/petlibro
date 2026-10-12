@@ -326,6 +326,18 @@
       "running_state": {
         "name": "Running State"
       },
+      "operation_status": {
+        "name": "Operation",
+        "state": {
+          "idle": "Idle",
+          "cleaning": "Cleaning",
+          "leveling": "Leveling",
+          "emptying": "Emptying",
+          "running": "Running",
+          "paused": "Paused",
+          "ending": "Ending"
+        }
+      },
       "exception_message": {
         "name": "Exception Message"
       },
@@ -430,6 +442,12 @@
       },
       "avoid_repeat_clean": {
         "name": "Avoid Repeat Clean"
+      },
+      "enable_adsorption": {
+        "name": "Coverage Assist"
+      },
+      "deodorization_timer_off": {
+        "name": "Air Purifier Auto-Off"
       },
       "enable_auto_clean_in_sleep_mode": {
         "name": "Auto Clean in Sleep Mode"
@@ -821,6 +839,12 @@
       },
       "deodorization_wind_speed_select": {
         "name": "Deodorization Wind Speed"
+      },
+      "manual_deodorization_wind_speed": {
+        "name": "Manual Air Purifier Fan Speed"
+      },
+      "deodorization_timer_off_interval": {
+        "name": "Air Purifier Auto-Off After"
       }
     },
     "text": {
